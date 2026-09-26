@@ -388,6 +388,9 @@ function switchUser(){
   document.getElementById("loginVeil").classList.remove("hidden");
 }
 
+let openUnits = new Set();
+let activeSubKey = null;
+
 function buildTree(){
   const root = document.getElementById("tree");
   root.innerHTML = "";
@@ -396,20 +399,31 @@ function buildTree(){
     const count = cached ? cached.length : null;
     const det = document.createElement("details");
     det.className = "unit" + (u.dataFile ? "" : " unavailable");
+    det.open = openUnits.has(u.n);
     const sum = document.createElement("summary");
-    sum.innerHTML = `<span class="unit-title">Unit ${u.n} &mdash; ${u.title}</span><span class="badge">${count!==null ? count+" questions" : (u.dataFile ? "" : "not available yet")}</span>`;
+    sum.innerHTML = `<span class="unit-title">Unit ${u.n} &mdash; ${u.title}</span><span class="badge">${count!==null ? count+" questions" : (u.dataFile ? '<span class="spinner"></span>loading...' : "not available yet")}</span>`;
     det.appendChild(sum);
     const list = document.createElement("div");
     list.className = "sub-list";
     u.subs.forEach(s=>{
       const sc = cached ? cached.filter(q=>q.sub===s).length : null;
       const btn = document.createElement("button");
-      btn.className = "sub-item";
+      btn.className = "sub-item" + (activeSubKey===(u.n+"::"+s) ? " active" : "");
       btn.innerHTML = `${s} ${sc!==null ? `<span class="cnt">(${sc})</span>` : ""}`;
       btn.onclick = ()=>selectSub(u, s, btn);
       list.appendChild(btn);
     });
     det.appendChild(list);
+    det.addEventListener("toggle", ()=>{
+      if(det.open){
+        openUnits.add(u.n);
+        if(u.dataFile && !unitCache[u.n]){
+          ensureUnitLoaded(u).then(()=>buildTree());
+        }
+      }else{
+        openUnits.delete(u.n);
+      }
+    });
     root.appendChild(det);
   });
 }
@@ -435,6 +449,8 @@ async function ensureUnitLoaded(u){
 async function selectSub(u, sub, btnEl){
   document.querySelectorAll(".sub-item.active").forEach(el=>el.classList.remove("active"));
   if(btnEl) btnEl.classList.add("active");
+  activeSubKey = u.n + "::" + sub;
+  openUnits.add(u.n);
   reviewMode = false;
   document.getElementById("wrongBtn").classList.remove("on");
   document.getElementById("main").innerHTML = `<div class="card empty"><p><span class="spinner"></span>Loading questions...</p></div>`;
@@ -578,6 +594,7 @@ function updateProgress(){
 
 async function reviewWrong(){
   reviewMode = true;
+  activeSubKey = null;
   document.getElementById("wrongBtn").classList.add("on");
   document.querySelectorAll(".sub-item.active").forEach(el=>el.classList.remove("active"));
   document.getElementById("main").innerHTML = `<div class="card empty"><p><span class="spinner"></span>Loading all units...</p></div>`;
