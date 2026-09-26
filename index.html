@@ -31,15 +31,15 @@ header.top h1{font-size:1.05rem; margin:0; font-weight:700}
 header.top .sub{font-size:.78rem; opacity:.85}
 .layout{display:flex; gap:14px; padding:14px; max-width:1400px; margin:0 auto; align-items:flex-start}
 .tree-panel{
-  width:300px; flex:0 0 300px; background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  width:380px; flex:0 0 380px; background:var(--panel); border:1px solid var(--line); border-radius:12px;
   padding:12px; max-height:calc(100vh - 90px); overflow-y:auto; position:sticky; top:10px;
 }
 .tree-panel h2{font-size:.85rem; color:var(--muted); margin:0 0 10px; text-transform:uppercase; letter-spacing:.03em}
 .unit{border-bottom:1px solid var(--line); padding:2px 0}
 .unit:last-child{border-bottom:none}
 .unit > summary{
-  cursor:pointer; padding:9px 8px; border-radius:8px; font-weight:700; font-size:.88rem;
-  display:flex; align-items:center; justify-content:space-between; list-style:none;
+  cursor:pointer; padding:9px 8px; border-radius:8px; font-weight:700; font-size:.86rem;
+  display:flex; flex-direction:column; gap:2px; list-style:none; line-height:1.3;
 }
 .unit > summary::-webkit-details-marker{display:none}
 .unit > summary:hover{background:var(--bg)}
