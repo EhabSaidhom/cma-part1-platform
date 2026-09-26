@@ -249,27 +249,108 @@ header.top .sub{font-size:.78rem; opacity:.85}
       wrong-answer review are keyed by id.
 ============================================================ */
 const UNITS = [
- {n:1, title:"External Financial Reporting", subs:["Revenue Recognition","Financial Statements"]},
- {n:2, title:"Financial Statements and Disclosures", subs:["Balance Sheet & Income Statement","Disclosures"]},
- {n:3, title:"Asset Valuation (1)", subs:["Inventory","Fixed Assets"]},
- {n:4, title:"Asset Valuation (2)", subs:["Intangible Assets","Impairment"]},
- {n:5, title:"Valuation of Liabilities", subs:["Current & Long-Term Liabilities"]},
- {n:6, title:"Cost Behavior & CVP Analysis", subs:["Fixed & Variable Costs","Breakeven Point"]},
- {n:7, title:"Cost Accounting Systems", subs:["Job Order / Process Costing"]},
- {n:8, title:"Activity-Based Costing (ABC)", subs:["Cost Drivers","Application"]},
- {n:9, title:"Supply Chain Management", subs:["Lean / JIT / MRP"]},
- {n:10, title:"Business Process Improvement", subs:["Total Quality Management","Theory of Constraints"]},
- {n:11, title:"Strategic Planning Concepts", subs:["SWOT Analysis","Product Life Cycle"]},
- {n:12, title:"Budgeting Concepts", subs:["Master Budget","Types of Budgets"]},
- {n:13, title:"Forecasting Techniques", subs:["Linear Regression","Time Series"]},
- {n:14, title:"Operational Budgets", dataFile:"data/unit-14.json",
-   subs:["Operational Budgets Question Bank","Cash Budget & Capital Budgets Question Bank","Budget Methodologies Question Bank"]},
- {n:15, title:"Variance Analysis", subs:["Material & Labor Variances","Overhead Variances"]},
- {n:16, title:"Performance Management", subs:["Balanced Scorecard","Responsibility Centers"]},
- {n:17, title:"Cost & Profitability Measures", subs:["ROI / RI / EVA"]},
- {n:18, title:"Governance & Internal Controls", subs:["COSO","Internal Audit"]},
- {n:19, title:"Risk Management", subs:["Types of Risk","Risk Framework"]},
- {n:20, title:"Technology and Analytics", subs:["Information Systems","Data Governance"]},
+ {n:1, title:"External Financial Statements", subs:[
+   "1.1 Concepts of Financial Accounting",
+   "1.2 Statement of Financial Position",
+   "1.3 Income Statement and Statement of Comprehensive Income",
+   "1.4 Statement of Changes in Equity and Equity Transactions",
+   "1.5 Statement of Cash Flows",
+   "1.6 Consolidation Accounting"]},
+ {n:2, title:"Measurement, Valuation, and Disclosure: Assets -- Short-Term Items", subs:[
+   "2.1 Accounts Receivable",
+   "2.2 Inventory -- Fundamentals",
+   "2.3 Inventory -- Cost Flow Methods",
+   "2.4 Measurement of Inventory Subsequent to Initial Recognition"]},
+ {n:3, title:"Measurement, Valuation, and Disclosure: Assets -- Long-Term Items", subs:[
+   "3.1 Investments in Equity Securities",
+   "3.2 Equity Method",
+   "3.3 Investments in Debt Securities",
+   "3.4 Property, Plant, and Equipment",
+   "3.5 Intangible Assets"]},
+ {n:4, title:"Measurement, Valuation, and Disclosure: Liabilities", subs:[
+   "4.1 Contingencies and Warranties",
+   "4.2 Leases",
+   "4.3 Income Taxes",
+   "4.4 Accounting for Bonds Payable"]},
+ {n:5, title:"Revenue and Impairment Recognition", subs:[
+   "5.1 Revenue from Contracts with Customers",
+   "5.2 Recognition of Revenue over Time",
+   "5.3 Impairment and Disposal of Long-Lived Assets"]},
+ {n:6, title:"Integrated Reporting", subs:[
+   "6.1 Integrated Reporting, Integrated Thinking, and the Integrated Report",
+   "6.2 Fundamental Concepts of Integrated Reporting",
+   "6.3 Guiding Principles and Content Elements of the Integrated Report",
+   "6.4 Adoption of Integrated Reporting"]},
+ {n:7, title:"Cost Management Concepts", subs:[
+   "7.1 Cost Management Terminology",
+   "7.2 Cost Behavior and Relevant Range",
+   "7.3 Costing Techniques",
+   "7.4 Absorption and Variable Costing"]},
+ {n:8, title:"Cost Accumulation Systems", subs:[
+   "8.1 Job-Order Costing",
+   "8.2 Process Costing",
+   "8.3 Activity-Based Costing",
+   "8.4 Life-Cycle Costing"]},
+ {n:9, title:"Cost Allocation Techniques", subs:[
+   "9.1 Joint Product and By-Product Costing",
+   "9.2 Overhead Allocation and Normal Costing",
+   "9.3 Allocating Service Department Costs"]},
+ {n:10, title:"Supply Chain Management", subs:[
+   "10.1 Just-in-Time Inventory and Lean Resource Management",
+   "10.2 Enterprise Resource Planning and Outsourcing",
+   "10.3 Capacity Management"]},
+ {n:11, title:"Business Process Improvement", subs:[
+   "11.1 Value-Chain Analysis",
+   "11.2 Other Process Improvement Tools"]},
+ {n:12, title:"Analysis, Forecasting, and Strategy", subs:[
+   "12.1 Correlation and Regression",
+   "12.2 Learning Curve Analysis",
+   "12.3 Expected Value and Sensitivity Analysis",
+   "12.4 Strategic Management",
+   "12.5 Strategic Planning"]},
+ {n:13, title:"Budgeting -- Concepts and Methodologies", dataFile:"data/unit-13.json", subs:[
+   "13.1 Roles of Budgets and the Budgeting Process",
+   "13.2 Budgeting and Standard Costs",
+   "13.3 The Master Budget",
+   "13.4 Budget Methodologies"]},
+ {n:14, title:"Budgeting -- Calculations and Pro Forma Financial Statements", dataFile:"data/unit-14.json", subs:[
+   "14.1 Sales Forecasts and the Sales Budget",
+   "14.2 Operating Budget Calculations -- Production and Direct Materials",
+   "14.3 Operating Budget Calculations -- Others",
+   "14.4 The Capital Budget and Projecting Cash Collections",
+   "14.5 Cash Disbursements and the Cash Budget",
+   "14.6 Pro Forma Financial Statements"]},
+ {n:15, title:"Cost and Variance Measures", subs:[
+   "15.1 Variance Analysis Overview",
+   "15.2 Static and Flexible Budget Variances",
+   "15.3 Direct Materials Variances",
+   "15.4 Direct Labor Variances",
+   "15.5 Mix and Yield Variances",
+   "15.6 Overhead Variances",
+   "15.7 Comprehensive Example",
+   "15.8 Sales Variances"]},
+ {n:16, title:"Responsibility Accounting and Performance Measures", subs:[
+   "16.1 Responsibility Centers",
+   "16.2 Performance Measures -- Cost, Revenue, and Profit Centers",
+   "16.3 Performance Measures -- Investment Centers",
+   "16.4 The Balanced Scorecard",
+   "16.5 Transfer Pricing"]},
+ {n:17, title:"Internal Controls -- Corporate Governance", subs:[
+   "17.2 Internal Control Frameworks",
+   "17.3 Internal Auditing and External Audit Responsibilities",
+   "17.4 System Controls and Security Measures"]},
+ {n:18, title:"Information Systems and Data Management", subs:[
+   "18.1 Accounting Information Systems and ERP",
+   "18.2 Data Governance and Data Life Cycle",
+   "18.3 Business Intelligence and Systems Infrastructure"]},
+ {n:19, title:"Technology Controls and Disaster Recovery", subs:[
+   "19.1 Information Systems Controls",
+   "19.2 Cyber Security and Threat Management",
+   "19.3 Disaster Recovery and Business Continuity"]},
+ {n:20, title:"Data Analytics and Visualization", subs:[
+   "20.1 Data Analysis and Mining Techniques",
+   "20.2 Visualization and Reporting Tools",
+   "20.3 Predictive Analytics in Decision Making"]},
 ];
 
 let userEmail = "";
