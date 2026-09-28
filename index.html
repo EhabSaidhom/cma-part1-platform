@@ -172,6 +172,12 @@ header.top .sub{font-size:.78rem; opacity:.85}
   .cert-close, .cert-print{display:none}
   .cert-sheet{border-width:6px; box-shadow:none}
 }
+.srcbar{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:10px; font-size:.78rem; color:var(--muted)}
+.srcbtn{border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:20px; padding:4px 11px; font-family:inherit; font-size:.75rem; cursor:pointer}
+.srcbtn.on{background:var(--brand); color:#fff; border-color:var(--brand)}
+.tag.src{font-weight:700}
+.tag.src-target{background:#e8eefc; color:#2b4a9e; border-color:#c4d2f5}
+.tag.src-mcq{background:#fff1dc; color:#a35a00; border-color:#f3d3a0}
 </style>
 </head>
 <body>
@@ -366,6 +372,8 @@ let answered = {};
 let flagged = {};
 let reviewMode = false;
 let activeSet = [];
+let subAll = [];
+let srcFilter = "all";
 const unitCache = {};      // unit number -> array of question objects (once loaded)
 const loadingUnits = {};   // unit number -> true while a fetch is in flight
 
@@ -486,10 +494,15 @@ async function ensureSubLoaded(u, s){
   if(!m) return [];
   const key = u.n + "::" + s;
   if(!loadedSubs[key]){
-    loadedSubs[key] = fetch(m.file)
-      .then(r=>{ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-      .then(data=>{ unitCache[u.n] = (unitCache[u.n]||[]).concat(data); return data; })
-      .catch(err=>{ console.error("Failed to load", m.file, err); delete loadedSubs[key]; return []; });
+    loadedSubs[key] = Promise.all((m.files||[]).map(f =>
+      fetch(f.file)
+        .then(r=>{ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(data=>{ data.forEach(q=>{ if(!q.source) q.source = f.source || "Target"; }); return data; })
+    )).then(parts=>{
+      const all = [].concat(...parts);
+      unitCache[u.n] = (unitCache[u.n]||[]).concat(all);
+      return all;
+    }).catch(err=>{ console.error("Failed to load", s, err); delete loadedSubs[key]; return []; });
   }
   await loadedSubs[key];
   return (unitCache[u.n]||[]).filter(q=>q.sub===s);
@@ -505,7 +518,15 @@ async function selectSub(u, sub, btnEl){
   document.getElementById("main").innerHTML = `<div class="card empty"><p><span class="spinner"></span>Loading questions...</p></div>`;
   const qs = await ensureSubLoaded(u, sub);
   buildTree();
+  subAll = qs; srcFilter = "all";
   activeSet = qs;
+  current = activeSet.length ? activeSet[0].id : null;
+  render();
+}
+function setSrc(v){
+  if(reviewMode) return;
+  srcFilter = v;
+  activeSet = subAll.filter(q => v === "all" || (q.source || "Target") === v);
   current = activeSet.length ? activeSet[0].id : null;
   render();
 }
@@ -563,8 +584,19 @@ function render(){
     }
   }
 
+  let srcBar = "";
+  if(!reviewMode){
+    const srcs = [...new Set(subAll.map(x=>x.source||"Target"))];
+    if(srcs.length > 1){
+      const opt = (v,label,n)=>`<button class="srcbtn ${srcFilter===v?"on":""}" onclick="setSrc('${v}')">${label} (${n})</button>`;
+      srcBar = `<div class="srcbar"><span>Source:</span>` + opt("all","All",subAll.length) +
+        srcs.map(x=>opt(x,x,subAll.filter(y=>(y.source||"Target")===x).length)).join("") + `</div>`;
+    }
+  }
   const linksHtml = (q.links||[]).map(l=>`<a href="${l.url}" target="_blank" rel="noopener">&#9654; ${l.label}</a>`).join("");
-  const pageBadges = `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` +
+  const srcName = q.source || "Target";
+  const pageBadges = `<span class="tag src ${srcName==="Target"?"src-target":"src-mcq"}">${srcName}</span>` +
+    (srcName==="Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : `<span class="tag">Book p.${q.qpage}</span>`) +
     ((q.links&&q.links[0]) ? `<a class="tag link" href="${q.links[0].url}" target="_blank" rel="noopener">&#9654; Video Explanation</a>` : "");
 
   main.innerHTML = `
@@ -577,6 +609,7 @@ function render(){
       </div>
       <div style="font-size:.8rem;color:var(--muted)">Question ${idx+1} of ${total}</div>
     </div>
+    ${srcBar}
     <div class="qgrid">${grid}</div>
   </div>
 
