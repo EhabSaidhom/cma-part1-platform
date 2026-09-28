@@ -436,18 +436,18 @@ function buildTree(){
   const root = document.getElementById("tree");
   root.innerHTML = "";
   UNITS.forEach(u=>{
-    const cached = unitCache[u.n];
-    const count = cached ? cached.length : null;
+    const cached = manifest ? (manifest[u.n] || {}) : null;
+    const count = cached ? unitIds(u).length : null;
     const det = document.createElement("details");
-    det.className = "unit" + (u.dataFile ? "" : " unavailable");
+    det.className = "unit" + ((manifest === null || (manifest[u.n] && unitIds(u).length)) ? "" : " unavailable");
     det.open = openUnits.has(u.n);
     const sum = document.createElement("summary");
-    sum.innerHTML = `<span class="unit-title">Unit ${u.n} &mdash; ${u.title}</span><span class="badge">${count!==null ? count+" questions" : (u.dataFile ? '<span class="spinner"></span>loading...' : "not available yet")}</span>`;
+    sum.innerHTML = `<span class="unit-title">Unit ${u.n} &mdash; ${u.title}</span><span class="badge">${count ? count+" questions" : (manifest ? "not available yet" : '<span class="spinner"></span>loading...')}</span>`;
     det.appendChild(sum);
     const list = document.createElement("div");
     list.className = "sub-list";
     u.subs.forEach(s=>{
-      const sc = cached ? cached.filter(q=>q.sub===s).length : null;
+      const sc = cached ? subIds(u,s).length : null;
       const btn = document.createElement("button");
       btn.className = "sub-item" + (activeSubKey===(u.n+"::"+s) ? " active" : "");
       btn.innerHTML = `${s} ${sc!==null ? `<span class="cnt">(${sc})</span>` : ""}`;
@@ -458,9 +458,6 @@ function buildTree(){
     det.addEventListener("toggle", ()=>{
       if(det.open){
         openUnits.add(u.n);
-        if(u.dataFile && !unitCache[u.n]){
-          ensureUnitLoaded(u).then(()=>buildTree());
-        }
       }else{
         openUnits.delete(u.n);
       }
@@ -469,22 +466,33 @@ function buildTree(){
   });
 }
 
-async function ensureUnitLoaded(u){
-  if(unitCache[u.n]) return unitCache[u.n];
-  if(!u.dataFile) return [];
-  if(loadingUnits[u.n]) return loadingUnits[u.n];
-  loadingUnits[u.n] = fetch(u.dataFile)
-    .then(r=>{
-      if(!r.ok) throw new Error("HTTP " + r.status);
-      return r.json();
-    })
-    .then(data=>{ unitCache[u.n] = data; return data; })
-    .catch(err=>{
-      console.error("Failed to load", u.dataFile, err);
-      unitCache[u.n] = [];
-      return [];
-    });
-  return loadingUnits[u.n];
+let manifest = null;   // {unit: {sub: {file, ids}}}
+const loadedSubs = {}; // "n::sub" -> promise
+async function loadManifest(){
+  if(manifest) return manifest;
+  try{
+    const r = await fetch("data/manifest.json");
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    manifest = await r.json();
+  }catch(e){ console.error("manifest load failed", e); manifest = {}; }
+  UNITS.forEach(u=>{ if(manifest[u.n]) unitCache[u.n] = unitCache[u.n] || []; });
+  return manifest;
+}
+function subIds(u, s){ return (manifest && manifest[u.n] && manifest[u.n][s] && manifest[u.n][s].ids) || []; }
+function unitIds(u){ return (u.subs||[]).flatMap(s=>subIds(u,s)); }
+async function ensureSubLoaded(u, s){
+  await loadManifest();
+  const m = manifest[u.n] && manifest[u.n][s];
+  if(!m) return [];
+  const key = u.n + "::" + s;
+  if(!loadedSubs[key]){
+    loadedSubs[key] = fetch(m.file)
+      .then(r=>{ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(data=>{ unitCache[u.n] = (unitCache[u.n]||[]).concat(data); return data; })
+      .catch(err=>{ console.error("Failed to load", m.file, err); delete loadedSubs[key]; return []; });
+  }
+  await loadedSubs[key];
+  return (unitCache[u.n]||[]).filter(q=>q.sub===s);
 }
 
 async function selectSub(u, sub, btnEl){
@@ -495,9 +503,9 @@ async function selectSub(u, sub, btnEl){
   reviewMode = false;
   document.getElementById("wrongBtn").classList.remove("on");
   document.getElementById("main").innerHTML = `<div class="card empty"><p><span class="spinner"></span>Loading questions...</p></div>`;
-  const qs = await ensureUnitLoaded(u);
+  const qs = await ensureSubLoaded(u, sub);
   buildTree();
-  activeSet = qs.filter(q=>q.sub===sub);
+  activeSet = qs;
   current = activeSet.length ? activeSet[0].id : null;
   render();
 }
@@ -640,7 +648,12 @@ async function reviewWrong(){
   document.querySelectorAll(".sub-item.active").forEach(el=>el.classList.remove("active"));
   document.getElementById("main").innerHTML = `<div class="card empty"><p><span class="spinner"></span>Loading all units...</p></div>`;
   // Load every unit that has a data file so mistakes across all of them can be reviewed
-  await Promise.all(UNITS.filter(u=>u.dataFile).map(ensureUnitLoaded));
+  await loadManifest();
+  const jobs = [];
+  UNITS.forEach(u=>(u.subs||[]).forEach(sb=>{
+    if(subIds(u,sb).some(id=>answered[id] && !answered[id].correct)) jobs.push(ensureSubLoaded(u,sb));
+  }));
+  await Promise.all(jobs);
   buildTree();
   const all = Object.values(unitCache).flat();
   activeSet = all.filter(q => answered[q.id] && !answered[q.id].correct);
@@ -657,14 +670,15 @@ function clearReview(){
 
 function openCertificate(unitN){
   const u = UNITS.find(x=>x.n===unitN);
-  const unitQs = unitCache[unitN] || [];
-  const attempted = unitQs.filter(q=>q.id in answered);
-  if(unitQs.length === 0){ alert("This unit has no questions loaded yet."); return; }
-  if(attempted.length < unitQs.length){
-    alert("Complete all questions in this unit first (" + attempted.length + " of " + unitQs.length + ") before generating a certificate.");
+  const ids = u ? unitIds(u) : [];
+  if(ids.length === 0){ alert("This unit has no questions loaded yet."); return; }
+  const attempted = ids.filter(id=>id in answered);
+  if(attempted.length < ids.length){
+    alert("Complete all questions in this unit first (" + attempted.length + " of " + ids.length + ") before generating a certificate.");
     return;
   }
-  const correct = unitQs.filter(q=>answered[q.id].correct).length;
+  const correct = ids.filter(id=>answered[id].correct).length;
+  const unitQs = ids;
   const pct = Math.round((correct/unitQs.length)*100);
   const today = new Date().toLocaleDateString('en-US');
   document.getElementById("certSheet").innerHTML = `
@@ -681,6 +695,8 @@ function openCertificate(unitN){
 function closeCert(){ document.getElementById("certModal").classList.remove("open"); }
 
 (async function init(){
+  await loadManifest();
+  buildTree();
   const { data } = await sb.auth.getSession();
   if(data.session){ await startSession(data.session.user); }
   else{ document.getElementById("loginVeil").classList.remove("hidden"); }
