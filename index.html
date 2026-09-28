@@ -179,9 +179,14 @@ header.top .sub{font-size:.78rem; opacity:.85}
 <div class="modal-veil hidden" id="loginVeil">
   <div class="modal-box">
     <h2>Welcome</h2>
-    <p>Enter your email to save your progress and mistake log, so it can be linked to your account when the platform is made public.</p>
-    <input type="email" id="emailInput" placeholder="name@example.com">
-    <button class="primary" onclick="submitEmail()">Enter</button>
+    <p>Sign in to save your progress and mistake log. It syncs across all your devices.</p>
+    <input type="email" id="emailInput" placeholder="name@example.com" autocomplete="email">
+    <input type="password" id="passInput" placeholder="Password (min 6 characters)" autocomplete="current-password" style="margin-top:8px">
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="primary" onclick="doAuth('in')">Sign In</button>
+      <button onclick="doAuth('up')">Create Account</button>
+    </div>
+    <div id="authMsg" style="margin-top:8px;font-size:.85rem;color:#b00020"></div>
   </div>
 </div>
 
@@ -192,7 +197,7 @@ header.top .sub{font-size:.78rem; opacity:.85}
   </div>
   <div class="user-bar">
     <span id="userEmailLbl"></span>
-    <button onclick="switchUser()">Switch User</button>
+    <button onclick="switchUser()">Sign Out</button>
   </div>
 </header>
 <div style="text-align:center;padding:6px;font-size:.78rem;color:var(--muted)" id="progressLine">Loading...</div>
@@ -216,6 +221,7 @@ header.top .sub{font-size:.78rem; opacity:.85}
   <div class="cert-sheet" id="certSheet"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================================================
    CMA Part 1 Practice Platform
@@ -363,28 +369,63 @@ let activeSet = [];
 const unitCache = {};      // unit number -> array of question objects (once loaded)
 const loadingUnits = {};   // unit number -> true while a fetch is in flight
 
+const SUPABASE_URL = "https://yvsiacxcjcsshymfuhwo.supabase.co";
+const SUPABASE_KEY = "sb_publishable_HJGeENBXWbpXSp94A12Dfg_1rrQZVVp";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let userId = "";
+
 function lsKey(){ return "cma_state__" + userEmail; }
-function loadUserData(){
-  try{
-    const saved = JSON.parse(localStorage.getItem(lsKey()) || "{}");
-    answered = saved.answered || {}; flagged = saved.flagged || {};
-  }catch(e){ answered = {}; flagged = {}; }
+function readLocal(){
+  try{ return JSON.parse(localStorage.getItem(lsKey()) || "{}"); }catch(e){ return {}; }
 }
+async function loadUserData(){
+  const local = readLocal();
+  answered = local.answered || {}; flagged = local.flagged || {};
+  try{
+    const { data, error } = await sb.from("user_progress").select("state").eq("user_id", userId).maybeSingle();
+    if(error) throw error;
+    if(data && data.state && (data.state.answered || data.state.flagged)){
+      // merge: server data wins on conflicts, local-only items are kept
+      answered = Object.assign({}, answered, data.state.answered || {});
+      flagged = Object.assign({}, flagged, data.state.flagged || {});
+    }
+    persist();   // push merged result back (also migrates old local progress)
+  }catch(e){ console.warn("Load from server failed, using local copy", e); }
+}
+let saveTimer = null;
 function persist(){
   try{ localStorage.setItem(lsKey(), JSON.stringify({answered, flagged})); }catch(e){}
+  if(!userId) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    const { error } = await sb.from("user_progress").upsert(
+      { user_id: userId, state: {answered, flagged}, updated_at: new Date().toISOString() });
+    if(error) console.warn("Save failed", error);
+  }, 600);
 }
-function submitEmail(){
-  const v = document.getElementById("emailInput").value.trim();
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ alert("Please enter a valid email address"); return; }
-  userEmail = v.toLowerCase();
-  try{ localStorage.setItem("cma_current_user", userEmail); }catch(e){}
+async function startSession(user){
+  userId = user.id; userEmail = (user.email || "").toLowerCase();
   document.getElementById("loginVeil").classList.add("hidden");
   document.getElementById("userEmailLbl").textContent = userEmail;
-  loadUserData();
+  await loadUserData();
   buildTree(); render();
 }
-function switchUser(){
-  document.getElementById("emailInput").value = userEmail;
+async function doAuth(mode){
+  const email = document.getElementById("emailInput").value.trim();
+  const pass = document.getElementById("passInput").value;
+  const msg = document.getElementById("authMsg"); msg.textContent = "";
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.textContent = "Please enter a valid email address"; return; }
+  if(pass.length < 6){ msg.textContent = "Password must be at least 6 characters"; return; }
+  const res = mode === "up" ? await sb.auth.signUp({email, password: pass})
+                            : await sb.auth.signInWithPassword({email, password: pass});
+  if(res.error){ msg.textContent = res.error.message; return; }
+  if(!res.data.session){ msg.textContent = "Account created. Check your email to confirm, then sign in."; return; }
+  await startSession(res.data.session.user);
+}
+async function switchUser(){
+  await sb.auth.signOut();
+  userId = ""; userEmail = ""; answered = {}; flagged = {};
+  document.getElementById("passInput").value = "";
   document.getElementById("loginVeil").classList.remove("hidden");
 }
 
@@ -639,17 +680,11 @@ function openCertificate(unitN){
 }
 function closeCert(){ document.getElementById("certModal").classList.remove("open"); }
 
-let savedUser = "";
-try{ savedUser = localStorage.getItem("cma_current_user") || ""; }catch(e){}
-if(savedUser){
-  userEmail = savedUser;
-  document.getElementById("userEmailLbl").textContent = userEmail;
-  loadUserData();
-  buildTree();
-  render();
-}else{
-  document.getElementById("loginVeil").classList.remove("hidden");
-}
+(async function init(){
+  const { data } = await sb.auth.getSession();
+  if(data.session){ await startSession(data.session.user); }
+  else{ document.getElementById("loginVeil").classList.remove("hidden"); }
+})();
 </script>
 </body>
 </html>
