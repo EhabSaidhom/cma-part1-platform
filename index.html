@@ -173,8 +173,10 @@ header.top .sub{font-size:.78rem; opacity:.85}
   .cert-sheet{border-width:6px; box-shadow:none}
 }
 .srcbar{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:10px; font-size:.78rem; color:var(--muted)}
-.srcbtn{border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:20px; padding:4px 11px; font-family:inherit; font-size:.75rem; cursor:pointer}
-.srcbtn.on{background:var(--brand); color:#fff; border-color:var(--brand)}
+.srcbtn{border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:20px; padding:4px 11px; font-family:inherit; font-size:.75rem; cursor:pointer; opacity:.55}
+.srcbtn.on{opacity:1; box-shadow:0 0 0 2px rgba(0,0,0,.12) inset}
+.srcbtn-target{background:#e8eefc; color:#2b4a9e; border-color:#c4d2f5}
+.srcbtn-mcq{background:#fff1dc; color:#a35a00; border-color:#f3d3a0}
 .tag.src{font-weight:700}
 .tag.src-target{background:#e8eefc; color:#2b4a9e; border-color:#c4d2f5}
 .tag.src-mcq{background:#fff1dc; color:#a35a00; border-color:#f3d3a0}
@@ -496,7 +498,7 @@ async function ensureSubLoaded(u, s){
     loadedSubs[key] = Promise.all((m.files||[]).map(f =>
       fetch(f.file)
         .then(r=>{ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-        .then(data=>{ data.forEach(q=>{ if(!q.source) q.source = f.source || "Target"; }); return data; })
+        .then(data=>{ data.forEach(q=>{ if(!q.source) q.source = f.source || "Sameh Allithy Target"; }); return data; })
     )).then(parts=>{
       const all = [].concat(...parts);
       unitCache[u.n] = (unitCache[u.n]||[]).concat(all);
@@ -517,15 +519,19 @@ async function selectSub(u, sub, btnEl){
   document.getElementById("main").innerHTML = `<div class="card empty"><p><span class="spinner"></span>Loading questions...</p></div>`;
   const qs = await ensureSubLoaded(u, sub);
   buildTree();
-  subAll = qs; srcFilter = "all";
-  activeSet = qs;
+  subAll = qs;
+  {
+    const srcs = [...new Set(qs.map(x=>x.source||"Sameh Allithy Target"))];
+    srcFilter = srcs[0] || "Sameh Allithy Target";
+  }
+  activeSet = subAll.filter(q => (q.source || "Sameh Allithy Target") === srcFilter);
   current = activeSet.length ? activeSet[0].id : null;
   render();
 }
 function setSrc(v){
   if(reviewMode) return;
   srcFilter = v;
-  activeSet = subAll.filter(q => v === "all" || (q.source || "Target") === v);
+  activeSet = subAll.filter(q => (q.source || "Sameh Allithy Target") === v);
   current = activeSet.length ? activeSet[0].id : null;
   render();
 }
@@ -585,17 +591,18 @@ function render(){
 
   let srcBar = "";
   if(!reviewMode){
-    const srcs = [...new Set(subAll.map(x=>x.source||"Target"))];
+    const srcs = [...new Set(subAll.map(x=>x.source||"Sameh Allithy Target"))];
     if(srcs.length > 1){
-      const opt = (v,label,n)=>`<button class="srcbtn ${srcFilter===v?"on":""}" onclick="setSrc('${v}')">${label} (${n})</button>`;
-      srcBar = `<div class="srcbar"><span>Source:</span>` + opt("all","All",subAll.length) +
-        srcs.map(x=>opt(x,x,subAll.filter(y=>(y.source||"Target")===x).length)).join("") + `</div>`;
+      const cls = (v)=> v==="Sameh Allithy Target" ? "srcbtn-target" : "srcbtn-mcq";
+      const opt = (v,n)=>`<button class="srcbtn ${cls(v)} ${srcFilter===v?"on":""}" onclick="setSrc('${v}')">${v} (${n})</button>`;
+      srcBar = `<div class="srcbar"><span>Source:</span>` +
+        srcs.map(x=>opt(x,subAll.filter(y=>(y.source||"Sameh Allithy Target")===x).length)).join("") + `</div>`;
     }
   }
   const linksHtml = (q.links||[]).map(l=>`<a href="${l.url}" target="_blank" rel="noopener">&#9654; ${l.label}</a>`).join("");
-  const srcName = q.source || "Target";
-  const pageBadges = `<span class="tag src ${srcName==="Target"?"src-target":"src-mcq"}">${srcName}</span>` +
-    (srcName==="Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : `<span class="tag">Book p.${q.qpage}</span>`) +
+  const srcName = q.source || "Sameh Allithy Target";
+  const pageBadges = `<span class="tag src ${srcName==="Sameh Allithy Target"?"src-target":"src-mcq"}">${srcName}</span>` +
+    (srcName==="Sameh Allithy Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : `<span class="tag">Book p.${q.qpage}</span>`) +
     ((q.links&&q.links[0]) ? `<a class="tag link" href="${q.links[0].url}" target="_blank" rel="noopener">&#9654; Video Explanation</a>` : "");
 
   main.innerHTML = `
