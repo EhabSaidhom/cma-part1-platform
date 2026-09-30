@@ -180,23 +180,37 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .tag.src{font-weight:700}
 .tag.src-target{background:#e8eefc; color:#2b4a9e; border-color:#c4d2f5}
 .tag.src-mcq{background:#fff1dc; color:#a35a00; border-color:#f3d3a0}
+.sub-item.extra{color:#b00020; border-color:#f3b3bd; background:#fff2f4}
+.sub-item.extra:hover{background:#ffe3e7}
+.extra-flag{display:inline-block; font-size:.62rem; font-weight:800; letter-spacing:.03em; color:#fff; background:#d32f2f; border-radius:4px; padding:1px 5px; margin:0 4px}
 
-.perf-box{max-width:920px;width:100%;max-height:90vh;overflow:auto;background:var(--panel);border-radius:14px;padding:20px;text-align:left}
-.perf-box h2{margin:0 0 10px;font-size:1.1rem}
-.kpis{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin:10px 0}
-.kpis div{border:1px solid var(--line);border-radius:10px;padding:10px}
-.kpis b{display:block;font-size:1.3rem}.kpis span{font-size:.72rem;color:var(--muted)}
-.pbar{height:9px;background:var(--line);border-radius:6px;overflow:hidden;flex:1}
-.pbar i{display:block;height:100%;background:var(--brand-2)}
-.prow{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.8rem}
-.prow .l{width:190px;flex:none}.prow .r{width:130px;flex:none;color:var(--muted);text-align:right}
-.ptbl{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:8px}
-.ptbl th,.ptbl td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left}
-.ptbl th{cursor:pointer;color:var(--muted)}.ptbl tr.lr{cursor:pointer}
-.perf-tools{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-.perf-tools input,.perf-tools button,.perf-x{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.8rem;cursor:pointer}
-.rtl{text-align:right}.rtl .ptbl th,.rtl .ptbl td{text-align:right}.rtl .prow .r{text-align:left}.two{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin:10px 0}.cardx{border:1px solid var(--line);border-radius:10px;padding:12px}.cardx h3{margin:0 0 8px;font-size:.9rem}
-@media(max-width:600px){.prow .l{width:110px}.prow .r{width:90px}}
+.modal-veil.dash-veil{align-items:flex-start; padding:26px 12px; overflow-y:auto}
+.dash-box{background:var(--panel); border-radius:14px; padding:22px; max-width:980px; width:100%; text-align:left; margin:10px auto}
+.dash-box h2{margin:0 0 4px; font-size:1.25rem}
+.dash-box .sub{color:var(--muted); font-size:.85rem; margin:0 0 18px}
+.dash-cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:20px}
+.dash-card{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center}
+.dash-card .num{font-size:1.5rem; font-weight:900; color:var(--brand)}
+.dash-card .lbl{font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin-top:2px}
+.dash-row{display:flex; gap:22px; flex-wrap:wrap; margin-bottom:22px; align-items:center}
+.donut{width:150px; height:150px; border-radius:50%; flex:0 0 150px; position:relative}
+.donut::after{content:""; position:absolute; inset:22px; border-radius:50%; background:var(--panel)}
+.donut-center{position:absolute; inset:22px; display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem; font-weight:900; color:var(--ink); z-index:1}
+.legend{font-size:.8rem; display:flex; flex-direction:column; gap:6px}
+.legend .dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-inline-end:6px}
+.dash-section-title{font-size:.85rem; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin:0 0 10px; font-weight:700}
+.unit-bar-row{margin-bottom:9px}
+.unit-bar-top{display:flex; justify-content:space-between; font-size:.78rem; margin-bottom:3px}
+.unit-bar-top .name{color:var(--ink); font-weight:600}
+.unit-bar-top .stat{color:var(--muted)}
+.unit-bar{height:9px; border-radius:5px; background:var(--bg); overflow:hidden; display:flex}
+.unit-bar span{height:100%}
+.dash-actions{display:flex; justify-content:flex-end; margin-top:6px}
+.dash-actions button{background:var(--brand); color:#fff; border:none; border-radius:9px; padding:11px 22px;
+  font-family:inherit; font-size:.95rem; font-weight:700; cursor:pointer}
+.dash-link{background:none; border:none; color:#fff; text-decoration:underline; cursor:pointer; font-family:inherit; font-size:.82rem; padding:0}
+@media(max-width:640px){ .dash-row{flex-direction:column; align-items:flex-start} }
 </style>
 </head>
 <body>
@@ -205,7 +219,6 @@ header.top .sub{font-size:.78rem; opacity:.85}
   <div class="modal-box">
     <h2>Welcome</h2>
     <p>Sign in to save your progress and mistake log. It syncs across all your devices.</p>
-    <input type="text" id="nameInput" placeholder="Full name (for Create Account; printed on your certificate)" autocomplete="name" style="margin-bottom:8px">
     <input type="email" id="emailInput" placeholder="name@example.com" autocomplete="email">
     <input type="password" id="passInput" placeholder="Password (min 6 characters)" autocomplete="current-password" style="margin-top:8px">
     <div style="display:flex;gap:8px;margin-top:10px">
@@ -216,17 +229,8 @@ header.top .sub{font-size:.78rem; opacity:.85}
   </div>
 </div>
 
-<div class="modal-veil hidden" id="nameVeil">
-  <div class="modal-box">
-    <h2>Your full name</h2>
-    <p>This name appears on your certificate and in your progress reports. Please enter it exactly as you want it printed.</p>
-    <input type="text" id="nameEdit" placeholder="Full name" autocomplete="name">
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="primary" onclick="saveName()">Save</button>
-      <button id="nameCancel" onclick="closeName()">Cancel</button>
-    </div>
-    <div id="nameMsg" style="margin-top:8px;font-size:.85rem;color:#b00020"></div>
-  </div>
+<div class="modal-veil hidden dash-veil" id="dashboardVeil">
+  <div class="dash-box" id="dashboardBox"></div>
 </div>
 
 <header class="top">
@@ -235,9 +239,8 @@ header.top .sub{font-size:.78rem; opacity:.85}
     <div class="sub">Nonprofit educational platform &middot; Financial Planning, Performance, and Analytics</div>
   </div>
   <div class="user-bar">
-    <span id="userEmailLbl" style="cursor:pointer" title="Click to edit your name" onclick="openNameModal(true)"></span>
-    <button onclick="openMyPerf()">My Performance</button>
-    <button id="adminBtn" class="hidden" style="display:none" onclick="openAdmin()">Admin Dashboard</button>
+    <span id="userEmailLbl"></span>
+    <button class="dash-link" onclick="openDashboard()">&#128202; Dashboard</button>
     <button onclick="switchUser()">Sign Out</button>
   </div>
 </header>
@@ -261,8 +264,6 @@ header.top .sub{font-size:.78rem; opacity:.85}
   <button class="cert-print" onclick="window.print()">&#128424; Print Certificate</button>
   <div class="cert-sheet" id="certSheet"></div>
 </div>
-
-<div class="modal-veil hidden" id="perfModal"><div class="perf-box" id="perfBox"></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -403,7 +404,6 @@ const UNITS = [
 ];
 
 let userEmail = "";
-let userName = "";
 let current = null;
 let answered = {};
 let flagged = {};
@@ -450,45 +450,116 @@ function persist(){
 }
 async function startSession(user){
   userId = user.id; userEmail = (user.email || "").toLowerCase();
-  userName = ((user.user_metadata && user.user_metadata.full_name) || "").trim();
   document.getElementById("loginVeil").classList.add("hidden");
-  showUserLabel();
+  document.getElementById("userEmailLbl").textContent = userEmail;
   await loadUserData();
+  await loadManifest();
   buildTree(); render();
-  checkAdmin();
-  if(!userName) openNameModal(false);
+  openDashboard();
 }
-function showUserLabel(){
-  const l = document.getElementById("userEmailLbl");
-  l.textContent = (userName ? userName + " · " : "") + userEmail;
+
+// ---------- Dashboard ----------
+const SRC_COLORS = {"Sameh Allithy Target":"#2b4a9e", "MCQ Book":"#a35a00"};
+function srcColor(name){ return SRC_COLORS[name] || "#6b7480"; }
+function dashStats(){
+  let total=0, correct=0, wrong=0, flaggedCt=0;
+  const bySource = {};     // source -> {total, correct, wrong}
+  const perUnit = [];      // {n, title, total, correct, wrong}
+  UNITS.forEach(u=>{
+    const ids = unitIds(u);
+    let uCorrect=0, uWrong=0;
+    ids.forEach(id=>{
+      const a = answered[id];
+      if(a){ if(a.correct) uCorrect++; else uWrong++; }
+      if(flagged[id]) flaggedCt++;
+    });
+    total += ids.length; correct += uCorrect; wrong += uWrong;
+    perUnit.push({n:u.n, title:u.title, total:ids.length, correct:uCorrect, wrong:uWrong});
+    const m = manifest && manifest[u.n];
+    if(m) Object.values(m).forEach(subEntry=>{
+      (subEntry.files||[]).forEach(f=>{
+        const s = bySource[f.source] || (bySource[f.source]={total:0,correct:0,wrong:0});
+        s.total += f.ids.length;
+        f.ids.forEach(id=>{ const a=answered[id]; if(a){ if(a.correct) s.correct++; else s.wrong++; } });
+      });
+    });
+  });
+  return {total, correct, wrong, notAttempted: total-correct-wrong, flaggedCt, bySource, perUnit};
 }
-let nameCancelable = false;
-function openNameModal(cancelable){
-  nameCancelable = cancelable;
-  document.getElementById("nameEdit").value = userName;
-  document.getElementById("nameMsg").textContent = "";
-  document.getElementById("nameCancel").style.display = cancelable ? "" : "none";
-  document.getElementById("nameVeil").classList.remove("hidden");
+function donutGradient(parts){
+  // parts: [{color, value}], value in same units; builds a conic-gradient string
+  const sum = parts.reduce((a,p)=>a+p.value,0) || 1;
+  let acc = 0, segs = [];
+  parts.forEach(p=>{
+    const start = acc/sum*360; acc += p.value; const end = acc/sum*360;
+    if(p.value>0) segs.push(`${p.color} ${start}deg ${end}deg`);
+  });
+  return segs.length ? `conic-gradient(${segs.join(",")})` : "var(--bg)";
 }
-function closeName(){ if(nameCancelable || userName) document.getElementById("nameVeil").classList.add("hidden"); }
-async function saveName(){
-  const v = document.getElementById("nameEdit").value.trim().replace(/\s+/g," ");
-  const msg = document.getElementById("nameMsg");
-  if(v.length < 3 || v.indexOf(" ") < 0){ msg.textContent = "Please enter your full name (first and last name)."; return; }
-  const { error } = await sb.auth.updateUser({ data: { full_name: v } });
-  if(error){ msg.textContent = error.message; return; }
-  userName = v; showUserLabel();
-  document.getElementById("nameVeil").classList.add("hidden");
+function openDashboard(){
+  const st = dashStats();
+  const acc = (st.correct+st.wrong) ? Math.round(st.correct/(st.correct+st.wrong)*100) : 0;
+  const donut1 = donutGradient([
+    {color:"var(--ok)", value:st.correct}, {color:"var(--bad)", value:st.wrong},
+    {color:"var(--line)", value:st.notAttempted}
+  ]);
+  const srcEntries = Object.entries(st.bySource);
+  const donut2 = donutGradient(srcEntries.map(([name,s])=>({color:srcColor(name), value:s.total})));
+  const legend1 = `
+    <div class="legend">
+      <div><span class="dot" style="background:var(--ok)"></span>Correct (${st.correct})</div>
+      <div><span class="dot" style="background:var(--bad)"></span>Wrong (${st.wrong})</div>
+      <div><span class="dot" style="background:var(--line)"></span>Not attempted (${st.notAttempted})</div>
+    </div>`;
+  const legend2 = `<div class="legend">` + srcEntries.map(([name,s])=>
+      `<div><span class="dot" style="background:${srcColor(name)}"></span>${name} (${s.total})</div>`
+    ).join("") + `</div>`;
+  const unitRows = st.perUnit.map(u=>{
+    const na = u.total - u.correct - u.wrong;
+    const pc = u.total ? (u.correct/u.total*100) : 0;
+    const pw = u.total ? (u.wrong/u.total*100) : 0;
+    const pn = 100-pc-pw;
+    const doneStr = u.total ? `${u.correct+u.wrong}/${u.total} answered` : "no questions yet";
+    return `<div class="unit-bar-row">
+      <div class="unit-bar-top"><span class="name">Unit ${u.n} &middot; ${u.title}</span><span class="stat">${doneStr}</span></div>
+      <div class="unit-bar">
+        <span style="width:${pc}%;background:var(--ok)"></span>
+        <span style="width:${pw}%;background:var(--bad)"></span>
+        <span style="width:${pn}%;background:var(--line)"></span>
+      </div>
+    </div>`;
+  }).join("");
+  document.getElementById("dashboardBox").innerHTML = `
+    <h2>Welcome back${userEmail ? ", " + userEmail : ""}</h2>
+    <p class="sub">Your progress and the platform's question library at a glance.</p>
+    <div class="dash-cards">
+      <div class="dash-card"><div class="num">${st.total}</div><div class="lbl">Total Questions</div></div>
+      <div class="dash-card"><div class="num">${st.correct+st.wrong}</div><div class="lbl">Answered</div></div>
+      <div class="dash-card"><div class="num">${acc}%</div><div class="lbl">Accuracy</div></div>
+      <div class="dash-card"><div class="num">${st.wrong}</div><div class="lbl">To Review</div></div>
+      <div class="dash-card"><div class="num">${st.flaggedCt}</div><div class="lbl">Flagged</div></div>
+    </div>
+    <div class="dash-row">
+      <div class="donut" style="background:${donut1}"><div class="donut-center">${acc}%</div></div>
+      ${legend1}
+      <div class="donut" style="background:${donut2}"></div>
+      ${legend2}
+    </div>
+    <div class="dash-section-title">Progress by Unit</div>
+    ${unitRows}
+    <div class="dash-actions"><button onclick="closeDashboard()">Start Studying &rarr;</button></div>
+  `;
+  document.getElementById("dashboardVeil").classList.remove("hidden");
 }
+function closeDashboard(){ document.getElementById("dashboardVeil").classList.add("hidden"); }
+
 async function doAuth(mode){
   const email = document.getElementById("emailInput").value.trim();
   const pass = document.getElementById("passInput").value;
   const msg = document.getElementById("authMsg"); msg.textContent = "";
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.textContent = "Please enter a valid email address"; return; }
   if(pass.length < 6){ msg.textContent = "Password must be at least 6 characters"; return; }
-  const fullName = document.getElementById("nameInput").value.trim().replace(/\s+/g," ");
-  if(mode === "up" && (fullName.length < 3 || fullName.indexOf(" ") < 0)){ msg.textContent = "Please enter your full name (first and last name)."; return; }
-  const res = mode === "up" ? await sb.auth.signUp({email, password: pass, options:{ data:{ full_name: fullName } }})
+  const res = mode === "up" ? await sb.auth.signUp({email, password: pass})
                             : await sb.auth.signInWithPassword({email, password: pass});
   if(res.error){ msg.textContent = res.error.message; return; }
   if(!res.data.session){ msg.textContent = "Account created. Check your email to confirm, then sign in."; return; }
@@ -496,7 +567,7 @@ async function doAuth(mode){
 }
 async function switchUser(){
   await sb.auth.signOut();
-  userId = ""; userEmail = ""; userName = ""; answered = {}; flagged = {}; document.getElementById("adminBtn").style.display="none";
+  userId = ""; userEmail = ""; answered = {}; flagged = {};
   document.getElementById("passInput").value = "";
   document.getElementById("loginVeil").classList.remove("hidden");
 }
@@ -518,11 +589,13 @@ function buildTree(){
     det.appendChild(sum);
     const list = document.createElement("div");
     list.className = "sub-list";
-    u.subs.forEach(s=>{
+    u.subs.concat(extraSubs(u)).forEach(s=>{
+      const isExtra = !u.subs.includes(s);
       const sc = cached ? subIds(u,s).length : null;
       const btn = document.createElement("button");
-      btn.className = "sub-item" + (activeSubKey===(u.n+"::"+s) ? " active" : "");
-      btn.innerHTML = `${s} ${sc!==null ? `<span class="cnt">(${sc})</span>` : ""}`;
+      btn.className = "sub-item" + (activeSubKey===(u.n+"::"+s) ? " active" : "") + (isExtra ? " extra" : "");
+      if(isExtra) btn.title = "Not in the official unit list -- may have been removed in the new syllabus";
+      btn.innerHTML = `${s} ${isExtra ? `<span class="extra-flag">NEW</span>` : ""} ${sc!==null ? `<span class="cnt">(${sc})</span>` : ""}`;
       btn.onclick = ()=>selectSub(u, s, btn);
       list.appendChild(btn);
     });
@@ -551,7 +624,12 @@ async function loadManifest(){
   return manifest;
 }
 function subIds(u, s){ return (manifest && manifest[u.n] && manifest[u.n][s] && manifest[u.n][s].ids) || []; }
-function unitIds(u){ return (u.subs||[]).flatMap(s=>subIds(u,s)); }
+function extraSubs(u){
+  const m = manifest && manifest[u.n];
+  if(!m) return [];
+  return Object.keys(m).filter(s => !(u.subs||[]).includes(s));
+}
+function unitIds(u){ return (u.subs||[]).concat(extraSubs(u)).flatMap(s=>subIds(u,s)); }
 async function ensureSubLoaded(u, s){
   await loadManifest();
   const m = manifest[u.n] && manifest[u.n][s];
@@ -719,7 +797,7 @@ function pick(qid, choiceIdx){
   if(answered[qid]) return;
   const q = activeSet.find(x=>x.id===qid);
   const note = (answered[qid] && answered[qid].note) || "";
-  answered[qid] = {choice:choiceIdx, correct: choiceIdx===q.correct, note, at: new Date().toISOString()};
+  answered[qid] = {choice:choiceIdx, correct: choiceIdx===q.correct, note};
   persist(); render();
 }
 function retry(qid){
@@ -774,7 +852,6 @@ function openCertificate(unitN){
   const u = UNITS.find(x=>x.n===unitN);
   const ids = u ? unitIds(u) : [];
   if(ids.length === 0){ alert("This unit has no questions loaded yet."); return; }
-  if(!userName){ openNameModal(true); alert("Please enter your full name first, then click Unit Certificate again."); return; }
   const attempted = ids.filter(id=>id in answered);
   if(attempted.length < ids.length){
     alert("Complete all questions in this unit first (" + attempted.length + " of " + ids.length + ") before generating a certificate.");
@@ -788,7 +865,7 @@ function openCertificate(unitN){
     <div class="kicker">CMA PART 1 &middot; FINANCIAL PLANNING, PERFORMANCE, AND ANALYTICS</div>
     <h1>Certificate of Completion</h1>
     <div class="body">This certifies that</div>
-    <div class="name">${esc(userName || userEmail)}</div>
+    <div class="name">${userEmail}</div>
     <div class="body">has successfully completed the questions for<br><b>Unit ${unitN}: ${u ? u.title : ""}</b></div>
     <div class="score">${correct} / ${unitQs.length} &mdash; ${pct}%</div>
     <div class="foot"><span>Date: ${today}</span><span>Nonprofit Educational Platform</span></div>
@@ -796,133 +873,6 @@ function openCertificate(unitN){
   document.getElementById("certModal").classList.add("open");
 }
 function closeCert(){ document.getElementById("certModal").classList.remove("open"); }
-
-
-/* ===================== Performance & Admin ===================== */
-function esc(t){return String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-function pct(a,b){return b?Math.round(a/b*100):0}
-function idIndex(){
-  const m={};
-  Object.keys(manifest||{}).forEach(un=>Object.keys(manifest[un]).forEach(sub=>{
-    (manifest[un][sub].ids||[]).forEach(id=>{m[id]={unit:un,sub:sub}});
-  }));
-  return m;
-}
-function statsFor(ans){
-  const units={}, subs={};
-  Object.keys(manifest||{}).forEach(un=>{
-    units[un]={tot:0,done:0,corr:0};
-    Object.keys(manifest[un]).forEach(sub=>{
-      const n=(manifest[un][sub].ids||[]).length;
-      units[un].tot+=n; subs[un+"|"+sub]={unit:un,sub:sub,tot:n,done:0,corr:0};
-    });
-  });
-  let done=0,corr=0;
-  Object.keys(ans||{}).forEach(id=>{
-    const a=ans[id], loc=idIndex_cache[id]; if(!loc||!a||a.choice==null) return; // skip note-only entries
-    done++; units[loc.unit].done++; subs[loc.unit+"|"+loc.sub].done++;
-    if(a.correct){corr++; units[loc.unit].corr++; subs[loc.unit+"|"+loc.sub].corr++;}
-  });
-  const tot=Object.values(units).reduce((a,u)=>a+u.tot,0);
-  return {units,subs,done,corr,tot};
-}
-let idIndex_cache={};
-function prepIdx(){ idIndex_cache=idIndex(); }
-function prow(label,done,corr,tot){
-  const acc=pct(corr,done);
-  return `<div class="prow"><span class="l">${esc(label)}</span><div class="pbar"><i style="width:${pct(done,tot)}%"></i></div><span class="r">${done}/${tot} done · ${done?acc+"% correct":"–"}</span></div>`;
-}
-function perfBody(st, subsToo){
-  let h=`<div class="kpis"><div><b>${st.done}</b><span>Answered</span></div><div><b>${pct(st.corr,st.done)}%</b><span>Accuracy</span></div><div><b>${pct(st.done,st.tot)}%</b><span>Completion</span></div><div><b>${st.done-st.corr}</b><span>Mistakes</span></div></div>`;
-  Object.keys(st.units).forEach(un=>{
-    const u=st.units[un]; if(!u.tot) return;
-    h+=prow("Unit "+un,u.done,u.corr,u.tot);
-    if(subsToo) Object.values(st.subs).filter(x=>x.unit===un&&x.tot).forEach(x=>{
-      h+=`<div style="margin-left:14px;opacity:.85">${prow(x.sub,x.done,x.corr,x.tot)}</div>`;
-    });
-  });
-  return h;
-}
-function showPerf(html){
-  const b=document.getElementById("perfBox");
-  b.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><span></span><button class="perf-x" onclick="closePerf()">&#10005; Close</button></div>`+html;
-  document.getElementById("perfModal").classList.remove("hidden");
-}
-function closePerf(){document.getElementById("perfModal").classList.add("hidden")}
-async function openMyPerf(){
-  await loadManifest(); prepIdx();
-  showPerf(`<h2>My Performance</h2><div style="color:var(--muted);font-size:.8rem">${esc(userName ? userName + " · " + userEmail : userEmail)}</div>`+perfBody(statsFor(answered),true));
-}
-async function checkAdmin(){
-  try{
-    const {data,error}=await sb.rpc("is_admin");
-    if(!error && data===true) document.getElementById("adminBtn").style.display="";
-  }catch(e){}
-}
-let adminRows=[], adminSort={k:"acc",d:-1}, adminOpen=null, adminUnit="all", adminQ="";
-async function openAdmin(){
-  await loadManifest(); prepIdx();
-  showPerf('<h2>لوحة متابعة أداء الدارسين</h2><div>جارٍ التحميل…</div>');
-  const {data,error}=await sb.rpc("admin_learners");
-  if(error){ showPerf("<h2>Admin Dashboard</h2><div style='color:#b00020'>"+esc(error.message)+"</div>"); return; }
-  adminRows=(data||[]).map(r=>({email:r.email||r.user_id, name:(r.full_name||'').trim(), label:(r.full_name||r.email||r.user_id), st:statsFor(r.answered||{}), upd:r.updated_at,
-    days:r.updated_at?Math.max(0,Math.floor((Date.now()-new Date(r.updated_at))/864e5)):999}));
-  renderAdmin();
-}
-function adminCalc(r){
-  const ks=adminUnit==="all"?Object.keys(r.st.units):[adminUnit]; let d=0,c=0,t=0;
-  ks.forEach(k=>{const u=r.st.units[k]; if(u){d+=u.done;c+=u.corr;t+=u.tot}});
-  return Object.assign({},r,{done:d,corr:c,acc:pct(c,d),comp:pct(d,t)});
-}
-function adminStatus(x){
-  if(x.days>7) return ["غير نشط","#6b7686"];
-  if(!x.done) return ["لم يبدأ","#6b7686"];
-  if(x.acc>=75) return ["ممتاز","#178a50"];
-  if(x.acc>=60) return ["جيد","#b97d08"];
-  return ["يحتاج دعم","#c23838"];
-}
-function accCol(v){return v>=75?"#178a50":v>=60?"#b97d08":"#c23838"}
-function abar(v,c){return '<div class="pbar"><i style="width:'+v+'%;background:'+c+'"></i></div>'}
-function adminDetail(st){
-  return Object.keys(st.units).filter(k=>st.units[k].tot).map(k=>{
-    const u=st.units[k], a=pct(u.corr,u.done);
-    return '<div class="prow"><span class="l" style="width:80px">الوحدة '+k+'</span>'+abar(a,accCol(a))+'<span class="r" style="width:190px">'+u.corr+'/'+u.done+' صحيحة من '+u.tot+'</span></div>';
-  }).join("");
-}
-function renderAdmin(){
-  const all=adminRows.map(adminCalc), q=adminQ.toLowerCase();
-  let rows=all.filter(r=>!q||(r.label+' '+r.email).toLowerCase().includes(q));
-  rows.sort((a,b)=>{const A=a[adminSort.k],B=b[adminSort.k];return (A>B?1:A<B?-1:0)*adminSort.d});
-  const started=all.filter(r=>r.done), act=all.filter(r=>r.days<=7).length;
-  const avg=started.length?Math.round(started.reduce((a,r)=>a+r.acc,0)/started.length):0;
-  const tot=all.reduce((a,r)=>a+r.done,0), cm=all.length?Math.round(all.reduce((a,r)=>a+r.comp,0)/all.length):0;
-  const kp=[["عدد الدارسين",all.length],["نشطون آخر 7 أيام",act],["متوسط الدقة",avg+"%"],["إجمالي الأسئلة المُجابة",tot],["متوسط الإنجاز",cm+"%"]]
-    .map(k=>'<div><b>'+k[1]+'</b><span>'+k[0]+'</span></div>').join("");
-  const uk=Object.keys(manifest||{}).filter(k=>adminRows.length?true:true);
-  const unitsH=uk.map(k=>{let d=0,c=0;adminRows.forEach(r=>{const u=r.st.units[k];if(u){d+=u.done;c+=u.corr}});const v=pct(c,d);
-    return '<div class="prow"><span class="l" style="width:80px">الوحدة '+k+'</span>'+abar(v,accCol(v))+'<span class="r" style="width:50px">'+(d?v+"%":"–")+'</span></div>'}).join("");
-  const top=started.slice().sort((a,b)=>b.acc-a.acc).slice(0,3).map((x,i)=>'<div class="prow"><span class="l" style="width:auto;flex:1">'+(i+1)+'. '+esc(x.label)+'</span><span class="r" style="width:50px">'+x.acc+'%</span></div>').join("")||'<div style="color:var(--muted)">لا توجد بيانات</div>';
-  const weak=all.filter(x=>x.days>7||(x.done&&x.acc<60)).map(x=>'<li>'+esc(x.label)+' — '+(x.days>7?(x.days>=999?'لم يبدأ بعد':'لا نشاط منذ '+x.days+' يومًا'):'دقة '+x.acc+'%')+'</li>').join("")||'<li style="color:var(--muted)">لا أحد حاليًا</li>';
-  let h='<div class="rtl" dir="rtl"><h2>لوحة متابعة أداء الدارسين</h2><div class="kpis">'+kp+'</div>'
-   +'<div class="two"><div class="cardx"><h3>متوسط الدقة حسب الوحدة</h3>'+unitsH+'</div><div class="cardx"><h3>أعلى الدارسين دقة</h3>'+top+'<h3 style="margin-top:12px">يحتاجون متابعة</h3><ul style="margin:0;padding-inline-start:18px;font-size:.8rem">'+weak+'</ul></div></div>'
-   +'<div class="perf-tools"><select class="perf-x" onchange="adminUnit=this.value;renderAdmin()"><option value="all">كل الوحدات</option>'+uk.map(k=>'<option value="'+k+'"'+(adminUnit===k?' selected':'')+'>الوحدة '+k+'</option>').join("")+'</select>'
-   +'<input id="adminQ" placeholder="بحث بالاسم أو البريد" value="'+esc(adminQ)+'" oninput="adminQ=this.value;renderAdmin();var e=document.getElementById(\'adminQ\');e.focus();e.setSelectionRange(e.value.length,e.value.length)"><button onclick="exportAdminCsv()">تصدير CSV</button></div>'
-   +'<div style="overflow-x:auto"><table class="ptbl"><thead><tr>'+[["label","الدارس"],["done","أُجيب"],["acc","الدقة"],["comp","الإنجاز"],["days","آخر نشاط"]].map(c=>'<th onclick="sortAdmin(\''+c[0]+'\')">'+c[1]+'</th>').join("")+'<th>الحالة</th></tr></thead><tbody>';
-  rows.forEach(r=>{
-    const st=adminStatus(r);
-    h+='<tr class="lr" onclick="toggleAdminRow(\''+esc(r.email)+'\')"><td>'+(r.name?'<b>'+esc(r.name)+'</b><div style="color:var(--muted);font-size:.72rem">'+esc(r.email)+'</div>':esc(r.email))+'</td><td>'+r.done+'</td><td style="min-width:110px"><div class="prow" style="margin:0">'+abar(r.acc,accCol(r.acc))+'<span style="width:38px;color:var(--muted)">'+r.acc+'%</span></div></td><td>'+r.comp+'%</td><td>'+(r.days>=999?"—":r.days===0?"اليوم":"منذ "+r.days+" يوم")+'</td><td><span style="background:'+st[1]+';color:#fff;padding:2px 9px;border-radius:20px;font-size:.72rem">'+st[0]+'</span></td></tr>';
-    if(adminOpen===r.email) h+='<tr><td colspan="6" style="background:var(--bg)">'+adminDetail(r.st)+'</td></tr>';
-  });
-  h+='</tbody></table></div></div>';
-  document.getElementById("perfBox").innerHTML='<div style="display:flex;justify-content:space-between"><span></span><button class="perf-x" onclick="closePerf()">&#10005; إغلاق</button></div>'+h;
-}
-function sortAdmin(k){adminSort.d=adminSort.k===k?-adminSort.d:-1;adminSort.k=k;renderAdmin()}
-function toggleAdminRow(e){adminOpen=adminOpen===e?null:e;renderAdmin()}
-function exportAdminCsv(){
-  const rows=[["Name","Email","Answered","Correct","Correct","Accuracy %","Completion %","Last activity"]].concat(adminRows.map(adminCalc).map(r=>[r.name,r.email,r.done,r.corr,r.acc,r.comp,r.upd||""]));
-  const csv="\ufeff"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
-  const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);a.download="learners-performance.csv";a.click();
-}
 
 (async function init(){
   await loadManifest();
