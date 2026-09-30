@@ -195,6 +195,7 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .ptbl th{cursor:pointer;color:var(--muted)}.ptbl tr.lr{cursor:pointer}
 .perf-tools{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 .perf-tools input,.perf-tools button,.perf-x{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.8rem;cursor:pointer}
+.rtl{text-align:right}.rtl .ptbl th,.rtl .ptbl td{text-align:right}.rtl .prow .r{text-align:left}.two{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin:10px 0}.cardx{border:1px solid var(--line);border-radius:10px;padding:12px}.cardx h3{margin:0 0 8px;font-size:.9rem}
 @media(max-width:600px){.prow .l{width:110px}.prow .r{width:90px}}
 </style>
 </head>
@@ -204,6 +205,7 @@ header.top .sub{font-size:.78rem; opacity:.85}
   <div class="modal-box">
     <h2>Welcome</h2>
     <p>Sign in to save your progress and mistake log. It syncs across all your devices.</p>
+    <input type="text" id="nameInput" placeholder="Full name (for Create Account; printed on your certificate)" autocomplete="name" style="margin-bottom:8px">
     <input type="email" id="emailInput" placeholder="name@example.com" autocomplete="email">
     <input type="password" id="passInput" placeholder="Password (min 6 characters)" autocomplete="current-password" style="margin-top:8px">
     <div style="display:flex;gap:8px;margin-top:10px">
@@ -214,13 +216,26 @@ header.top .sub{font-size:.78rem; opacity:.85}
   </div>
 </div>
 
+<div class="modal-veil hidden" id="nameVeil">
+  <div class="modal-box">
+    <h2>Your full name</h2>
+    <p>This name appears on your certificate and in your progress reports. Please enter it exactly as you want it printed.</p>
+    <input type="text" id="nameEdit" placeholder="Full name" autocomplete="name">
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="primary" onclick="saveName()">Save</button>
+      <button id="nameCancel" onclick="closeName()">Cancel</button>
+    </div>
+    <div id="nameMsg" style="margin-top:8px;font-size:.85rem;color:#b00020"></div>
+  </div>
+</div>
+
 <header class="top">
   <div>
     <h1>CMA Part 1 Practice Platform</h1>
     <div class="sub">Nonprofit educational platform &middot; Financial Planning, Performance, and Analytics</div>
   </div>
   <div class="user-bar">
-    <span id="userEmailLbl"></span>
+    <span id="userEmailLbl" style="cursor:pointer" title="Click to edit your name" onclick="openNameModal(true)"></span>
     <button onclick="openMyPerf()">My Performance</button>
     <button id="adminBtn" class="hidden" style="display:none" onclick="openAdmin()">Admin Dashboard</button>
     <button onclick="switchUser()">Sign Out</button>
@@ -388,6 +403,7 @@ const UNITS = [
 ];
 
 let userEmail = "";
+let userName = "";
 let current = null;
 let answered = {};
 let flagged = {};
@@ -434,11 +450,35 @@ function persist(){
 }
 async function startSession(user){
   userId = user.id; userEmail = (user.email || "").toLowerCase();
+  userName = ((user.user_metadata && user.user_metadata.full_name) || "").trim();
   document.getElementById("loginVeil").classList.add("hidden");
-  document.getElementById("userEmailLbl").textContent = userEmail;
+  showUserLabel();
   await loadUserData();
   buildTree(); render();
   checkAdmin();
+  if(!userName) openNameModal(false);
+}
+function showUserLabel(){
+  const l = document.getElementById("userEmailLbl");
+  l.textContent = (userName ? userName + " · " : "") + userEmail;
+}
+let nameCancelable = false;
+function openNameModal(cancelable){
+  nameCancelable = cancelable;
+  document.getElementById("nameEdit").value = userName;
+  document.getElementById("nameMsg").textContent = "";
+  document.getElementById("nameCancel").style.display = cancelable ? "" : "none";
+  document.getElementById("nameVeil").classList.remove("hidden");
+}
+function closeName(){ if(nameCancelable || userName) document.getElementById("nameVeil").classList.add("hidden"); }
+async function saveName(){
+  const v = document.getElementById("nameEdit").value.trim().replace(/\s+/g," ");
+  const msg = document.getElementById("nameMsg");
+  if(v.length < 3 || v.indexOf(" ") < 0){ msg.textContent = "Please enter your full name (first and last name)."; return; }
+  const { error } = await sb.auth.updateUser({ data: { full_name: v } });
+  if(error){ msg.textContent = error.message; return; }
+  userName = v; showUserLabel();
+  document.getElementById("nameVeil").classList.add("hidden");
 }
 async function doAuth(mode){
   const email = document.getElementById("emailInput").value.trim();
@@ -446,7 +486,9 @@ async function doAuth(mode){
   const msg = document.getElementById("authMsg"); msg.textContent = "";
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.textContent = "Please enter a valid email address"; return; }
   if(pass.length < 6){ msg.textContent = "Password must be at least 6 characters"; return; }
-  const res = mode === "up" ? await sb.auth.signUp({email, password: pass})
+  const fullName = document.getElementById("nameInput").value.trim().replace(/\s+/g," ");
+  if(mode === "up" && (fullName.length < 3 || fullName.indexOf(" ") < 0)){ msg.textContent = "Please enter your full name (first and last name)."; return; }
+  const res = mode === "up" ? await sb.auth.signUp({email, password: pass, options:{ data:{ full_name: fullName } }})
                             : await sb.auth.signInWithPassword({email, password: pass});
   if(res.error){ msg.textContent = res.error.message; return; }
   if(!res.data.session){ msg.textContent = "Account created. Check your email to confirm, then sign in."; return; }
@@ -454,7 +496,7 @@ async function doAuth(mode){
 }
 async function switchUser(){
   await sb.auth.signOut();
-  userId = ""; userEmail = ""; answered = {}; flagged = {}; document.getElementById("adminBtn").style.display="none";
+  userId = ""; userEmail = ""; userName = ""; answered = {}; flagged = {}; document.getElementById("adminBtn").style.display="none";
   document.getElementById("passInput").value = "";
   document.getElementById("loginVeil").classList.remove("hidden");
 }
@@ -732,6 +774,7 @@ function openCertificate(unitN){
   const u = UNITS.find(x=>x.n===unitN);
   const ids = u ? unitIds(u) : [];
   if(ids.length === 0){ alert("This unit has no questions loaded yet."); return; }
+  if(!userName){ openNameModal(true); alert("Please enter your full name first, then click Unit Certificate again."); return; }
   const attempted = ids.filter(id=>id in answered);
   if(attempted.length < ids.length){
     alert("Complete all questions in this unit first (" + attempted.length + " of " + ids.length + ") before generating a certificate.");
@@ -745,7 +788,7 @@ function openCertificate(unitN){
     <div class="kicker">CMA PART 1 &middot; FINANCIAL PLANNING, PERFORMANCE, AND ANALYTICS</div>
     <h1>Certificate of Completion</h1>
     <div class="body">This certifies that</div>
-    <div class="name">${userEmail}</div>
+    <div class="name">${esc(userName || userEmail)}</div>
     <div class="body">has successfully completed the questions for<br><b>Unit ${unitN}: ${u ? u.title : ""}</b></div>
     <div class="score">${correct} / ${unitQs.length} &mdash; ${pct}%</div>
     <div class="foot"><span>Date: ${today}</span><span>Nonprofit Educational Platform</span></div>
@@ -808,7 +851,7 @@ function showPerf(html){
 function closePerf(){document.getElementById("perfModal").classList.add("hidden")}
 async function openMyPerf(){
   await loadManifest(); prepIdx();
-  showPerf(`<h2>My Performance</h2><div style="color:var(--muted);font-size:.8rem">${esc(userEmail)}</div>`+perfBody(statsFor(answered),true));
+  showPerf(`<h2>My Performance</h2><div style="color:var(--muted);font-size:.8rem">${esc(userName ? userName + " · " + userEmail : userEmail)}</div>`+perfBody(statsFor(answered),true));
 }
 async function checkAdmin(){
   try{
@@ -816,41 +859,67 @@ async function checkAdmin(){
     if(!error && data===true) document.getElementById("adminBtn").style.display="";
   }catch(e){}
 }
-let adminRows=[], adminSort={k:"acc",d:-1}, adminOpen=null;
+let adminRows=[], adminSort={k:"acc",d:-1}, adminOpen=null, adminUnit="all", adminQ="";
 async function openAdmin(){
   await loadManifest(); prepIdx();
-  showPerf("<h2>Admin Dashboard — All Learners</h2><div>Loading…</div>");
+  showPerf('<h2>لوحة متابعة أداء الدارسين</h2><div>جارٍ التحميل…</div>');
   const {data,error}=await sb.rpc("admin_learners");
   if(error){ showPerf("<h2>Admin Dashboard</h2><div style='color:#b00020'>"+esc(error.message)+"</div>"); return; }
-  adminRows=(data||[]).map(r=>{
-    const st=statsFor(r.answered||{}); const d=r.updated_at?Math.floor((Date.now()-new Date(r.updated_at))/864e5):999;
-    return {email:r.email||r.user_id,st,done:st.done,acc:pct(st.corr,st.done),comp:pct(st.done,st.tot),days:d,upd:r.updated_at};
-  });
+  adminRows=(data||[]).map(r=>({email:r.email||r.user_id, name:(r.full_name||'').trim(), label:(r.full_name||r.email||r.user_id), st:statsFor(r.answered||{}), upd:r.updated_at,
+    days:r.updated_at?Math.max(0,Math.floor((Date.now()-new Date(r.updated_at))/864e5)):999}));
   renderAdmin();
 }
+function adminCalc(r){
+  const ks=adminUnit==="all"?Object.keys(r.st.units):[adminUnit]; let d=0,c=0,t=0;
+  ks.forEach(k=>{const u=r.st.units[k]; if(u){d+=u.done;c+=u.corr;t+=u.tot}});
+  return Object.assign({},r,{done:d,corr:c,acc:pct(c,d),comp:pct(d,t)});
+}
+function adminStatus(x){
+  if(x.days>7) return ["غير نشط","#6b7686"];
+  if(!x.done) return ["لم يبدأ","#6b7686"];
+  if(x.acc>=75) return ["ممتاز","#178a50"];
+  if(x.acc>=60) return ["جيد","#b97d08"];
+  return ["يحتاج دعم","#c23838"];
+}
+function accCol(v){return v>=75?"#178a50":v>=60?"#b97d08":"#c23838"}
+function abar(v,c){return '<div class="pbar"><i style="width:'+v+'%;background:'+c+'"></i></div>'}
+function adminDetail(st){
+  return Object.keys(st.units).filter(k=>st.units[k].tot).map(k=>{
+    const u=st.units[k], a=pct(u.corr,u.done);
+    return '<div class="prow"><span class="l" style="width:80px">الوحدة '+k+'</span>'+abar(a,accCol(a))+'<span class="r" style="width:190px">'+u.corr+'/'+u.done+' صحيحة من '+u.tot+'</span></div>';
+  }).join("");
+}
 function renderAdmin(){
-  const q=(document.getElementById("adminQ")||{}).value||"";
-  let rows=adminRows.filter(r=>r.email.toLowerCase().includes(q.toLowerCase()));
+  const all=adminRows.map(adminCalc), q=adminQ.toLowerCase();
+  let rows=all.filter(r=>!q||(r.label+' '+r.email).toLowerCase().includes(q));
   rows.sort((a,b)=>{const A=a[adminSort.k],B=b[adminSort.k];return (A>B?1:A<B?-1:0)*adminSort.d});
-  const all=adminRows, act=all.filter(r=>r.days<=7).length, started=all.filter(r=>r.done);
+  const started=all.filter(r=>r.done), act=all.filter(r=>r.days<=7).length;
   const avg=started.length?Math.round(started.reduce((a,r)=>a+r.acc,0)/started.length):0;
-  const tot=all.reduce((a,r)=>a+r.done,0);
-  let h=`<h2>Admin Dashboard — All Learners</h2>
-  <div class="kpis"><div><b>${all.length}</b><span>Learners</span></div><div><b>${act}</b><span>Active (7 days)</span></div><div><b>${avg}%</b><span>Avg accuracy</span></div><div><b>${tot}</b><span>Total answers</span></div></div>
-  <div class="perf-tools"><input id="adminQ" placeholder="Search email" value="${esc(q)}" oninput="renderAdmin();var e=document.getElementById('adminQ');e.focus();e.setSelectionRange(e.value.length,e.value.length)"><button onclick="exportAdminCsv()">Export CSV</button></div>
-  <table class="ptbl"><thead><tr>${[["email","Learner"],["done","Answered"],["acc","Accuracy"],["comp","Completion"],["days","Last activity"]].map(c=>`<th onclick="sortAdmin('${c[0]}')">${c[1]}</th>`).join("")}</tr></thead><tbody>`;
-  rows.forEach((r,i)=>{
-    h+=`<tr class="lr" onclick="toggleAdminRow('${esc(r.email)}')"><td>${esc(r.email)}</td><td>${r.done}</td><td>${r.done?r.acc+"%":"–"}</td><td>${r.comp}%</td><td>${r.days>=999?"–":r.days===0?"Today":r.days+" d ago"}</td></tr>`;
-    if(adminOpen===r.email) h+=`<tr><td colspan="5" style="background:var(--bg)">${perfBody(r.st,true)}</td></tr>`;
+  const tot=all.reduce((a,r)=>a+r.done,0), cm=all.length?Math.round(all.reduce((a,r)=>a+r.comp,0)/all.length):0;
+  const kp=[["عدد الدارسين",all.length],["نشطون آخر 7 أيام",act],["متوسط الدقة",avg+"%"],["إجمالي الأسئلة المُجابة",tot],["متوسط الإنجاز",cm+"%"]]
+    .map(k=>'<div><b>'+k[1]+'</b><span>'+k[0]+'</span></div>').join("");
+  const uk=Object.keys(manifest||{}).filter(k=>adminRows.length?true:true);
+  const unitsH=uk.map(k=>{let d=0,c=0;adminRows.forEach(r=>{const u=r.st.units[k];if(u){d+=u.done;c+=u.corr}});const v=pct(c,d);
+    return '<div class="prow"><span class="l" style="width:80px">الوحدة '+k+'</span>'+abar(v,accCol(v))+'<span class="r" style="width:50px">'+(d?v+"%":"–")+'</span></div>'}).join("");
+  const top=started.slice().sort((a,b)=>b.acc-a.acc).slice(0,3).map((x,i)=>'<div class="prow"><span class="l" style="width:auto;flex:1">'+(i+1)+'. '+esc(x.label)+'</span><span class="r" style="width:50px">'+x.acc+'%</span></div>').join("")||'<div style="color:var(--muted)">لا توجد بيانات</div>';
+  const weak=all.filter(x=>x.days>7||(x.done&&x.acc<60)).map(x=>'<li>'+esc(x.label)+' — '+(x.days>7?(x.days>=999?'لم يبدأ بعد':'لا نشاط منذ '+x.days+' يومًا'):'دقة '+x.acc+'%')+'</li>').join("")||'<li style="color:var(--muted)">لا أحد حاليًا</li>';
+  let h='<div class="rtl" dir="rtl"><h2>لوحة متابعة أداء الدارسين</h2><div class="kpis">'+kp+'</div>'
+   +'<div class="two"><div class="cardx"><h3>متوسط الدقة حسب الوحدة</h3>'+unitsH+'</div><div class="cardx"><h3>أعلى الدارسين دقة</h3>'+top+'<h3 style="margin-top:12px">يحتاجون متابعة</h3><ul style="margin:0;padding-inline-start:18px;font-size:.8rem">'+weak+'</ul></div></div>'
+   +'<div class="perf-tools"><select class="perf-x" onchange="adminUnit=this.value;renderAdmin()"><option value="all">كل الوحدات</option>'+uk.map(k=>'<option value="'+k+'"'+(adminUnit===k?' selected':'')+'>الوحدة '+k+'</option>').join("")+'</select>'
+   +'<input id="adminQ" placeholder="بحث بالاسم أو البريد" value="'+esc(adminQ)+'" oninput="adminQ=this.value;renderAdmin();var e=document.getElementById(\'adminQ\');e.focus();e.setSelectionRange(e.value.length,e.value.length)"><button onclick="exportAdminCsv()">تصدير CSV</button></div>'
+   +'<div style="overflow-x:auto"><table class="ptbl"><thead><tr>'+[["label","الدارس"],["done","أُجيب"],["acc","الدقة"],["comp","الإنجاز"],["days","آخر نشاط"]].map(c=>'<th onclick="sortAdmin(\''+c[0]+'\')">'+c[1]+'</th>').join("")+'<th>الحالة</th></tr></thead><tbody>';
+  rows.forEach(r=>{
+    const st=adminStatus(r);
+    h+='<tr class="lr" onclick="toggleAdminRow(\''+esc(r.email)+'\')"><td>'+(r.name?'<b>'+esc(r.name)+'</b><div style="color:var(--muted);font-size:.72rem">'+esc(r.email)+'</div>':esc(r.email))+'</td><td>'+r.done+'</td><td style="min-width:110px"><div class="prow" style="margin:0">'+abar(r.acc,accCol(r.acc))+'<span style="width:38px;color:var(--muted)">'+r.acc+'%</span></div></td><td>'+r.comp+'%</td><td>'+(r.days>=999?"—":r.days===0?"اليوم":"منذ "+r.days+" يوم")+'</td><td><span style="background:'+st[1]+';color:#fff;padding:2px 9px;border-radius:20px;font-size:.72rem">'+st[0]+'</span></td></tr>';
+    if(adminOpen===r.email) h+='<tr><td colspan="6" style="background:var(--bg)">'+adminDetail(r.st)+'</td></tr>';
   });
-  h+="</tbody></table>";
-  const b=document.getElementById("perfBox");
-  b.innerHTML=`<div style="display:flex;justify-content:space-between"><span></span><button class="perf-x" onclick="closePerf()">&#10005; Close</button></div>`+h;
+  h+='</tbody></table></div></div>';
+  document.getElementById("perfBox").innerHTML='<div style="display:flex;justify-content:space-between"><span></span><button class="perf-x" onclick="closePerf()">&#10005; إغلاق</button></div>'+h;
 }
 function sortAdmin(k){adminSort.d=adminSort.k===k?-adminSort.d:-1;adminSort.k=k;renderAdmin()}
 function toggleAdminRow(e){adminOpen=adminOpen===e?null:e;renderAdmin()}
 function exportAdminCsv(){
-  const rows=[["Email","Answered","Correct","Accuracy %","Completion %","Last activity"]].concat(adminRows.map(r=>[r.email,r.done,r.st.corr,r.acc,r.comp,r.upd||""]));
+  const rows=[["Name","Email","Answered","Correct","Correct","Accuracy %","Completion %","Last activity"]].concat(adminRows.map(adminCalc).map(r=>[r.name,r.email,r.done,r.corr,r.acc,r.comp,r.upd||""]));
   const csv="\ufeff"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
   const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);a.download="learners-performance.csv";a.click();
 }
