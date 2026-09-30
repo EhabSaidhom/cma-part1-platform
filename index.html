@@ -180,6 +180,22 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .tag.src{font-weight:700}
 .tag.src-target{background:#e8eefc; color:#2b4a9e; border-color:#c4d2f5}
 .tag.src-mcq{background:#fff1dc; color:#a35a00; border-color:#f3d3a0}
+
+.perf-box{max-width:920px;width:100%;max-height:90vh;overflow:auto;background:var(--panel);border-radius:14px;padding:20px;text-align:left}
+.perf-box h2{margin:0 0 10px;font-size:1.1rem}
+.kpis{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin:10px 0}
+.kpis div{border:1px solid var(--line);border-radius:10px;padding:10px}
+.kpis b{display:block;font-size:1.3rem}.kpis span{font-size:.72rem;color:var(--muted)}
+.pbar{height:9px;background:var(--line);border-radius:6px;overflow:hidden;flex:1}
+.pbar i{display:block;height:100%;background:var(--brand-2)}
+.prow{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.8rem}
+.prow .l{width:190px;flex:none}.prow .r{width:130px;flex:none;color:var(--muted);text-align:right}
+.ptbl{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:8px}
+.ptbl th,.ptbl td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left}
+.ptbl th{cursor:pointer;color:var(--muted)}.ptbl tr.lr{cursor:pointer}
+.perf-tools{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.perf-tools input,.perf-tools button,.perf-x{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.8rem;cursor:pointer}
+@media(max-width:600px){.prow .l{width:110px}.prow .r{width:90px}}
 </style>
 </head>
 <body>
@@ -205,6 +221,8 @@ header.top .sub{font-size:.78rem; opacity:.85}
   </div>
   <div class="user-bar">
     <span id="userEmailLbl"></span>
+    <button onclick="openMyPerf()">My Performance</button>
+    <button id="adminBtn" class="hidden" style="display:none" onclick="openAdmin()">Admin Dashboard</button>
     <button onclick="switchUser()">Sign Out</button>
   </div>
 </header>
@@ -228,6 +246,8 @@ header.top .sub{font-size:.78rem; opacity:.85}
   <button class="cert-print" onclick="window.print()">&#128424; Print Certificate</button>
   <div class="cert-sheet" id="certSheet"></div>
 </div>
+
+<div class="modal-veil hidden" id="perfModal"><div class="perf-box" id="perfBox"></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -418,6 +438,7 @@ async function startSession(user){
   document.getElementById("userEmailLbl").textContent = userEmail;
   await loadUserData();
   buildTree(); render();
+  checkAdmin();
 }
 async function doAuth(mode){
   const email = document.getElementById("emailInput").value.trim();
@@ -433,7 +454,7 @@ async function doAuth(mode){
 }
 async function switchUser(){
   await sb.auth.signOut();
-  userId = ""; userEmail = ""; answered = {}; flagged = {};
+  userId = ""; userEmail = ""; answered = {}; flagged = {}; document.getElementById("adminBtn").style.display="none";
   document.getElementById("passInput").value = "";
   document.getElementById("loginVeil").classList.remove("hidden");
 }
@@ -656,7 +677,7 @@ function pick(qid, choiceIdx){
   if(answered[qid]) return;
   const q = activeSet.find(x=>x.id===qid);
   const note = (answered[qid] && answered[qid].note) || "";
-  answered[qid] = {choice:choiceIdx, correct: choiceIdx===q.correct, note};
+  answered[qid] = {choice:choiceIdx, correct: choiceIdx===q.correct, note, at: new Date().toISOString()};
   persist(); render();
 }
 function retry(qid){
@@ -732,6 +753,107 @@ function openCertificate(unitN){
   document.getElementById("certModal").classList.add("open");
 }
 function closeCert(){ document.getElementById("certModal").classList.remove("open"); }
+
+
+/* ===================== Performance & Admin ===================== */
+function esc(t){return String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function pct(a,b){return b?Math.round(a/b*100):0}
+function idIndex(){
+  const m={};
+  Object.keys(manifest||{}).forEach(un=>Object.keys(manifest[un]).forEach(sub=>{
+    (manifest[un][sub].ids||[]).forEach(id=>{m[id]={unit:un,sub:sub}});
+  }));
+  return m;
+}
+function statsFor(ans){
+  const units={}, subs={};
+  Object.keys(manifest||{}).forEach(un=>{
+    units[un]={tot:0,done:0,corr:0};
+    Object.keys(manifest[un]).forEach(sub=>{
+      const n=(manifest[un][sub].ids||[]).length;
+      units[un].tot+=n; subs[un+"|"+sub]={unit:un,sub:sub,tot:n,done:0,corr:0};
+    });
+  });
+  let done=0,corr=0;
+  Object.keys(ans||{}).forEach(id=>{
+    const a=ans[id], loc=idIndex_cache[id]; if(!loc||!a||a.choice==null) return; // skip note-only entries
+    done++; units[loc.unit].done++; subs[loc.unit+"|"+loc.sub].done++;
+    if(a.correct){corr++; units[loc.unit].corr++; subs[loc.unit+"|"+loc.sub].corr++;}
+  });
+  const tot=Object.values(units).reduce((a,u)=>a+u.tot,0);
+  return {units,subs,done,corr,tot};
+}
+let idIndex_cache={};
+function prepIdx(){ idIndex_cache=idIndex(); }
+function prow(label,done,corr,tot){
+  const acc=pct(corr,done);
+  return `<div class="prow"><span class="l">${esc(label)}</span><div class="pbar"><i style="width:${pct(done,tot)}%"></i></div><span class="r">${done}/${tot} done · ${done?acc+"% correct":"–"}</span></div>`;
+}
+function perfBody(st, subsToo){
+  let h=`<div class="kpis"><div><b>${st.done}</b><span>Answered</span></div><div><b>${pct(st.corr,st.done)}%</b><span>Accuracy</span></div><div><b>${pct(st.done,st.tot)}%</b><span>Completion</span></div><div><b>${st.done-st.corr}</b><span>Mistakes</span></div></div>`;
+  Object.keys(st.units).forEach(un=>{
+    const u=st.units[un]; if(!u.tot) return;
+    h+=prow("Unit "+un,u.done,u.corr,u.tot);
+    if(subsToo) Object.values(st.subs).filter(x=>x.unit===un&&x.tot).forEach(x=>{
+      h+=`<div style="margin-left:14px;opacity:.85">${prow(x.sub,x.done,x.corr,x.tot)}</div>`;
+    });
+  });
+  return h;
+}
+function showPerf(html){
+  const b=document.getElementById("perfBox");
+  b.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><span></span><button class="perf-x" onclick="closePerf()">&#10005; Close</button></div>`+html;
+  document.getElementById("perfModal").classList.remove("hidden");
+}
+function closePerf(){document.getElementById("perfModal").classList.add("hidden")}
+async function openMyPerf(){
+  await loadManifest(); prepIdx();
+  showPerf(`<h2>My Performance</h2><div style="color:var(--muted);font-size:.8rem">${esc(userEmail)}</div>`+perfBody(statsFor(answered),true));
+}
+async function checkAdmin(){
+  try{
+    const {data,error}=await sb.rpc("is_admin");
+    if(!error && data===true) document.getElementById("adminBtn").style.display="";
+  }catch(e){}
+}
+let adminRows=[], adminSort={k:"acc",d:-1}, adminOpen=null;
+async function openAdmin(){
+  await loadManifest(); prepIdx();
+  showPerf("<h2>Admin Dashboard — All Learners</h2><div>Loading…</div>");
+  const {data,error}=await sb.rpc("admin_learners");
+  if(error){ showPerf("<h2>Admin Dashboard</h2><div style='color:#b00020'>"+esc(error.message)+"</div>"); return; }
+  adminRows=(data||[]).map(r=>{
+    const st=statsFor(r.answered||{}); const d=r.updated_at?Math.floor((Date.now()-new Date(r.updated_at))/864e5):999;
+    return {email:r.email||r.user_id,st,done:st.done,acc:pct(st.corr,st.done),comp:pct(st.done,st.tot),days:d,upd:r.updated_at};
+  });
+  renderAdmin();
+}
+function renderAdmin(){
+  const q=(document.getElementById("adminQ")||{}).value||"";
+  let rows=adminRows.filter(r=>r.email.toLowerCase().includes(q.toLowerCase()));
+  rows.sort((a,b)=>{const A=a[adminSort.k],B=b[adminSort.k];return (A>B?1:A<B?-1:0)*adminSort.d});
+  const all=adminRows, act=all.filter(r=>r.days<=7).length, started=all.filter(r=>r.done);
+  const avg=started.length?Math.round(started.reduce((a,r)=>a+r.acc,0)/started.length):0;
+  const tot=all.reduce((a,r)=>a+r.done,0);
+  let h=`<h2>Admin Dashboard — All Learners</h2>
+  <div class="kpis"><div><b>${all.length}</b><span>Learners</span></div><div><b>${act}</b><span>Active (7 days)</span></div><div><b>${avg}%</b><span>Avg accuracy</span></div><div><b>${tot}</b><span>Total answers</span></div></div>
+  <div class="perf-tools"><input id="adminQ" placeholder="Search email" value="${esc(q)}" oninput="renderAdmin();var e=document.getElementById('adminQ');e.focus();e.setSelectionRange(e.value.length,e.value.length)"><button onclick="exportAdminCsv()">Export CSV</button></div>
+  <table class="ptbl"><thead><tr>${[["email","Learner"],["done","Answered"],["acc","Accuracy"],["comp","Completion"],["days","Last activity"]].map(c=>`<th onclick="sortAdmin('${c[0]}')">${c[1]}</th>`).join("")}</tr></thead><tbody>`;
+  rows.forEach((r,i)=>{
+    h+=`<tr class="lr" onclick="toggleAdminRow('${esc(r.email)}')"><td>${esc(r.email)}</td><td>${r.done}</td><td>${r.done?r.acc+"%":"–"}</td><td>${r.comp}%</td><td>${r.days>=999?"–":r.days===0?"Today":r.days+" d ago"}</td></tr>`;
+    if(adminOpen===r.email) h+=`<tr><td colspan="5" style="background:var(--bg)">${perfBody(r.st,true)}</td></tr>`;
+  });
+  h+="</tbody></table>";
+  const b=document.getElementById("perfBox");
+  b.innerHTML=`<div style="display:flex;justify-content:space-between"><span></span><button class="perf-x" onclick="closePerf()">&#10005; Close</button></div>`+h;
+}
+function sortAdmin(k){adminSort.d=adminSort.k===k?-adminSort.d:-1;adminSort.k=k;renderAdmin()}
+function toggleAdminRow(e){adminOpen=adminOpen===e?null:e;renderAdmin()}
+function exportAdminCsv(){
+  const rows=[["Email","Answered","Correct","Accuracy %","Completion %","Last activity"]].concat(adminRows.map(r=>[r.email,r.done,r.st.corr,r.acc,r.comp,r.upd||""]));
+  const csv="\ufeff"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+  const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);a.download="learners-performance.csv";a.click();
+}
 
 (async function init(){
   await loadManifest();
