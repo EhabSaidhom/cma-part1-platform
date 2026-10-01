@@ -867,7 +867,7 @@ async function saveMyName(){
     if(error) throw error;
     myProfile = myProfile || {}; myProfile.display_name = v;
     document.getElementById("nameBanner").classList.add("hidden");
-  }catch(e){ alert("Could not save your name, please try again."); }
+  }catch(e){ console.error("saveMyName failed", e); alert("Could not save your name, please try again."); }
 }
 
 let openUnits = new Set();
