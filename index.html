@@ -70,6 +70,10 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .qbtn.correct{background:#e5f5ec; color:var(--ok); border-color:var(--ok)}
 .qbtn.wrong{background:#fbeae8; color:var(--bad); border-color:var(--bad)}
 .qbtn.flagged{outline:2px solid var(--flag)}
+.qbtn{position:relative}
+.qbtn.has-note::after{content:"";position:absolute;top:3px;right:3px;width:6px;height:6px;border-radius:50%;background:var(--brand)}
+#noteTip{position:fixed;z-index:9999;max-width:300px;background:#1f2933;color:#fff;font-size:.8rem;line-height:1.5;padding:8px 11px;border-radius:9px;box-shadow:0 6px 20px rgba(0,0,0,.25);pointer-events:none;white-space:pre-wrap;word-break:break-word;display:none}
+#noteTip b{display:block;font-size:.7rem;opacity:.7;margin-bottom:3px}
 
 .qhead{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
 .qhead h3{margin:0; font-size:1rem}
@@ -1002,7 +1006,7 @@ function render(){
   let grid = "";
   activeSet.forEach((x,i)=>{
     const st = statusOf(x);
-    grid += `<button class="qbtn ${st!=="not"?st:""} ${x.id===q.id?"current":""} ${flagged[x.id]?"flagged":""}" onclick="jumpTo(${x.id})">${i+1}</button>`;
+    grid += `<button class="qbtn ${st!=="not"?st:""} ${x.id===q.id?"current":""} ${flagged[x.id]?"flagged":""} ${hasNote(x.id)?"has-note":""}" data-qid="${x.id}" onclick="jumpTo(${x.id})">${i+1}</button>`;
   });
 
   const isAns = q.id in answered;
@@ -1105,6 +1109,7 @@ function retry(qid){
 function saveNote(qid, val){
   if(!answered[qid]) answered[qid] = {choice:null, correct:false, note:val};
   else answered[qid].note = val;
+  const nb=document.querySelector('.qbtn[data-qid="'+qid+'"]'); if(nb) nb.classList.toggle("has-note", hasNote(qid));
   persist();
 }
 function toggleFlag(qid){ flagged[qid] = !flagged[qid]; persist(); render(); }
@@ -1171,6 +1176,26 @@ function openCertificate(unitN){
   document.getElementById("certModal").classList.add("open");
 }
 function closeCert(){ document.getElementById("certModal").classList.remove("open"); }
+
+
+/* ===== Note tooltip on question-number hover ===== */
+function hasNote(id){ return !!(answered[id] && answered[id].note && String(answered[id].note).trim()); }
+(function(){
+  const tip=document.createElement("div"); tip.id="noteTip"; document.body.appendChild(tip);
+  function show(btn){
+    const id=+btn.dataset.qid; if(!hasNote(id)){ tip.style.display="none"; return; }
+    tip.innerHTML="<b>Question "+btn.textContent+" \u2014 My note</b>";
+    const t=document.createElement("div"); t.dir="auto"; t.textContent=answered[id].note; tip.appendChild(t);
+    tip.style.display="block";
+    const r=btn.getBoundingClientRect(), w=tip.offsetWidth, h=tip.offsetHeight;
+    let x=Math.min(Math.max(8,r.left+r.width/2-w/2), window.innerWidth-w-8);
+    let y=r.top-h-8; if(y<8) y=r.bottom+8;
+    tip.style.left=x+"px"; tip.style.top=y+"px";
+  }
+  document.addEventListener("mouseover",e=>{ const b=e.target.closest&&e.target.closest(".qbtn"); if(b) show(b); });
+  document.addEventListener("mouseout",e=>{ const b=e.target.closest&&e.target.closest(".qbtn"); if(b) tip.style.display="none"; });
+  document.addEventListener("scroll",()=>{tip.style.display="none"},true);
+})();
 
 (async function init(){
   await loadManifest();
