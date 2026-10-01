@@ -97,6 +97,13 @@ header.top .sub{font-size:.78rem; opacity:.85}
   padding:13px 10px; cursor:pointer; background:var(--panel); font-size:.95rem; font-weight:700;
 }
 .opt:hover{border-color:var(--brand)}
+.opt.tried{opacity:.45;text-decoration:line-through;cursor:not-allowed;border-color:var(--bad)}
+#retryVeil{position:fixed;inset:0;background:rgba(10,15,12,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10000}
+#retryVeil .box{background:var(--panel);border-radius:14px;padding:24px;max-width:360px;width:100%;text-align:center;border-top:5px solid var(--bad);animation:rpop .18s ease-out}
+#retryVeil h2{margin:0 0 8px;font-size:1.1rem;color:var(--bad)}
+#retryVeil p{margin:0 0 16px;font-size:.88rem;color:var(--muted);line-height:1.5}
+#retryVeil button{padding:9px 22px;border:0;border-radius:9px;background:var(--brand);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+@keyframes rpop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
 .opt.correct{border-color:var(--ok); background:#e9f7ef; color:var(--ok)}
 .opt.wrong{border-color:var(--bad); background:#fdecea; color:var(--bad)}
 @media(max-width:520px){ .options{grid-template-columns:repeat(2,1fr)} }
@@ -1017,7 +1024,7 @@ function render(){
     if(isAns){
       if(i===q.correct) cls += " correct";
       else if(i===answered[q.id].choice) cls += " wrong";
-    }
+    } else if(triedWrong[q.id]===i) cls += " tried";
     optsHtml += `<div class="${cls}" onclick="pick(${q.id},${i})">${letter}</div>`;
   });
 
@@ -1098,12 +1105,19 @@ function render(){
 function pick(qid, choiceIdx){
   if(answered[qid]) return;
   const q = activeSet.find(x=>x.id===qid);
+  // First wrong attempt: warn and allow one more try (not recorded)
+  if(q && choiceIdx!==q.correct && !(qid in triedWrong)){
+    triedWrong[qid] = choiceIdx;
+    render(); showRetryPopup();
+    return;
+  }
+  if(triedWrong[qid]===choiceIdx) return;
   const note = (answered[qid] && answered[qid].note) || "";
   answered[qid] = {choice:choiceIdx, correct: choiceIdx===q.correct, note, at: new Date().toISOString()};
   persist(); render();
 }
 function retry(qid){
-  delete answered[qid];
+  delete answered[qid]; delete triedWrong[qid];
   persist(); render();
 }
 function saveNote(qid, val){
@@ -1196,6 +1210,20 @@ function hasNote(id){ return !!(answered[id] && answered[id].note && String(answ
   document.addEventListener("mouseout",e=>{ const b=e.target.closest&&e.target.closest(".qbtn"); if(b) tip.style.display="none"; });
   document.addEventListener("scroll",()=>{tip.style.display="none"},true);
 })();
+
+
+/* ===== Incorrect answer -> warning popup + one more chance ===== */
+let triedWrong = {};
+function showRetryPopup(){
+  closeRetryPopup();
+  const v=document.createElement("div"); v.id="retryVeil";
+  v.innerHTML='<div class="box" role="alertdialog" aria-modal="true"><div style="font-size:2rem">&#9888;&#65039;</div><h2>Incorrect answer</h2><p>That is not the correct answer.<br>You have <b>one more chance</b> &mdash; think again and choose another option.</p><button id="retryBtn">Try again</button></div>';
+  v.addEventListener("click",e=>{ if(e.target===v) closeRetryPopup(); });
+  document.body.appendChild(v);
+  document.getElementById("retryBtn").focus();
+}
+function closeRetryPopup(){ const v=document.getElementById("retryVeil"); if(v) v.remove(); }
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"||e.key==="Enter") closeRetryPopup(); });
 
 (async function init(){
   await loadManifest();
