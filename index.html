@@ -140,6 +140,7 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .modal-veil{position:fixed; inset:0; background:rgba(10,15,12,.6); display:flex; align-items:center;
   justify-content:center; z-index:50; padding:16px}
 .modal-veil.hidden{display:none}
+.hidden{display:none !important}
 .modal-box{background:var(--panel); border-radius:14px; padding:24px; max-width:380px; width:100%; text-align:center}
 .modal-box h2{margin:0 0 8px; font-size:1.05rem}
 .modal-box p{color:var(--muted); font-size:.85rem; margin:0 0 16px}
@@ -211,6 +212,30 @@ header.top .sub{font-size:.78rem; opacity:.85}
   font-family:inherit; font-size:.95rem; font-weight:700; cursor:pointer}
 .dash-link{background:none; border:none; color:#fff; text-decoration:underline; cursor:pointer; font-family:inherit; font-size:.82rem; padding:0}
 @media(max-width:640px){ .dash-row{flex-direction:column; align-items:flex-start} }
+
+.admin-box{max-width:1180px}
+.admin-kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:18px}
+.admin-controls{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px}
+.admin-controls input, .admin-controls select{padding:8px 10px; border:1px solid var(--line); border-radius:8px;
+  background:var(--bg); color:var(--ink); font-family:inherit; font-size:.85rem}
+.admin-controls input{flex:1; min-width:160px}
+.admin-table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:10px; margin-bottom:20px}
+table.admin-table{width:100%; border-collapse:collapse; font-size:.82rem}
+table.admin-table th, table.admin-table td{padding:8px 10px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap}
+table.admin-table th{cursor:pointer; user-select:none; color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.03em; background:var(--bg)}
+table.admin-table tbody tr{cursor:pointer}
+table.admin-table tbody tr:hover{background:var(--bg)}
+.status-pill{display:inline-block; padding:2px 9px; border-radius:20px; font-size:.72rem; font-weight:700}
+.status-excellent{background:#e3f7e8; color:#1d7a35}
+.status-good{background:#e8eefc; color:#2b4a9e}
+.status-support{background:#fdeaea; color:#b3261e}
+.status-inactive{background:#f1f1f1; color:#666}
+.status-new{background:#fff3cd; color:#7a5b00}
+.admin-two-col{display:flex; gap:22px; flex-wrap:wrap; margin-bottom:20px}
+.admin-col{flex:1; min-width:260px}
+.admin-list{list-style:none; margin:0; padding:0; font-size:.83rem}
+.admin-list li{display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line)}
+.back-link{background:none; border:none; color:var(--brand); text-decoration:underline; cursor:pointer; font-family:inherit; font-size:.85rem; padding:0; margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -219,7 +244,8 @@ header.top .sub{font-size:.78rem; opacity:.85}
   <div class="modal-box">
     <h2>Welcome</h2>
     <p>Sign in to save your progress and mistake log. It syncs across all your devices.</p>
-    <input type="email" id="emailInput" placeholder="name@example.com" autocomplete="email">
+    <input type="text" id="nameInput" placeholder="Full name (for new accounts)" autocomplete="name">
+    <input type="email" id="emailInput" placeholder="name@example.com" autocomplete="email" style="margin-top:8px">
     <input type="password" id="passInput" placeholder="Password (min 6 characters)" autocomplete="current-password" style="margin-top:8px">
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="primary" onclick="doAuth('in')">Sign In</button>
@@ -233,6 +259,10 @@ header.top .sub{font-size:.78rem; opacity:.85}
   <div class="dash-box" id="dashboardBox"></div>
 </div>
 
+<div class="modal-veil hidden dash-veil" id="adminVeil">
+  <div class="dash-box admin-box" id="adminBox"></div>
+</div>
+
 <header class="top">
   <div>
     <h1>CMA Part 1 Practice Platform</h1>
@@ -240,11 +270,17 @@ header.top .sub{font-size:.78rem; opacity:.85}
   </div>
   <div class="user-bar">
     <span id="userEmailLbl"></span>
-    <button class="dash-link" onclick="openDashboard()">&#128202; Dashboard</button>
+    <button class="dash-link" onclick="openDashboard()">&#128202; My Performance</button>
+    <button class="dash-link hidden" id="adminBtn" onclick="openAdminDashboard()">&#128737; Admin Dashboard</button>
     <button onclick="switchUser()">Sign Out</button>
   </div>
 </header>
 <div style="text-align:center;padding:6px;font-size:.78rem;color:var(--muted)" id="progressLine">Loading...</div>
+<div id="nameBanner" class="hidden" style="background:#fff3cd;color:#7a5b00;text-align:center;padding:8px;font-size:.82rem;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap">
+  <span>Add your name so it appears correctly on your certificates:</span>
+  <input id="nameBannerInput" placeholder="Full name" style="padding:5px 8px;border:1px solid #e0c46a;border-radius:6px;font-family:inherit">
+  <button onclick="saveMyName()" style="padding:5px 12px;border:none;border-radius:6px;background:#7a5b00;color:#fff;cursor:pointer;font-family:inherit">Save</button>
+</div>
 
 <div class="layout">
   <aside class="tree-panel">
@@ -418,6 +454,7 @@ const SUPABASE_URL = "https://yvsiacxcjcsshymfuhwo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_HJGeENBXWbpXSp94A12Dfg_1rrQZVVp";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let userId = "";
+let myProfile = null;
 
 function lsKey(){ return "cma_state__" + userEmail; }
 function readLocal(){
@@ -454,6 +491,7 @@ async function startSession(user){
   document.getElementById("userEmailLbl").textContent = userEmail;
   await loadUserData();
   await loadManifest();
+  await loadMyProfile();
   buildTree(); render();
   openDashboard();
 }
@@ -553,23 +591,283 @@ function openDashboard(){
 }
 function closeDashboard(){ document.getElementById("dashboardVeil").classList.add("hidden"); }
 
+// ---------- Admin Dashboard ----------
+let adminStudents = null;   // cached after first load this session
+let adminSort = {key:"accuracy", dir:"desc"};
+let adminSearch = "";
+let adminUnitFilter = "all";
+const STATUS_LABEL = {excellent:"Excellent", good:"Good", support:"Needs Support", inactive:"Inactive", new:"Not Started"};
+const STATUS_CLASS = {excellent:"status-excellent", good:"status-good", support:"status-support", inactive:"status-inactive", new:"status-new"};
+
+function bankTotalQuestions(){
+  return UNITS.reduce((sum,u)=>sum+unitIds(u).length, 0);
+}
+function studentUnitStats(ans, u){
+  const ids = unitIds(u);
+  let correct=0, wrong=0;
+  ids.forEach(id=>{ const a = ans[id]; if(a){ if(a.correct) correct++; else wrong++; } });
+  return {total:ids.length, correct, wrong, answered:correct+wrong};
+}
+function studentOverallStats(ans){
+  let correct=0, wrong=0;
+  UNITS.forEach(u=>{ const s = studentUnitStats(ans,u); correct+=s.correct; wrong+=s.wrong; });
+  return {correct, wrong, answered:correct+wrong};
+}
+function classifyStudent(hasAnyRow, answeredCt, accuracy, lastActive){
+  if(!hasAnyRow || answeredCt===0) return "new";
+  const daysSince = lastActive ? (Date.now()-lastActive.getTime())/86400000 : Infinity;
+  if(daysSince > 7) return "inactive";
+  if(accuracy < 60) return "support";
+  if(accuracy >= 85) return "excellent";
+  return "good";
+}
+async function loadAllStudentsData(){
+  const [{data:profiles, error:e1}, {data:progress, error:e2}] = await Promise.all([
+    sb.from("profiles").select("user_id,email,display_name,role"),
+    sb.from("user_progress_admin").select("user_id,updated_at,answered,flagged")
+  ]);
+  if(e1) throw e1; if(e2) throw e2;
+  const progByUser = {}; (progress||[]).forEach(p=>progByUser[p.user_id]=p);
+  const bankTotal = bankTotalQuestions();
+  return (profiles||[]).filter(p=>p.role!=="admin").map(p=>{
+    const row = progByUser[p.user_id];
+    const ans = (row && row.answered) || {};
+    const stats = studentOverallStats(ans);
+    const accuracy = stats.answered ? Math.round(stats.correct/stats.answered*100) : 0;
+    const completion = bankTotal ? Math.round(stats.answered/bankTotal*100) : 0;
+    const lastActive = row && row.updated_at ? new Date(row.updated_at) : null;
+    const status = classifyStudent(!!row, stats.answered, accuracy, lastActive);
+    return {
+      user_id:p.user_id, email:p.email||"", name:p.display_name||"", answeredObj:ans,
+      correct:stats.correct, wrong:stats.wrong, answered:stats.answered,
+      accuracy, completion, lastActive, status
+    };
+  });
+}
+function fmtDate(d){ return d ? d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : "Never"; }
+function studentStatsForUnit(st, unitN){
+  if(unitN === "all") return {answered:st.answered, correct:st.correct, accuracy:st.accuracy};
+  const u = UNITS.find(x=>x.n===Number(unitN));
+  const s = studentUnitStats(st.answeredObj, u);
+  const accuracy = s.answered ? Math.round(s.correct/s.answered*100) : 0;
+  return {answered:s.answered, correct:s.correct, accuracy};
+}
+async function openAdminDashboard(){
+  const box = document.getElementById("adminBox");
+  box.innerHTML = `<p>Loading student data&hellip;</p>`;
+  document.getElementById("adminVeil").classList.remove("hidden");
+  try{
+    adminStudents = await loadAllStudentsData();
+  }catch(e){
+    box.innerHTML = `<p>Could not load student data: ${e.message||e}</p><div class="dash-actions"><button onclick="closeAdmin()">Close</button></div>`;
+    return;
+  }
+  renderAdminDashboard();
+}
+function closeAdmin(){ document.getElementById("adminVeil").classList.add("hidden"); }
+
+function renderAdminDashboard(){
+  const box = document.getElementById("adminBox");
+  const students = adminStudents || [];
+  const n = students.length;
+  const active7 = students.filter(s=>s.lastActive && (Date.now()-s.lastActive.getTime())<=7*86400000).length;
+  const withAnswers = students.filter(s=>s.answered>0);
+  const avgAcc = withAnswers.length ? Math.round(withAnswers.reduce((a,s)=>a+s.accuracy,0)/withAnswers.length) : 0;
+  const totalAnswered = students.reduce((a,s)=>a+s.answered,0);
+  const avgCompletion = n ? Math.round(students.reduce((a,s)=>a+s.completion,0)/n) : 0;
+
+  // per-unit average accuracy (only counting students who attempted that unit)
+  const unitAvg = UNITS.map(u=>{
+    const vals = students.map(s=>studentStatsForUnit(s,String(u.n))).filter(v=>v.answered>0);
+    const avg = vals.length ? Math.round(vals.reduce((a,v)=>a+v.accuracy,0)/vals.length) : null;
+    return {n:u.n, title:u.title, avg, attempted:vals.length};
+  }).filter(x=>x.attempted>0);
+
+  const eligible = withAnswers.filter(s=>s.answered>=10);
+  const top3 = [...eligible].sort((a,b)=>b.accuracy-a.accuracy || b.answered-a.answered).slice(0,3);
+
+  const watchlist = students.filter(s=>{
+    if(s.status==="new") return false;
+    return s.accuracy<60 || s.status==="inactive";
+  });
+
+  const unitOptions = `<option value="all">All Units</option>` +
+    UNITS.map(u=>`<option value="${u.n}">Unit ${u.n} -- ${u.title}</option>`).join("");
+
+  box.innerHTML = buildAdminHtml({n,active7,avgAcc,totalAnswered,avgCompletion,unitAvg,top3,watchlist,unitOptions});
+  attachAdminHandlers();
+  renderAdminTable();
+}
+function buildAdminHtml(d){
+  return `
+    <h2>Admin Dashboard</h2>
+    <p class="sub">All students' performance across the platform. Personal notes are never included here.</p>
+    <div class="admin-kpis">
+      <div class="dash-card"><div class="num">${d.n}</div><div class="lbl">Students</div></div>
+      <div class="dash-card"><div class="num">${d.active7}</div><div class="lbl">Active last 7 days</div></div>
+      <div class="dash-card"><div class="num">${d.avgAcc}%</div><div class="lbl">Avg Accuracy</div></div>
+      <div class="dash-card"><div class="num">${d.totalAnswered}</div><div class="lbl">Total Answered</div></div>
+      <div class="dash-card"><div class="num">${d.avgCompletion}%</div><div class="lbl">Avg Completion</div></div>
+    </div>
+    <div class="admin-two-col">
+      <div class="admin-col">
+        <div class="dash-section-title">Average Accuracy by Unit</div>
+        <ul class="admin-list">${d.unitAvg.map(u=>`<li><span>Unit ${u.n} &middot; ${u.title}</span><b>${u.avg}%</b></li>`).join("") || "<li>No data yet</li>"}</ul>
+      </div>
+      <div class="admin-col">
+        <div class="dash-section-title">Top 3 Students</div>
+        <ul class="admin-list">${d.top3.map((s,i)=>`<li><span>${i+1}. ${s.name||s.email}</span><b>${s.accuracy}%</b></li>`).join("") || "<li>Not enough data yet</li>"}</ul>
+        <div class="dash-section-title" style="margin-top:14px">Needs Follow-up (${d.watchlist.length})</div>
+        <ul class="admin-list">${d.watchlist.slice(0,6).map(s=>`<li><span>${s.name||s.email}</span><b>${s.status==="inactive"?"Inactive":s.accuracy+"%"}</b></li>`).join("") || "<li>Nobody right now</li>"}</ul>
+      </div>
+    </div>
+    <div class="admin-controls">
+      <input id="adminSearchInput" placeholder="Search by name or email&hellip;" oninput="adminSearch=this.value; renderAdminTable();">
+      <select id="adminUnitSelect" onchange="adminUnitFilter=this.value; renderAdminTable();">${d.unitOptions}</select>
+      <button onclick="exportAdminCsv()">&#11015; Export CSV</button>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr>
+          <th onclick="adminSortBy('name')">Name / Email</th>
+          <th onclick="adminSortBy('answered')">Answered</th>
+          <th onclick="adminSortBy('accuracy')">Accuracy</th>
+          <th onclick="adminSortBy('completion')">Completion</th>
+          <th onclick="adminSortBy('lastActive')">Last Active</th>
+          <th onclick="adminSortBy('status')">Status</th>
+        </tr></thead>
+        <tbody id="adminTbody"></tbody>
+      </table>
+    </div>
+    <div id="adminDetail"></div>
+    <div class="dash-actions"><button onclick="closeAdmin()">Close</button></div>
+  `;
+}
+function attachAdminHandlers(){
+  document.getElementById("adminSearchInput").value = adminSearch;
+  document.getElementById("adminUnitSelect").value = adminUnitFilter;
+}
+function adminSortBy(key){
+  if(adminSort.key===key) adminSort.dir = adminSort.dir==="asc" ? "desc" : "asc";
+  else adminSort = {key, dir:"desc"};
+  renderAdminTable();
+}
+function renderAdminTable(){
+  if(!adminStudents) return;
+  const q = (adminSearch||"").toLowerCase();
+  let rows = adminStudents.map(s=>{
+    const scoped = studentStatsForUnit(s, adminUnitFilter);
+    return Object.assign({}, s, {scopedAnswered:scoped.answered, scopedAccuracy:scoped.accuracy});
+  }).filter(s=> !q || (s.name||"").toLowerCase().includes(q) || (s.email||"").toLowerCase().includes(q));
+
+  const key = adminSort.key, dir = adminSort.dir==="asc" ? 1 : -1;
+  const getVal = (s)=>{
+    if(key==="name") return (s.name||s.email||"").toLowerCase();
+    if(key==="answered") return adminUnitFilter==="all" ? s.answered : s.scopedAnswered;
+    if(key==="accuracy") return adminUnitFilter==="all" ? s.accuracy : s.scopedAccuracy;
+    if(key==="completion") return s.completion;
+    if(key==="lastActive") return s.lastActive ? s.lastActive.getTime() : -1;
+    if(key==="status") return s.status;
+    return 0;
+  };
+  rows.sort((a,b)=>{ const va=getVal(a), vb=getVal(b); return va<vb?-1*dir:va>vb?1*dir:0; });
+
+  document.getElementById("adminTbody").innerHTML = rows.map(s=>`
+    <tr onclick="openStudentDetail('${s.user_id}')">
+      <td>${s.name ? s.name+`<br><span style="color:var(--muted);font-size:.75rem">${s.email}</span>` : s.email}</td>
+      <td>${adminUnitFilter==="all" ? s.answered : s.scopedAnswered}</td>
+      <td>${adminUnitFilter==="all" ? s.accuracy : s.scopedAccuracy}%</td>
+      <td>${s.completion}%</td>
+      <td>${fmtDate(s.lastActive)}</td>
+      <td><span class="status-pill ${STATUS_CLASS[s.status]}">${STATUS_LABEL[s.status]}</span></td>
+    </tr>
+  `).join("") || `<tr><td colspan="6" style="text-align:center;color:var(--muted)">No students match</td></tr>`;
+}
+function openStudentDetail(uid){
+  const s = (adminStudents||[]).find(x=>x.user_id===uid);
+  if(!s) return;
+  const rows = UNITS.map(u=>{
+    const st = studentUnitStats(s.answeredObj, u);
+    if(st.total===0) return "";
+    const pc = st.total ? st.correct/st.total*100 : 0;
+    const pw = st.total ? st.wrong/st.total*100 : 0;
+    const pn = 100-pc-pw;
+    return `<div class="unit-bar-row">
+      <div class="unit-bar-top"><span class="name">Unit ${u.n} &middot; ${u.title}</span><span class="stat">${st.answered}/${st.total} answered</span></div>
+      <div class="unit-bar"><span style="width:${pc}%;background:var(--ok)"></span><span style="width:${pw}%;background:var(--bad)"></span><span style="width:${pn}%;background:var(--line)"></span></div>
+    </div>`;
+  }).join("");
+  document.getElementById("adminDetail").innerHTML = `
+    <button class="back-link" onclick="document.getElementById('adminDetail').innerHTML=''">&times; Close detail</button>
+    <div class="dash-section-title">${s.name || s.email} &mdash; Performance by Unit</div>
+    ${rows || "<p style='color:var(--muted)'>No questions answered yet.</p>"}
+  `;
+  document.getElementById("adminDetail").scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+function exportAdminCsv(){
+  const rows = [["Name","Email","Answered","Correct","Wrong","Accuracy %","Completion %","Last Active","Status"]];
+  (adminStudents||[]).forEach(s=>{
+    rows.push([s.name, s.email, s.answered, s.correct, s.wrong, s.accuracy, s.completion,
+      s.lastActive ? s.lastActive.toISOString().slice(0,10) : "", STATUS_LABEL[s.status]]);
+  });
+  const csv = rows.map(r=>r.map(v=>{
+    const str = String(v==null?"":v);
+    return /[",\n]/.test(str) ? '"'+str.replace(/"/g,'""')+'"' : str;
+  }).join(",")).join("\r\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "cma-platform-students-"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
 async function doAuth(mode){
+  const name = document.getElementById("nameInput").value.trim();
   const email = document.getElementById("emailInput").value.trim();
   const pass = document.getElementById("passInput").value;
   const msg = document.getElementById("authMsg"); msg.textContent = "";
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.textContent = "Please enter a valid email address"; return; }
   if(pass.length < 6){ msg.textContent = "Password must be at least 6 characters"; return; }
+  if(mode === "up" && !name){ msg.textContent = "Please enter your full name"; return; }
   const res = mode === "up" ? await sb.auth.signUp({email, password: pass})
                             : await sb.auth.signInWithPassword({email, password: pass});
   if(res.error){ msg.textContent = res.error.message; return; }
   if(!res.data.session){ msg.textContent = "Account created. Check your email to confirm, then sign in."; return; }
+  if(mode === "up" && name){
+    try{ await sb.from("profiles").update({display_name:name}).eq("user_id", res.data.session.user.id); }
+    catch(e){ console.warn("Could not save name", e); }
+  }
   await startSession(res.data.session.user);
 }
 async function switchUser(){
   await sb.auth.signOut();
-  userId = ""; userEmail = ""; answered = {}; flagged = {};
+  userId = ""; userEmail = ""; answered = {}; flagged = {}; myProfile = null;
   document.getElementById("passInput").value = "";
+  document.getElementById("adminBtn").classList.add("hidden");
+  document.getElementById("nameBanner").classList.add("hidden");
   document.getElementById("loginVeil").classList.remove("hidden");
+}
+async function loadMyProfile(){
+  try{
+    const { data, error } = await sb.from("profiles").select("display_name,email,role").eq("user_id", userId).maybeSingle();
+    if(error) throw error;
+    myProfile = data || null;
+  }catch(e){ console.warn("Could not load profile", e); myProfile = null; }
+  const nameOk = myProfile && myProfile.display_name && myProfile.display_name.trim();
+  document.getElementById("nameBanner").classList.toggle("hidden", !!nameOk);
+  document.getElementById("adminBtn").classList.toggle("hidden", !(myProfile && myProfile.role === "admin"));
+}
+async function saveMyName(){
+  const v = document.getElementById("nameBannerInput").value.trim();
+  if(!v) return;
+  try{
+    const { error } = await sb.from("profiles").update({display_name:v}).eq("user_id", userId);
+    if(error) throw error;
+    myProfile = myProfile || {}; myProfile.display_name = v;
+    document.getElementById("nameBanner").classList.add("hidden");
+  }catch(e){ alert("Could not save your name, please try again."); }
 }
 
 let openUnits = new Set();
@@ -797,7 +1095,7 @@ function pick(qid, choiceIdx){
   if(answered[qid]) return;
   const q = activeSet.find(x=>x.id===qid);
   const note = (answered[qid] && answered[qid].note) || "";
-  answered[qid] = {choice:choiceIdx, correct: choiceIdx===q.correct, note};
+  answered[qid] = {choice:choiceIdx, correct: choiceIdx===q.correct, note, at: new Date().toISOString()};
   persist(); render();
 }
 function retry(qid){
@@ -865,7 +1163,7 @@ function openCertificate(unitN){
     <div class="kicker">CMA PART 1 &middot; FINANCIAL PLANNING, PERFORMANCE, AND ANALYTICS</div>
     <h1>Certificate of Completion</h1>
     <div class="body">This certifies that</div>
-    <div class="name">${userEmail}</div>
+    <div class="name">${(myProfile && myProfile.display_name) || userEmail}</div>
     <div class="body">has successfully completed the questions for<br><b>Unit ${unitN}: ${u ? u.title : ""}</b></div>
     <div class="score">${correct} / ${unitQs.length} &mdash; ${pct}%</div>
     <div class="foot"><span>Date: ${today}</span><span>Nonprofit Educational Platform</span></div>
