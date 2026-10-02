@@ -240,6 +240,10 @@ table.admin-table tbody tr:hover{background:var(--bg)}
 .admin-list{list-style:none; margin:0; padding:0; font-size:.83rem}
 .admin-list li{display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line)}
 .back-link{background:none; border:none; color:var(--brand); text-decoration:underline; cursor:pointer; font-family:inherit; font-size:.85rem; padding:0; margin-bottom:12px}
+
+.src-global-row{display:flex; align-items:center; gap:6px; font-size:.74rem; color:var(--muted); margin:2px 0 10px}
+.src-global-row select{flex:1; padding:5px 6px; border:1px solid var(--line); border-radius:7px;
+  background:var(--panel); color:var(--ink); font-family:inherit; font-size:.76rem}
 </style>
 </head>
 <body>
@@ -293,6 +297,10 @@ table.admin-table tbody tr:hover{background:var(--bg)}
       <button id="allBtn" onclick="clearReview()">All Units</button>
     </div>
     <h2>Units (20)</h2>
+    <div class="src-global-row">
+      <label for="globalSrcSelect">Source:</label>
+      <select id="globalSrcSelect" onchange="setGlobalSource(this.value)"></select>
+    </div>
     <div id="tree"></div>
   </aside>
 
@@ -505,10 +513,10 @@ const SRC_COLORS = {"Sameh Allithy Target":"#2b4a9e", "MCQ Book":"#a35a00"};
 function srcColor(name){ return SRC_COLORS[name] || "#6b7480"; }
 function dashStats(){
   let total=0, correct=0, wrong=0, flaggedCt=0;
-  const bySource = {};     // source -> {total, correct, wrong}
-  const perUnit = [];      // {n, title, total, correct, wrong}
+  const bySource = {};     // source -> {total, correct, wrong}  (always unfiltered, for the source donut)
+  const perUnit = [];      // {n, title, total, correct, wrong}  (respects globalSourceFilter)
   UNITS.forEach(u=>{
-    const ids = unitIds(u);
+    const ids = unitIdsFiltered(u);
     let uCorrect=0, uWrong=0;
     ids.forEach(id=>{
       const a = answered[id];
@@ -573,7 +581,7 @@ function openDashboard(){
   }).join("");
   document.getElementById("dashboardBox").innerHTML = `
     <h2>Welcome back${userEmail ? ", " + userEmail : ""}</h2>
-    <p class="sub">Your progress and the platform's question library at a glance.</p>
+    <p class="sub">Your progress and the platform's question library at a glance.${globalSourceFilter!=="all" ? ` <b>(filtered to ${globalSourceFilter})</b>` : ""}</p>
     <div class="dash-cards">
       <div class="dash-card"><div class="num">${st.total}</div><div class="lbl">Total Questions</div></div>
       <div class="dash-card"><div class="num">${st.correct+st.wrong}</div><div class="lbl">Answered</div></div>
@@ -878,22 +886,29 @@ let openUnits = new Set();
 let activeSubKey = null;
 
 function buildTree(){
+  populateGlobalSourceSelect();
   const root = document.getElementById("tree");
   root.innerHTML = "";
   UNITS.forEach(u=>{
     const cached = manifest ? (manifest[u.n] || {}) : null;
-    const count = cached ? unitIds(u).length : null;
+    const count = cached ? unitIdsFiltered(u).length : null;
+    const totalCount = cached ? unitIds(u).length : null;
     const det = document.createElement("details");
     det.className = "unit" + ((manifest === null || (manifest[u.n] && unitIds(u).length)) ? "" : " unavailable");
     det.open = openUnits.has(u.n);
     const sum = document.createElement("summary");
-    sum.innerHTML = `<span class="unit-title">Unit ${u.n} &mdash; ${u.title}</span><span class="badge">${count ? count+" questions" : (manifest ? "not available yet" : '<span class="spinner"></span>loading...')}</span>`;
+    let badgeText;
+    if(manifest === null) badgeText = '<span class="spinner"></span>loading...';
+    else if(!totalCount) badgeText = "not available yet";
+    else if(!count) badgeText = "0 in this source";
+    else badgeText = count + " questions";
+    sum.innerHTML = `<span class="unit-title">Unit ${u.n} &mdash; ${u.title}</span><span class="badge">${badgeText}</span>`;
     det.appendChild(sum);
     const list = document.createElement("div");
     list.className = "sub-list";
     u.subs.concat(extraSubs(u)).forEach(s=>{
       const isExtra = !u.subs.includes(s);
-      const sc = cached ? subIds(u,s).length : null;
+      const sc = cached ? subIdsFiltered(u,s).length : null;
       const btn = document.createElement("button");
       btn.className = "sub-item" + (activeSubKey===(u.n+"::"+s) ? " active" : "") + (isExtra ? " extra" : "");
       if(isExtra) btn.title = "Not in the official unit list -- may have been removed in the new syllabus";
@@ -932,6 +947,39 @@ function extraSubs(u){
   return Object.keys(m).filter(s => !(u.subs||[]).includes(s));
 }
 function unitIds(u){ return (u.subs||[]).concat(extraSubs(u)).flatMap(s=>subIds(u,s)); }
+
+// ---------- Global source filter (affects tree counts + My Performance) ----------
+let globalSourceFilter = localStorage.getItem("cma_global_source") || "all";
+function allSources(){
+  const set = new Set();
+  if(manifest) Object.values(manifest).forEach(unitSubs=>
+    Object.values(unitSubs).forEach(subEntry=>
+      (subEntry.files||[]).forEach(f=>set.add(f.source || "Sameh Allithy Target"))));
+  return [...set].sort();
+}
+function subIdsForSource(u, s, src){
+  const m = manifest && manifest[u.n] && manifest[u.n][s];
+  if(!m) return [];
+  if(!src || src === "all") return m.ids || [];
+  return [].concat(...(m.files||[]).filter(f=>(f.source||"Sameh Allithy Target")===src).map(f=>f.ids));
+}
+function subIdsFiltered(u, s){ return subIdsForSource(u, s, globalSourceFilter); }
+function unitIdsFiltered(u){ return (u.subs||[]).concat(extraSubs(u)).flatMap(s=>subIdsFiltered(u,s)); }
+function populateGlobalSourceSelect(){
+  const sel = document.getElementById("globalSrcSelect");
+  if(!sel) return;
+  const srcs = allSources();
+  if(globalSourceFilter !== "all" && !srcs.includes(globalSourceFilter)) globalSourceFilter = "all";
+  sel.innerHTML = `<option value="all">All sources (${srcs.length})</option>` +
+    srcs.map(s=>`<option value="${s}">${s}</option>`).join("");
+  sel.value = globalSourceFilter;
+}
+function setGlobalSource(v){
+  globalSourceFilter = v;
+  localStorage.setItem("cma_global_source", v);
+  buildTree();
+  if(!document.getElementById("dashboardVeil").classList.contains("hidden")) openDashboard();
+}
 async function ensureSubLoaded(u, s){
   await loadManifest();
   const m = manifest[u.n] && manifest[u.n][s];
