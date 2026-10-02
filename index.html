@@ -887,12 +887,22 @@ let activeSubKey = null;
 
 function buildTree(){
   populateGlobalSourceSelect();
+  const filtering = globalSourceFilter !== "all";
   const root = document.getElementById("tree");
   root.innerHTML = "";
   UNITS.forEach(u=>{
     const cached = manifest ? (manifest[u.n] || {}) : null;
     const count = cached ? unitIdsFiltered(u).length : null;
     const totalCount = cached ? unitIds(u).length : null;
+
+    // When filtering to one source, a unit with zero questions in that
+    // source is skipped entirely; a unit that has no questions at all
+    // (any source) still shows, greyed out, same as before.
+    if(filtering && totalCount && !count) return;
+
+    const allSubs = u.subs.concat(extraSubs(u));
+    const visibleSubs = filtering ? allSubs.filter(s=>subIdsFiltered(u,s).length>0) : allSubs;
+
     const det = document.createElement("details");
     det.className = "unit" + ((manifest === null || (manifest[u.n] && unitIds(u).length)) ? "" : " unavailable");
     det.open = openUnits.has(u.n);
@@ -900,13 +910,12 @@ function buildTree(){
     let badgeText;
     if(manifest === null) badgeText = '<span class="spinner"></span>loading...';
     else if(!totalCount) badgeText = "not available yet";
-    else if(!count) badgeText = "0 in this source";
     else badgeText = count + " questions";
     sum.innerHTML = `<span class="unit-title">Unit ${u.n} &mdash; ${u.title}</span><span class="badge">${badgeText}</span>`;
     det.appendChild(sum);
     const list = document.createElement("div");
     list.className = "sub-list";
-    u.subs.concat(extraSubs(u)).forEach(s=>{
+    visibleSubs.forEach(s=>{
       const isExtra = !u.subs.includes(s);
       const sc = cached ? subIdsFiltered(u,s).length : null;
       const btn = document.createElement("button");
