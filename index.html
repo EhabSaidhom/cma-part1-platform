@@ -745,7 +745,7 @@ function renderAdminDashboard(){
   const unitOptions = `<option value="all">All Units</option>` +
     UNITS.map(u=>`<option value="${u.n}">${uName(u,"--")}</option>`).join("");
 
-  box.innerHTML = buildAdminHtml({n,active7,avgAcc,totalAnswered,avgCompletion,unitAvg,top3,watchlist,unitOptions});
+  box.innerHTML = buildAdminHtml({n,active7,avgAcc,totalAnswered,avgCompletion,unitAvg,top3,watchlist,unitOptions,timeHtml:weeklyTimeHtml(students)});
   attachAdminHandlers();
   renderAdminTable();
 }
@@ -772,6 +772,7 @@ function buildAdminHtml(d){
         <ul class="admin-list">${d.watchlist.slice(0,6).map(s=>`<li><span>${s.name||s.email}</span><b>${s.status==="inactive"?"Inactive":s.accuracy+"%"}</b></li>`).join("") || "<li>Nobody right now</li>"}</ul>
       </div>
     </div>
+    ${d.timeHtml||""}
     <div class="admin-controls">
       <input id="adminSearchInput" placeholder="Search by name or email&hellip;" oninput="adminSearch=this.value; renderAdminTable();">
       <select id="adminUnitSelect" onchange="adminUnitFilter=this.value; renderAdminTable();">${d.unitOptions}</select>
@@ -1461,6 +1462,64 @@ function timeSectionHtml(){
     <div class="time-note">Timing is measured while this tab is open and visible (max 15 min per question). Answers saved before timing was added have no time.</div>
     <div class="dash-section-title">Activity &mdash; Last 7 Days</div>
     <div class="act-bars">${bars}</div>`;
+}
+
+
+/* ===== Admin: study time per day, last 7 days (minutes) ===== */
+let weeklyCache = null;
+function dayKeyOf(d){ return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function weeklyTime(students){
+  const days = [];
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-i); days.push(d); }
+  const idx = {}; days.forEach((d,i)=>idx[dayKeyOf(d)]=i);
+  const rows = students.map(st=>{
+    const secs = new Array(7).fill(0), qn = new Array(7).fill(0);
+    Object.values(st.answeredObj||{}).forEach(a=>{
+      if(!a || a.choice==null || !a.at) return;
+      const t = new Date(a.at); if(isNaN(t)) return;
+      const i = idx[dayKeyOf(t)]; if(i===undefined) return;
+      qn[i]++; if(a.time>0) secs[i]+=a.time;
+    });
+    return {st, secs, qn, total:secs.reduce((x,y)=>x+y,0), solved:qn.reduce((x,y)=>x+y,0)};
+  });
+  const sum = (arr)=>arr.reduce((x,y)=>x+y,0);
+  return {days, rows,
+    dayTot: days.map((_,i)=>sum(rows.map(r=>r.secs[i]))),
+    dayQ:   days.map((_,i)=>sum(rows.map(r=>r.qn[i]))),
+    dayActive: days.map((_,i)=>rows.filter(r=>r.qn[i]>0).length)};
+}
+function fmtMin(sec){ if(!sec) return "0"; const m=sec/60; return m<1 ? "<1" : String(Math.round(m)); }
+function weeklyTimeHtml(students){
+  const w = weeklyCache = weeklyTime(students||[]);
+  const totSecs = w.dayTot.reduce((x,y)=>x+y,0), totQ = w.dayQ.reduce((x,y)=>x+y,0);
+  const timedAny = totSecs>0;
+  const dn = (d)=>d.toLocaleDateString("en-US",{weekday:"short"})+" "+d.getDate();
+  const mx = Math.max(1, ...w.dayTot);
+  const bars = w.days.map((d,i)=>`<div title="${d.toLocaleDateString()}: ${Math.round(w.dayTot[i]/60)} min, ${w.dayQ[i]} questions, ${w.dayActive[i]} active"><span>${w.dayTot[i] ? fmtMin(w.dayTot[i]) : ""}</span><i style="height:${Math.round(w.dayTot[i]/mx*52)+2}px"></i><span>${dn(d)}</span></div>`).join("");
+  const rows = w.rows.filter(r=>r.solved>0).sort((a,b)=>b.total-a.total);
+  const idle = w.rows.length - rows.length;
+  const body = rows.map(r=>`<tr><td>${r.st.name ? r.st.name : r.st.email}</td>${r.secs.map((x,i)=>`<td title="${r.qn[i]} questions">${r.qn[i] ? fmtMin(x) : "&ndash;"}</td>`).join("")}<td><b>${fmtMin(r.total)}</b></td></tr>`).join("")
+    || `<tr><td colspan="9" style="text-align:center;color:var(--muted)">No activity in the last 7 days</td></tr>`;
+  const totRow = `<tr style="background:var(--bg);font-weight:700"><td>Total (all students)</td>${w.dayTot.map(x=>`<td>${fmtMin(x)}</td>`).join("")}<td>${fmtMin(totSecs)}</td></tr>`;
+  return `
+    <div class="dash-section-title">Study Time per Day &mdash; Last 7 Days (minutes)</div>
+    <div class="dash-cards">
+      <div class="dash-card"><div class="num">${fmtMin(totSecs)}</div><div class="lbl">Total minutes (7 days)</div></div>
+      <div class="dash-card"><div class="num">${totQ}</div><div class="lbl">Questions solved (7 days)</div></div>
+      <div class="dash-card"><div class="num">${totSecs && totQ ? fmtDur(totSecs/Math.max(1,w.rows.reduce((a,r)=>a+r.qn.reduce((x,y)=>x+y,0),0))) : "&ndash;"}</div><div class="lbl">Avg time / question</div></div>
+      <div class="dash-card"><div class="num">${w.rows.filter(r=>r.solved>0).length}</div><div class="lbl">Active students</div></div>
+    </div>
+    <div class="act-bars" style="height:80px">${bars}</div>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Student</th>${w.days.map(d=>`<th>${dn(d)}</th>`).join("")}<th>Total</th></tr></thead><tbody>${body}${totRow}</tbody></table></div>
+    <div class="time-note" style="margin-top:-12px">${timedAny ? "" : "No timed answers found yet: timing is recorded only for answers solved after this update. "}Minutes are counted per day (admin's local date) from the time each answer was solved; ${idle} student(s) had no activity. <a href="#" onclick="exportWeeklyTimeCsv();return false">Export CSV</a></div>`;
+}
+function exportWeeklyTimeCsv(){
+  const w = weeklyCache; if(!w) return;
+  const head = ["Name","Email"].concat(w.days.map(d=>d.toISOString().slice(0,10)+" (min)"), ["Total (min)","Questions"]);
+  const rows = w.rows.filter(r=>r.solved>0).sort((a,b)=>b.total-a.total).map(r=>[r.st.name||"", r.st.email||""].concat(r.secs.map(x=>(x/60).toFixed(1)), [(r.total/60).toFixed(1), r.solved]));
+  const csv = "\ufeff"+[head].concat(rows).map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+  const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+  a.download = "study-time-last-7-days.csv"; document.body.appendChild(a); a.click(); a.remove();
 }
 
 (async function init(){
