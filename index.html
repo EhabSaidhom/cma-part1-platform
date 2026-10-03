@@ -64,6 +64,27 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .filters{display:flex; gap:6px; flex-wrap:wrap; font-size:.75rem; color:var(--muted)}
 .filters span{background:var(--bg); padding:4px 9px; border-radius:20px; border:1px solid var(--line)}
 .qgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(38px,1fr)); gap:6px; margin-top:10px}
+.attach{margin-top:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.attach>summary{cursor:pointer;padding:10px 12px;font-weight:700;font-size:.88rem;list-style:none}
+.attach>summary .cnt{color:var(--muted);font-weight:500}
+.attach-body{padding:0 12px 12px}
+.attach-note{font-size:.74rem;color:var(--muted);margin-bottom:8px;line-height:1.5}
+.attach-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+.attach-form input[type=text]{flex:1;min-width:160px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.8rem}
+.attach-form label{font-size:.8rem;display:flex;gap:5px;align-items:center}
+.attach button{padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.78rem;cursor:pointer}
+.attach button.att-up{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}
+.attach button.att-del{color:var(--bad);border-color:var(--bad)}
+.attach button:disabled{opacity:.5;cursor:wait}
+.attach-status{font-size:.78rem;min-height:1.1em;margin-bottom:6px;color:var(--muted)}
+.attach-status.err{color:var(--bad)}
+.att-grp{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:10px 0 4px}
+.att-item{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.att-ic{font-size:1.3rem}
+.att-main{flex:1;min-width:0}
+.att-name{font-size:.84rem;font-weight:600;word-break:break-word}
+.att-meta{font-size:.7rem;color:var(--muted)}
+.att-act{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;font-size:.75rem}
 .qbtn{
   aspect-ratio:1; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink);
   font-family:inherit; font-weight:700; font-size:.8rem; cursor:pointer;
@@ -897,6 +918,7 @@ async function switchUser(){
   await sb.auth.signOut();
   userId = ""; userEmail = ""; answered = {}; flagged = {}; myProfile = null;
   document.getElementById("passInput").value = "";
+  attachCache = {}; attachKeyLoaded = null;
   document.getElementById("adminBtn").classList.add("hidden");
   document.getElementById("nameBanner").classList.add("hidden");
   document.getElementById("loginVeil").classList.remove("hidden");
@@ -1194,6 +1216,7 @@ function render(){
     </div>
     ${srcBar}
     <div class="qgrid">${grid}</div>
+    ${attachPanelHtml()}
   </div>
 
   <div class="card">
@@ -1227,6 +1250,7 @@ function render(){
     </div>
   </div>`;
   updateProgress();
+  attachAfterRender();
 }
 
 function pick(qid, choiceIdx){
@@ -1520,6 +1544,132 @@ function exportWeeklyTimeCsv(){
   const csv = "\ufeff"+[head].concat(rows).map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
   const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
   a.download = "study-time-last-7-days.csv"; document.body.appendChild(a); a.click(); a.remove();
+}
+
+
+/* ===== Attachments (files shared / private per sub-unit) ===== */
+const ATT_MAX = 20*1024*1024;
+const ATT_EXT = ["pdf","doc","docx","xls","xlsx","ppt","pptx","txt","csv","epub","zip","png","jpg","jpeg","webp"];
+let attachOpen = false, attachCache = {}, attachKeyLoaded = null, attMsg = {t:"", err:false};
+function attEsc(t){ return String(t==null?"":t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function attFmtSize(b){ return b>=1048576 ? (b/1048576).toFixed(1)+" MB" : Math.max(1,Math.round(b/1024))+" KB"; }
+function attIcon(name){
+  const e=(name.split(".").pop()||"").toLowerCase();
+  if(e==="pdf") return "&#128213;"; if(["doc","docx","txt"].includes(e)) return "&#128196;";
+  if(["xls","xlsx","csv"].includes(e)) return "&#128202;"; if(["ppt","pptx"].includes(e)) return "&#128191;";
+  if(["png","jpg","jpeg","webp"].includes(e)) return "&#128247;"; if(e==="epub") return "&#128218;"; return "&#128206;";
+}
+function attSub(){ if(!activeSubKey) return null; const i=activeSubKey.indexOf("::"); return {n:Number(activeSubKey.slice(0,i)), sub:activeSubKey.slice(i+2)}; }
+function attIsAdmin(){ return !!(myProfile && myProfile.role==="admin"); }
+function attStatus(t, err){
+  attMsg = {t:t||"", err:!!err};
+  const el=document.getElementById("attachStatus"); if(el){ el.textContent=attMsg.t; el.className="attach-status"+(attMsg.err?" err":""); }
+}
+function attachPanelHtml(){
+  if(!activeSubKey) return "";
+  return `
+    <details class="attach" id="attachBox" ${attachOpen?"open":""} ontoggle="attachOpen=this.open">
+      <summary>&#128206; Attachments <span class="cnt" id="attachCount"></span></summary>
+      <div class="attach-body">
+        <div class="attach-note">Upload a book or file for this sub-unit (max 20 MB: PDF, Word, Excel, PowerPoint, text, EPUB, ZIP, images).
+          <b>Shared</b> files are visible to all students; <b>private</b> files are visible only to you and the platform admin.</div>
+        <div class="attach-form">
+          <input type="file" id="attachFile" accept=".${ATT_EXT.join(",.")}">
+          <input type="text" id="attachDesc" maxlength="120" placeholder="Short description (optional)">
+          <label><input type="checkbox" id="attachShare"> Share with other students</label>
+          <button class="att-up" id="attachUpBtn" onclick="uploadAttachment()">Upload</button>
+        </div>
+        <div class="attach-status${attMsg.err?" err":""}" id="attachStatus">${attEsc(attMsg.t)}</div>
+        <div id="attachList"></div>
+      </div>
+    </details>`;
+}
+function attachAfterRender(){
+  if(!document.getElementById("attachBox")) return;
+  if(attachKeyLoaded!==activeSubKey){ attachKeyLoaded=activeSubKey; attMsg={t:"",err:false}; attachLoad(); }
+  else attachPaint();
+}
+async function attachLoad(){
+  const k=attSub(); if(!k) return; const key=activeSubKey;
+  const { data, error } = await sb.from("attachments").select("*").eq("unit_n",k.n).eq("sub",k.sub).order("created_at",{ascending:false});
+  if(error){
+    attStatus(/relation|does not exist|schema cache/i.test(error.message) ? "Attachments are not set up yet (run supabase-attachments.sql)." : "Could not load attachments: "+error.message, true);
+    return;
+  }
+  attachCache[key]=data||[];
+  if(key===activeSubKey) attachPaint();
+}
+function attItem(r, mine){
+  const when = new Date(r.created_at).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  const canDel = mine || attIsAdmin();
+  return `<div class="att-item"><span class="att-ic">${attIcon(r.file_name)}</span>
+    <div class="att-main"><div class="att-name">${attEsc(r.file_name)}</div>
+      <div class="att-meta">${attFmtSize(r.size_bytes)} &middot; ${attEsc(r.owner_name||"Student")} &middot; ${when}${r.description?" &middot; "+attEsc(r.description):""}</div></div>
+    <div class="att-act"><button onclick="attDownload('${r.id}')">&#11015; Download</button>
+      ${mine?`<label><input type="checkbox" ${r.shared?"checked":""} onchange="attToggle('${r.id}',this.checked)"> Shared</label>`:""}
+      ${canDel?`<button class="att-del" onclick="attDelete('${r.id}')">Delete</button>`:""}</div></div>`;
+}
+function attachPaint(){
+  const rows = attachCache[activeSubKey]||[];
+  const cnt=document.getElementById("attachCount"); if(cnt) cnt.textContent = rows.length ? "("+rows.length+")" : "";
+  const box=document.getElementById("attachList"); if(!box) return;
+  const shared = rows.filter(r=>r.shared);
+  const mine = rows.filter(r=>!r.shared && r.owner_id===userId);
+  const others = attIsAdmin() ? rows.filter(r=>!r.shared && r.owner_id!==userId) : [];   // admins only (server RLS enforces this too)
+  let h="";
+  if(shared.length) h += `<div class="att-grp">Shared with everyone (${shared.length})</div>` + shared.map(r=>attItem(r, r.owner_id===userId)).join("");
+  if(mine.length)   h += `<div class="att-grp">My private files (${mine.length})</div>` + mine.map(r=>attItem(r,true)).join("");
+  if(others.length) h += `<div class="att-grp">Private files of other students (admin view)</div>` + others.map(r=>attItem(r,false)).join("");
+  box.innerHTML = h || `<div class="attach-note">No files for this sub-unit yet.</div>`;
+}
+async function uploadAttachment(){
+  const k=attSub(); if(!k) return;
+  const f=(document.getElementById("attachFile").files||[])[0];
+  if(!f){ attStatus("Choose a file first.", true); return; }
+  if(f.size===0){ attStatus("This file is empty.", true); return; }
+  if(f.size>ATT_MAX){ attStatus("File is too large ("+attFmtSize(f.size)+"). Maximum is 20 MB.", true); return; }
+  const ext=(f.name.split(".").pop()||"").toLowerCase();
+  if(!ATT_EXT.includes(ext)){ attStatus("This file type is not allowed. Allowed: "+ATT_EXT.join(", "), true); return; }
+  const share=document.getElementById("attachShare").checked;
+  const desc=document.getElementById("attachDesc").value.trim().slice(0,120);
+  const btn=document.getElementById("attachUpBtn"); btn.disabled=true;
+  attStatus("Uploading "+f.name+" ("+attFmtSize(f.size)+")... please wait", false);
+  const id=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2);
+  const path=userId+"/"+id+"-"+f.name.replace(/[^\w.\-]+/g,"_").slice(-80);
+  try{
+    const up=await sb.storage.from("attachments").upload(path, f, {contentType:f.type||undefined, upsert:false});
+    if(up.error) throw up.error;
+    const ins=await sb.from("attachments").insert({unit_n:k.n, sub:k.sub, file_name:f.name.slice(0,200), description:desc||null,
+      size_bytes:f.size, mime_type:f.type||null, storage_path:path, shared:share,
+      owner_name:(myProfile&&myProfile.display_name)||userEmail});
+    if(ins.error){ await sb.storage.from("attachments").remove([path]); throw ins.error; }
+    const fi=document.getElementById("attachFile"); if(fi) fi.value="";
+    const de=document.getElementById("attachDesc"); if(de) de.value="";
+    const sh=document.getElementById("attachShare"); if(sh) sh.checked=false;
+    attStatus("Uploaded \u2713"+(share?" (shared with all students)":" (private)"), false);
+    await attachLoad();
+  }catch(e){ attStatus("Upload failed: "+(e.message||e), true); }
+  const b2=document.getElementById("attachUpBtn"); if(b2) b2.disabled=false;
+}
+async function attDownload(id){
+  const r=(attachCache[activeSubKey]||[]).find(x=>x.id===id); if(!r) return;
+  const { data, error } = await sb.storage.from("attachments").createSignedUrl(r.storage_path, 60, {download:r.file_name});
+  if(error){ attStatus("Could not open the file: "+error.message, true); return; }
+  const a=document.createElement("a"); a.href=data.signedUrl; a.rel="noopener"; document.body.appendChild(a); a.click(); a.remove();
+}
+async function attToggle(id, on){
+  const { error } = await sb.from("attachments").update({shared:!!on}).eq("id",id);
+  if(error) attStatus("Could not change sharing: "+error.message, true); else attStatus(on?"Now shared with all students.":"Now private.", false);
+  attachLoad();
+}
+async function attDelete(id){
+  const r=(attachCache[activeSubKey]||[]).find(x=>x.id===id); if(!r) return;
+  if(!confirm("Delete \""+r.file_name+"\"? This cannot be undone.")) return;
+  const rm=await sb.storage.from("attachments").remove([r.storage_path]);
+  if(rm.error){ attStatus("Could not delete the file: "+rm.error.message, true); return; }
+  const { error } = await sb.from("attachments").delete().eq("id",id);
+  if(error){ attStatus("Could not delete: "+error.message, true); return; }
+  attStatus("Deleted.", false); attachLoad();
 }
 
 (async function init(){
