@@ -45,6 +45,8 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .unit > summary:hover{background:var(--bg)}
 .unit .badge{font-size:.68rem; color:var(--muted); font-weight:400}
 .unit .unit-title{color:#1a7f4e; font-weight:600; letter-spacing:.01em}
+.unit.group > summary .unit-title{color:#1f5fbf; font-weight:700}
+.group-body{padding-left:10px; border-left:2px solid var(--line); margin:2px 0 6px 6px}
 .unit.unavailable > summary{opacity:.45; cursor:default}
 .sub-list{padding:2px 0 8px 4px; margin:0}
 .sub-item{
@@ -459,25 +461,25 @@ const UNITS = [
    "20.1 Technology-Enabled Finance Transformation",
    "20.2 Analytics and Big Data",
    "20.3 Data Visualization"]},
- {n:21, title:"Retired 2016 — Section A: External Financial Reporting Decisions", subs:[
+ {n:21, title:"Section A: External Financial Reporting Decisions", bare:true, group:"Exam Test", subs:[
    "A.1 Financial statements",
    "A.2 Recognition, measurement, valuation, and disclosure"]},
- {n:22, title:"Retired 2016 — Section B: Planning, Budgeting and Forecasting", subs:[
+ {n:22, title:"Section B: Planning, Budgeting and Forecasting", bare:true, group:"Exam Test", subs:[
    "B.2 Budgeting concepts",
    "B.3 Forecasting techniques",
    "B.4 Budget methodologies",
    "B.5 Annual profit plan and supporting schedules"]},
- {n:23, title:"Retired 2016 — Section C: Performance Management", subs:[
+ {n:23, title:"Section C: Performance Management", bare:true, group:"Exam Test", subs:[
    "C.1 Cost and variance measures",
    "C.2 Responsibility centers and reporting segments",
    "C.3 Performance measures"]},
- {n:24, title:"Retired 2016 — Section D: Cost Management", subs:[
+ {n:24, title:"Section D: Cost Management", bare:true, group:"Exam Test", subs:[
    "D.1 Measurement concepts",
    "D.2 Costing systems",
    "D.3 Overhead costs",
    "D.4 Supply chain management",
    "D.5 Business process improvement"]},
- {n:25, title:"Retired 2016 — Section E: Internal Controls", subs:[
+ {n:25, title:"Section E: Internal Controls", bare:true, group:"Exam Test", subs:[
    "E.1 Governance, risk, and compliance",
    "E.2 Internal auditing",
    "E.3 Systems controls and security measures"]},
@@ -603,7 +605,7 @@ function openDashboard(){
     const pn = 100-pc-pw;
     const doneStr = u.total ? `${u.correct+u.wrong}/${u.total} answered` : "no questions yet";
     return `<div class="unit-bar-row">
-      <div class="unit-bar-top"><span class="name">Unit ${u.n} &middot; ${u.title}</span><span class="stat">${doneStr}</span></div>
+      <div class="unit-bar-top"><span class="name">${uName(u,"&middot;")}</span><span class="stat">${doneStr}</span></div>
       <div class="unit-bar">
         <span style="width:${pc}%;background:var(--ok)"></span>
         <span style="width:${pw}%;background:var(--bad)"></span>
@@ -736,7 +738,7 @@ function renderAdminDashboard(){
   });
 
   const unitOptions = `<option value="all">All Units</option>` +
-    UNITS.map(u=>`<option value="${u.n}">Unit ${u.n} -- ${u.title}</option>`).join("");
+    UNITS.map(u=>`<option value="${u.n}">${uName(u,"--")}</option>`).join("");
 
   box.innerHTML = buildAdminHtml({n,active7,avgAcc,totalAnswered,avgCompletion,unitAvg,top3,watchlist,unitOptions});
   attachAdminHandlers();
@@ -756,7 +758,7 @@ function buildAdminHtml(d){
     <div class="admin-two-col">
       <div class="admin-col">
         <div class="dash-section-title">Average Accuracy by Unit</div>
-        <ul class="admin-list">${d.unitAvg.map(u=>`<li><span>Unit ${u.n} &middot; ${u.title}</span><b>${u.avg}%</b></li>`).join("") || "<li>No data yet</li>"}</ul>
+        <ul class="admin-list">${d.unitAvg.map(u=>`<li><span>${uName(u,"&middot;")}</span><b>${u.avg}%</b></li>`).join("") || "<li>No data yet</li>"}</ul>
       </div>
       <div class="admin-col">
         <div class="dash-section-title">Top 3 Students</div>
@@ -837,7 +839,7 @@ function openStudentDetail(uid){
     const pw = st.total ? st.wrong/st.total*100 : 0;
     const pn = 100-pc-pw;
     return `<div class="unit-bar-row">
-      <div class="unit-bar-top"><span class="name">Unit ${u.n} &middot; ${u.title}</span><span class="stat">${st.answered}/${st.total} answered</span></div>
+      <div class="unit-bar-top"><span class="name">${uName(u,"&middot;")}</span><span class="stat">${st.answered}/${st.total} answered</span></div>
       <div class="unit-bar"><span style="width:${pc}%;background:var(--ok)"></span><span style="width:${pw}%;background:var(--bad)"></span><span style="width:${pn}%;background:var(--line)"></span></div>
     </div>`;
   }).join("");
@@ -915,6 +917,8 @@ async function saveMyName(){
 }
 
 let openUnits = new Set();
+let openGroups = new Set();
+function uName(u, sep){ const x = UNITS.find(v=>v.n===u.n) || u; return x.bare ? x.title : `Unit ${u.n} ${sep} ${u.title}`; }
 let activeSubKey = null;
 
 function buildTree(){
@@ -922,6 +926,7 @@ function buildTree(){
   const filtering = globalSourceFilter !== "all";
   const root = document.getElementById("tree");
   root.innerHTML = "";
+  const groups = {};
   UNITS.forEach(u=>{
     const cached = manifest ? (manifest[u.n] || {}) : null;
     const count = cached ? unitIdsFiltered(u).length : null;
@@ -930,7 +935,7 @@ function buildTree(){
     // When filtering to one source, a unit with zero questions in that
     // source is skipped entirely; a unit that has no questions at all
     // (any source) still shows, greyed out, same as before.
-    if(filtering && totalCount && !count) return;
+    if(filtering && cached && !count) return;
 
     const allSubs = u.subs.concat(extraSubs(u));
     const visibleSubs = filtering ? allSubs.filter(s=>subIdsFiltered(u,s).length>0) : allSubs;
@@ -943,7 +948,7 @@ function buildTree(){
     if(manifest === null) badgeText = '<span class="spinner"></span>loading...';
     else if(!totalCount) badgeText = "not available yet";
     else badgeText = count + " questions";
-    sum.innerHTML = `<span class="unit-title">Unit ${u.n} &mdash; ${u.title}</span><span class="badge">${badgeText}</span>`;
+    sum.innerHTML = `<span class="unit-title">${uName(u,"&mdash;")}</span><span class="badge">${badgeText}</span>`;
     det.appendChild(sum);
     const list = document.createElement("div");
     list.className = "sub-list";
@@ -965,7 +970,30 @@ function buildTree(){
         openUnits.delete(u.n);
       }
     });
-    root.appendChild(det);
+    if(u.group){
+      let g = groups[u.group];
+      if(!g){
+        const el = document.createElement("details");
+        el.className = "unit group";
+        el.open = openGroups.has(u.group);
+        const gs = document.createElement("summary");
+        el.appendChild(gs);
+        const body = document.createElement("div");
+        body.className = "group-body";
+        el.appendChild(body);
+        el.addEventListener("toggle", (ev)=>{ if(ev.target!==el) return; if(el.open) openGroups.add(u.group); else openGroups.delete(u.group); });
+        root.appendChild(el);
+        g = groups[u.group] = {el, gs, body, count:0, name:u.group};
+      }
+      g.body.appendChild(det);
+      g.count += (count||0);
+      det.addEventListener("toggle", ()=>{ if(det.open) openGroups.add(u.group); });
+    } else {
+      root.appendChild(det);
+    }
+  });
+  Object.values(groups).forEach(g=>{
+    g.gs.innerHTML = `<span class="unit-title">${g.name}</span><span class="badge">${manifest===null ? '<span class="spinner"></span>loading...' : g.count + " questions"}</span>`;
   });
 }
 
@@ -1019,6 +1047,12 @@ function setGlobalSource(v){
   globalSourceFilter = v;
   localStorage.setItem("cma_global_source", v);
   buildTree();
+  if(activeSubKey){            // refresh the open sub-unit so it follows the new filter
+    const parts = activeSubKey.split("::"), u = UNITS.find(x=>String(x.n)===parts[0]);
+    if(u && subIdsFiltered(u, parts[1]).length){ selectSub(u, parts[1], null); }
+    else { activeSubKey = null; subAll = []; activeSet = []; current = null;
+      document.getElementById("main").innerHTML = '<div class="card empty"><p>Pick a sub-unit from the list.</p></div>'; }
+  }
   if(!document.getElementById("dashboardVeil").classList.contains("hidden")) openDashboard();
 }
 async function ensureSubLoaded(u, s){
@@ -1045,14 +1079,18 @@ async function selectSub(u, sub, btnEl){
   document.querySelectorAll(".sub-item.active").forEach(el=>el.classList.remove("active"));
   if(btnEl) btnEl.classList.add("active");
   activeSubKey = u.n + "::" + sub;
-  openUnits.add(u.n);
+  openUnits.add(u.n); if(u.group) openGroups.add(u.group);
   reviewMode = false;
   document.getElementById("wrongBtn").classList.remove("on");
   document.getElementById("main").innerHTML = `<div class="card empty"><p><span class="spinner"></span>Loading questions...</p></div>`;
   const qs = await ensureSubLoaded(u, sub);
   buildTree();
   subAll = qs;
-  {
+  if(globalSourceFilter !== "all"){
+    // global Source filter is active: keep only that source so counts/tabs match the tree
+    subAll = qs.filter(x => (x.source||"Sameh Allithy Target") === globalSourceFilter);
+    srcFilter = globalSourceFilter;
+  } else {
     const srcs = [...new Set(qs.map(x=>x.source||"Sameh Allithy Target"))];
     srcFilter = srcs[0] || "Sameh Allithy Target";
   }
@@ -1265,7 +1303,7 @@ function openCertificate(unitN){
     <h1>Certificate of Completion</h1>
     <div class="body">This certifies that</div>
     <div class="name">${(myProfile && myProfile.display_name) || userEmail}</div>
-    <div class="body">has successfully completed the questions for<br><b>Unit ${unitN}: ${u ? u.title : ""}</b></div>
+    <div class="body">has successfully completed the questions for<br><b>${u ? (u.bare ? u.title : "Unit "+unitN+": "+u.title) : "Unit "+unitN}</b></div>
     <div class="score">${correct} / ${unitQs.length} &mdash; ${pct}%</div>
     <div class="foot"><span>Date: ${today}</span><span>Nonprofit Educational Platform</span></div>
   `;
