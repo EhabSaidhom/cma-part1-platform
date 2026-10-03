@@ -203,6 +203,10 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .dash-box h2{margin:0 0 4px; font-size:1.25rem}
 .dash-box .sub{color:var(--muted); font-size:.85rem; margin:0 0 18px}
 .dash-cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:20px}
+.time-note{font-size:.7rem;color:var(--muted);margin:-10px 0 14px}
+.act-bars{display:flex;align-items:flex-end;gap:6px;height:64px;margin:6px 0 4px}
+.act-bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:.62rem;color:var(--muted);height:100%}
+.act-bars i{display:block;width:100%;background:var(--brand);border-radius:4px 4px 0 0;min-height:2px}
 .dash-card{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center}
 .dash-card .num{font-size:1.5rem; font-weight:900; color:var(--brand)}
 .dash-card .lbl{font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin-top:2px}
@@ -543,7 +547,7 @@ async function startSession(user){
 }
 
 // ---------- Dashboard ----------
-const SRC_COLORS = {"Sameh Allithy Target":"#2b4a9e", "MCQ Book":"#a35a00"};
+const SRC_COLORS = {"Sameh Allithy Target":"#2b4a9e", "MCQ Book":"#a35a00", "Gleim 2025 Vol. 1":"#1a7f4e", "Gleim 2025 Vol. 2":"#7b3fa0", "ICMA Retired Questions 2016":"#c23838"};
 function srcColor(name){ return SRC_COLORS[name] || "#6b7480"; }
 function dashStats(){
   let total=0, correct=0, wrong=0, flaggedCt=0;
@@ -629,6 +633,7 @@ function openDashboard(){
       <div class="donut" style="background:${donut2}"></div>
       ${legend2}
     </div>
+    ${timeSectionHtml()}
     <div class="dash-section-title">Progress by Unit</div>
     ${unitRows}
     <div class="dash-actions"><button onclick="closeDashboard()">Start Studying &rarr;</button></div>
@@ -1123,6 +1128,7 @@ function render(){
   }
   const q = activeSet.find(x=>x.id===current) || activeSet[0];
   current = q.id;
+  if(!(q.id in answered)) timerSync(q.id);
   const idx = activeSet.indexOf(q);
 
   const total = activeSet.length, notAtt = activeSet.filter(x=>!(x.id in answered)).length;
@@ -1153,9 +1159,9 @@ function render(){
     const userLetter = letters[answered[q.id].choice];
     const correctLetter = letters[q.correct];
     if(answered[q.id].correct){
-      bannerHtml = `<div class="result-banner show correct">&#10003; Correct!</div>`;
+      bannerHtml = `<div class="result-banner show correct">&#10003; Correct!${timeTag(answered[q.id])}</div>`;
     }else{
-      bannerHtml = `<div class="result-banner show wrong">&#10007; Incorrect. Your answer: ${userLetter} &middot; Correct answer: ${correctLetter}</div>`;
+      bannerHtml = `<div class="result-banner show wrong">&#10007; Incorrect. Your answer: ${userLetter} &middot; Correct answer: ${correctLetter}${timeTag(answered[q.id])}</div>`;
     }
   }
 
@@ -1233,7 +1239,9 @@ function pick(qid, choiceIdx){
   }
   if(triedWrong[qid]===choiceIdx) return;
   const note = (answered[qid] && answered[qid].note) || "";
+  const secs = (qTimer.id===qid) ? Math.min(timerElapsed(), TIME_CAP) : 0;
   answered[qid] = {choice:choiceIdx, correct: choiceIdx===q.correct, note, at: new Date().toISOString()};
+  if(secs>0) answered[qid].time = secs;
   persist(); render();
 }
 function retry(qid){
@@ -1340,7 +1348,7 @@ function showRetryPopup(){
   v.innerHTML='<div class="box" role="alertdialog" aria-modal="true"><div style="font-size:2rem">&#9888;&#65039;</div><h2>Incorrect answer</h2><p>That is not the correct answer.<br>You have <b>one more chance</b> &mdash; think again and choose another option.</p><button id="retryBtn">Try again</button></div>';
   v.addEventListener("click",e=>{ if(e.target===v) closeRetryPopup(); });
   document.body.appendChild(v);
-  document.getElementById("retryBtn").focus();
+  const rb=document.getElementById("retryBtn"); rb.onclick=closeRetryPopup; rb.focus();
 }
 function closeRetryPopup(){ const v=document.getElementById("retryVeil"); if(v) v.remove(); }
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"||e.key==="Enter") closeRetryPopup(); });
@@ -1372,7 +1380,7 @@ function importProgress(inp){
       const cur=answered[id];
       if(cur&&cur.choice!=null){ keep++; return; }          // already solved here: keep existing answer
       if(ch===null){ if(typeof e.note==="string"&&e.note.trim()&&!(cur&&cur.note)){ merged[id]={choice:null,correct:false,note:e.note}; noteOnly++; } return; }
-      merged[id]={choice:ch,correct:!!e.correct,note:(cur&&cur.note)||(typeof e.note==="string"?e.note:""),at:e.at||new Date().toISOString()};
+      merged[id]={choice:ch,correct:!!e.correct,note:(cur&&cur.note)||(typeof e.note==="string"?e.note:""),at:e.at||undefined, time:(Number.isFinite(+e.time)&&+e.time>0)?Math.round(+e.time):undefined};
       add++;
     });
     if(!add&&!noteOnly){ alert("Nothing new to import.\n\nAlready solved here (kept): "+keep+"\nInvalid entries: "+bad); return; }
@@ -1385,6 +1393,75 @@ function importProgress(inp){
   rd.readAsText(f);
 }
 
+
+
+/* ===== Solve time tracking + study-time stats ===== */
+const TIME_CAP = 900;                       // seconds; one question counts at most 15 min (idle protection)
+let qTimer = {id:null, acc:0, since:null};
+function timerSync(id){
+  if(qTimer.id!==id) qTimer = {id:id, acc:0, since:document.hidden?null:Date.now()};
+}
+function timerElapsed(){
+  let t = qTimer.acc; if(qTimer.since) t += Date.now()-qTimer.since;
+  return Math.round(t/1000);
+}
+document.addEventListener("visibilitychange", ()=>{
+  if(!qTimer.id) return;
+  if(document.hidden){ if(qTimer.since){ qTimer.acc += Date.now()-qTimer.since; qTimer.since=null; } }
+  else if(!qTimer.since){ qTimer.since = Date.now(); }
+});
+function fmtDur(sec){
+  sec = Math.round(sec||0);
+  if(sec<=0) return "0s";
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+  if(h) return h+"h "+String(m).padStart(2,"0")+"m";
+  if(m) return m+"m "+String(s).padStart(2,"0")+"s";
+  return s+"s";
+}
+function timeTag(a){ return (a && a.time) ? ` &middot; &#9201; ${fmtDur(a.time)}` : ""; }
+function timeStats(hours){
+  const ids = new Set(UNITS.flatMap(u=>unitIdsFiltered(u)));
+  const cutoff = hours ? Date.now()-hours*3600*1000 : 0;
+  let n=0, timed=0, secs=0, corr=0;
+  Object.keys(answered).forEach(id=>{
+    const a = answered[id];
+    if(!ids.has(+id) || !a || a.choice==null) return;
+    const t = a.at ? Date.parse(a.at) : NaN;
+    if(hours && !(t>=cutoff)) return;
+    n++; if(a.correct) corr++;
+    if(a.time>0){ timed++; secs += a.time; }
+  });
+  return {n, timed, secs, avg: timed ? secs/timed : 0, acc: n ? Math.round(corr/n*100) : 0};
+}
+function timeSectionHtml(){
+  const d2 = timeStats(48), all = timeStats(0);
+  const card = (v,l)=>`<div class="dash-card"><div class="num">${v}</div><div class="lbl">${l}</div></div>`;
+  // last 7 days activity
+  const days = [];
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-i); days.push({d, n:0}); }
+  Object.values(answered).forEach(a=>{
+    const t = a && a.at ? new Date(a.at) : null; if(!t || a.choice==null) return;
+    const day = new Date(t); day.setHours(0,0,0,0);
+    const slot = days.find(x=>x.d.getTime()===day.getTime()); if(slot) slot.n++;
+  });
+  const mx = Math.max(1, ...days.map(x=>x.n));
+  const bars = days.map(x=>`<div title="${x.d.toLocaleDateString()}: ${x.n}"><span>${x.n||""}</span><i style="height:${Math.round(x.n/mx*44)+2}px"></i><span>${x.d.toLocaleDateString("en-US",{weekday:"short"})}</span></div>`).join("");
+  return `
+    <div class="dash-section-title">Study Time &mdash; Last 48 Hours</div>
+    <div class="dash-cards">
+      ${card(d2.n, "Solved (48h)")}
+      ${card(fmtDur(d2.secs), "Total Time (48h)")}
+      ${card(d2.timed ? fmtDur(d2.avg) : "&ndash;", "Avg / Question (48h)")}
+      ${card(d2.n ? d2.acc+"%" : "&ndash;", "Accuracy (48h)")}
+    </div>
+    <div class="dash-cards">
+      ${card(fmtDur(all.secs), "Total Time (all)")}
+      ${card(all.timed ? fmtDur(all.avg) : "&ndash;", "Avg / Question (all)")}
+    </div>
+    <div class="time-note">Timing is measured while this tab is open and visible (max 15 min per question). Answers saved before timing was added have no time.</div>
+    <div class="dash-section-title">Activity &mdash; Last 7 Days</div>
+    <div class="act-bars">${bars}</div>`;
+}
 
 (async function init(){
   await loadManifest();
