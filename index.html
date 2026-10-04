@@ -239,6 +239,9 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .act-bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:.62rem;color:var(--muted);height:100%}
 .act-bars i{display:block;width:100%;background:var(--brand);border-radius:4px 4px 0 0;min-height:2px}
 .dash-card{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center}
+.dash-card.click{cursor:pointer; transition:border-color .12s, transform .12s}
+.dash-card.click:hover{border-color:var(--brand); transform:translateY(-1px)}
+.dash-card.click .lbl::after{content:" \203A"; color:var(--brand)}
 .dash-card .num{font-size:1.5rem; font-weight:900; color:var(--brand)}
 .dash-card .lbl{font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin-top:2px}
 .dash-row{display:flex; gap:22px; flex-wrap:wrap; margin-bottom:22px; align-items:center}
@@ -340,7 +343,9 @@ table.admin-table tbody tr:hover{background:var(--bg)}
 <div class="layout">
   <aside class="tree-panel">
     <div class="tree-actions">
-      <button id="wrongBtn" onclick="reviewWrong()">Review Mistakes</button>
+      <button id="wrongBtn" onclick="reviewList('wrong')">Review Mistakes</button>
+      <button id="flaggedBtn" onclick="reviewList('flagged')">&#9873; Flagged</button>
+      <button id="commentBtn" onclick="reviewList('comment')">&#128221; Comments</button>
       <button id="allBtn" onclick="clearReview()">All Units</button>
     </div>
     <h2>Units (20)</h2>
@@ -589,7 +594,7 @@ function dashStats(){
     let uCorrect=0, uWrong=0;
     ids.forEach(id=>{
       const a = answered[id];
-      if(a){ if(a.correct) uCorrect++; else uWrong++; }
+      if(a && a.choice!=null){ if(a.correct) uCorrect++; else uWrong++; }
       if(flagged[id]) flaggedCt++;
     });
     total += ids.length; correct += uCorrect; wrong += uWrong;
@@ -617,6 +622,8 @@ function donutGradient(parts){
 }
 function openDashboard(){
   const st = dashStats();
+  const dashIds = new Set(UNITS.flatMap(u=>unitIdsFiltered(u)));
+  const commentCt = Object.keys(answered).filter(id=>dashIds.has(+id) && hasNote(id)).length;
   const acc = (st.correct+st.wrong) ? Math.round(st.correct/(st.correct+st.wrong)*100) : 0;
   const donut1 = donutGradient([
     {color:"var(--ok)", value:st.correct}, {color:"var(--bad)", value:st.wrong},
@@ -655,8 +662,9 @@ function openDashboard(){
       <div class="dash-card"><div class="num">${st.total}</div><div class="lbl">Total Questions</div></div>
       <div class="dash-card"><div class="num">${st.correct+st.wrong}</div><div class="lbl">Answered</div></div>
       <div class="dash-card"><div class="num">${acc}%</div><div class="lbl">Accuracy</div></div>
-      <div class="dash-card"><div class="num">${st.wrong}</div><div class="lbl">To Review</div></div>
-      <div class="dash-card"><div class="num">${st.flaggedCt}</div><div class="lbl">Flagged</div></div>
+      <div class="dash-card click" onclick="openReviewFromDash('wrong')" title="Open the questions you answered wrong"><div class="num">${st.wrong}</div><div class="lbl">To Review</div></div>
+      <div class="dash-card click" onclick="openReviewFromDash('flagged')" title="Open flagged questions"><div class="num">${st.flaggedCt}</div><div class="lbl">Flagged</div></div>
+      <div class="dash-card click" onclick="openReviewFromDash('comment')" title="Open questions that have your comments"><div class="num">${commentCt}</div><div class="lbl">Has Comment</div></div>
     </div>
     <div class="dash-row">
       <div class="donut" style="background:${donut1}"><div class="donut-center">${acc}%</div></div>
@@ -671,6 +679,7 @@ function openDashboard(){
   `;
   document.getElementById("dashboardVeil").classList.remove("hidden");
 }
+function openReviewFromDash(kind){ closeDashboard(); reviewList(kind); }
 function closeDashboard(){ document.getElementById("dashboardVeil").classList.add("hidden"); }
 
 // ---------- Admin Dashboard ----------
@@ -687,7 +696,7 @@ function bankTotalQuestions(){
 function studentUnitStats(ans, u){
   const ids = unitIds(u);
   let correct=0, wrong=0;
-  ids.forEach(id=>{ const a = ans[id]; if(a){ if(a.correct) correct++; else wrong++; } });
+  ids.forEach(id=>{ const a = ans[id]; if(a && a.choice!=null){ if(a.correct) correct++; else wrong++; } });
   return {total:ids.length, correct, wrong, answered:correct+wrong};
 }
 function studentOverallStats(ans){
@@ -1119,7 +1128,7 @@ async function selectSub(u, sub, btnEl){
   activeSubKey = u.n + "::" + sub;
   openUnits.add(u.n); if(u.group) openGroups.add(u.group);
   reviewMode = false;
-  document.getElementById("wrongBtn").classList.remove("on");
+  Object.values(REVIEW_BTN).forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove("on"); });
   document.getElementById("main").innerHTML = `<div class="card empty"><p><span class="spinner"></span>Loading questions...</p></div>`;
   const qs = await ensureSubLoaded(u, sub);
   buildTree();
@@ -1144,8 +1153,9 @@ function setSrc(v){
   render();
 }
 
+function isDone(id){ const a=answered[id]; return !!(a && a.choice!=null); }
 function statusOf(q){
-  if(!(q.id in answered)) return "not";
+  if(!isDone(q.id)) return "not";
   return answered[q.id].correct ? "correct" : "wrong";
 }
 
@@ -1161,12 +1171,12 @@ function render(){
   }
   const q = activeSet.find(x=>x.id===current) || activeSet[0];
   current = q.id;
-  if(!(q.id in answered)) timerSync(q.id);
+  if(!isDone(q.id)) timerSync(q.id);
   const idx = activeSet.indexOf(q);
 
-  const total = activeSet.length, notAtt = activeSet.filter(x=>!(x.id in answered)).length;
-  const corr = activeSet.filter(x=>answered[x.id]?.correct).length;
-  const wrong = activeSet.filter(x=>answered[x.id] && !answered[x.id].correct).length;
+  const total = activeSet.length, notAtt = activeSet.filter(x=>!isDone(x.id)).length;
+  const corr = activeSet.filter(x=>isDone(x.id) && answered[x.id].correct).length;
+  const wrong = activeSet.filter(x=>isDone(x.id) && !answered[x.id].correct).length;
   const flg = activeSet.filter(x=>flagged[x.id]).length;
 
   let grid = "";
@@ -1175,7 +1185,7 @@ function render(){
     grid += `<button class="qbtn ${st!=="not"?st:""} ${x.id===q.id?"current":""} ${flagged[x.id]?"flagged":""} ${hasNote(x.id)?"has-note":""}" data-qid="${x.id}" onclick="jumpTo(${x.id})">${i+1}</button>`;
   });
 
-  const isAns = q.id in answered;
+  const isAns = isDone(q.id);
   const letters = ["A","B","C","D"];
   let optsHtml = "";
   letters.forEach((letter,i)=>{
@@ -1218,7 +1228,7 @@ function render(){
   <div class="card">
     <div class="nav-row">
       <div class="filters">
-        ${reviewMode ? '<span style="color:var(--flag);font-weight:700">Mistake Review Mode</span>' : ''}
+        ${reviewMode ? `<span style="color:var(--flag);font-weight:700">${REVIEW_LABEL[reviewKind]||"Review"}</span>` : ''}
         <span>All ${total}</span><span>Not Attempted ${notAtt}</span>
         <span>Correct ${corr}</span><span>Wrong ${wrong}</span><span>Flagged ${flg}</span>
       </div>
@@ -1264,7 +1274,7 @@ function render(){
 }
 
 function pick(qid, choiceIdx){
-  if(answered[qid]) return;
+  if(isDone(qid)) return;
   const q = activeSet.find(x=>x.id===qid);
   // First wrong attempt: warn and allow one more try (not recorded)
   if(q && choiceIdx!==q.correct && !(qid in triedWrong)){
@@ -1297,32 +1307,51 @@ function step(dir){
   if(next){ current = next.id; render(); }
 }
 function updateProgress(){
-  const doneQ = Object.keys(answered).length;
+  const doneQ = Object.keys(answered).filter(isDone).length;
   document.getElementById("progressLine").textContent = `${doneQ} questions answered so far`;
 }
 
-async function reviewWrong(){
-  reviewMode = true;
+let reviewKind = "wrong";
+const REVIEW_LABEL = {wrong:"Mistake Review Mode", flagged:"Flagged Questions", comment:"Questions with Comments"};
+const REVIEW_BTN = {wrong:"wrongBtn", flagged:"flaggedBtn", comment:"commentBtn"};
+function reviewTest(kind, id){
+  if(kind==="flagged") return !!flagged[id];
+  if(kind==="comment") return hasNote(id);
+  return isDone(id) && !answered[id].correct;
+}
+function reviewWrong(){ return reviewList("wrong"); }
+async function reviewList(kind){
+  reviewMode = true; reviewKind = kind;
   activeSubKey = null;
-  document.getElementById("wrongBtn").classList.add("on");
+  Object.values(REVIEW_BTN).forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove("on"); });
+  const bt = document.getElementById(REVIEW_BTN[kind]); if(bt) bt.classList.add("on");
   document.querySelectorAll(".sub-item.active").forEach(el=>el.classList.remove("active"));
   document.getElementById("main").innerHTML = `<div class="card empty"><p><span class="spinner"></span>Loading all units...</p></div>`;
-  // Load every unit that has a data file so mistakes across all of them can be reviewed
   await loadManifest();
   const jobs = [];
-  UNITS.forEach(u=>(u.subs||[]).forEach(sb=>{
-    if(subIds(u,sb).some(id=>answered[id] && !answered[id].correct)) jobs.push(ensureSubLoaded(u,sb));
+  UNITS.forEach(u=>(u.subs||[]).concat(extraSubs(u)).forEach(sb=>{
+    if(subIdsFiltered(u,sb).some(id=>reviewTest(kind,id))) jobs.push(ensureSubLoaded(u,sb));
   }));
   await Promise.all(jobs);
   buildTree();
   const all = Object.values(unitCache).flat();
-  activeSet = all.filter(q => answered[q.id] && !answered[q.id].correct);
+  const seen = new Set();
+  activeSet = all.filter(q => {
+    if(seen.has(q.id)) return false; seen.add(q.id);
+    if(globalSourceFilter!=="all" && (q.source||"Sameh Allithy Target")!==globalSourceFilter) return false;
+    return reviewTest(kind, q.id);
+  });
   current = activeSet.length ? activeSet[0].id : null;
+  if(!activeSet.length){
+    const msg = {wrong:"No mistakes to review.", flagged:"No flagged questions.", comment:"No questions have comments yet."}[kind];
+    document.getElementById("main").innerHTML = `<div class="card empty"><p>${msg}</p></div>`;
+    updateProgress(); return;
+  }
   render();
 }
 function clearReview(){
   reviewMode = false;
-  document.getElementById("wrongBtn").classList.remove("on");
+  Object.values(REVIEW_BTN).forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove("on"); });
   activeSet = [];
   current = null;
   render();
@@ -1332,7 +1361,7 @@ function openCertificate(unitN){
   const u = UNITS.find(x=>x.n===unitN);
   const ids = u ? unitIds(u) : [];
   if(ids.length === 0){ alert("This unit has no questions loaded yet."); return; }
-  const attempted = ids.filter(id=>id in answered);
+  const attempted = ids.filter(isDone);
   if(attempted.length < ids.length){
     alert("Complete all questions in this unit first (" + attempted.length + " of " + ids.length + ") before generating a certificate.");
     return;
