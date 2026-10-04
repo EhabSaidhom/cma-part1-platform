@@ -73,6 +73,16 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .attach-form input[type=text]{flex:1;min-width:160px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.8rem}
 .attach-form label{font-size:.8rem;display:flex;gap:5px;align-items:center}
 .attach button{padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.78rem;cursor:pointer}
+.attach button.att-view{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}
+#pdfOverlay{position:fixed;inset:0;z-index:10001;background:rgba(15,20,25,.92);display:flex;flex-direction:column;-webkit-user-select:none;user-select:none}
+#pdfOverlay .pdf-bar{display:flex;gap:8px;align-items:center;padding:8px 12px;background:#1f2933;color:#fff;font-size:.82rem;flex-wrap:wrap}
+#pdfOverlay .pdf-title{flex:1;min-width:120px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pdfOverlay .pdf-bar button{padding:5px 11px;border:1px solid #52606d;border-radius:7px;background:#323f4b;color:#fff;font:inherit;cursor:pointer}
+#pdfOverlay .pdf-scroll{flex:1;overflow:auto;padding:12px;text-align:center}
+#pdfOverlay .pdf-page{margin:0 auto 12px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+#pdfOverlay canvas{display:block;width:100%;height:auto;pointer-events:none}
+#pdfOverlay .pdf-msg{color:#fff;margin-top:40px;font-size:.9rem}
+@media print{#pdfOverlay{display:none!important}}
 .attach button.att-up{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}
 .attach button.att-del{color:var(--bad);border-color:var(--bad)}
 .attach button:disabled{opacity:.5;cursor:wait}
@@ -1605,7 +1615,7 @@ function attItem(r, mine){
   return `<div class="att-item"><span class="att-ic">${attIcon(r.file_name)}</span>
     <div class="att-main"><div class="att-name">${attEsc(r.file_name)}</div>
       <div class="att-meta">${attFmtSize(r.size_bytes)} &middot; ${attEsc(r.owner_name||"Student")} &middot; ${when}${r.description?" &middot; "+attEsc(r.description):""}</div></div>
-    <div class="att-act"><button onclick="attDownload('${r.id}')">&#11015; Download</button>
+    <div class="att-act">${/\.pdf$/i.test(r.file_name)?`<button class="att-view" onclick="attView('${r.id}')">&#128065; View</button>`:""}<button onclick="attDownload('${r.id}')">&#11015; Download</button>
       ${mine?`<label><input type="checkbox" ${r.shared?"checked":""} onchange="attToggle('${r.id}',this.checked)"> Shared</label>`:""}
       ${canDel?`<button class="att-del" onclick="attDelete('${r.id}')">Delete</button>`:""}</div></div>`;
 }
@@ -1671,6 +1681,86 @@ async function attDelete(id){
   if(error){ attStatus("Could not delete: "+error.message, true); return; }
   attStatus("Deleted.", false); attachLoad();
 }
+
+
+/* ===== In-page PDF viewer (no new tab, no download button) ===== */
+const PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+const PDFJS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+let pdfLibPromise = null, pdfV = null;
+function loadPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(!pdfLibPromise) pdfLibPromise = new Promise((res,rej)=>{
+    const sc = document.createElement("script"); sc.src = PDFJS_URL;
+    sc.onload = ()=>{ window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER; res(window.pdfjsLib); };
+    sc.onerror = ()=>{ pdfLibPromise = null; rej(new Error("Could not load the PDF viewer. Check your connection.")); };
+    document.head.appendChild(sc);
+  });
+  return pdfLibPromise;
+}
+async function attView(id){
+  const r = (attachCache[activeSubKey]||[]).find(x=>x.id===id); if(!r) return;
+  closePdfViewer();
+  const ov = document.createElement("div"); ov.id = "pdfOverlay";
+  ov.innerHTML = `<div class="pdf-bar"><span class="pdf-title">${attEsc(r.file_name)}</span><span id="pdfPageInfo"></span>
+      <button onclick="pdfZoom(-0.2)" title="Zoom out">&minus;</button><button onclick="pdfZoom(0.2)" title="Zoom in">+</button>
+      <button onclick="pdfZoom(0)" title="Fit width">Fit</button><button onclick="closePdfViewer()">&#10005; Close</button></div>
+    <div class="pdf-scroll" id="pdfScroll"><div class="pdf-msg">Loading...</div></div>`;
+  ov.addEventListener("contextmenu", e=>e.preventDefault());
+  document.body.appendChild(ov);
+  const scroll = document.getElementById("pdfScroll");
+  try{
+    const sg = await sb.storage.from("attachments").createSignedUrl(r.storage_path, 300);
+    if(sg.error) throw sg.error;
+    const [lib, resp] = await Promise.all([loadPdfJs(), fetch(sg.data.signedUrl)]);
+    if(!resp.ok) throw new Error("Could not fetch the file ("+resp.status+")");
+    const buf = await resp.arrayBuffer();
+    const doc = await lib.getDocument({data:buf}).promise;
+    if(!document.getElementById("pdfOverlay")){ doc.destroy(); return; }       // closed while loading
+    pdfV = {doc, zoom:1, obs:null};
+    await pdfBuild();
+  }catch(e){ scroll.innerHTML = `<div class="pdf-msg">Could not open this PDF: ${attEsc(e.message||e)}</div>`; }
+}
+async function pdfBuild(){
+  const v = pdfV; if(!v) return;
+  const scroll = document.getElementById("pdfScroll"); if(!scroll) return;
+  if(v.obs) v.obs.disconnect();
+  scroll.innerHTML = "";
+  const p1 = await v.doc.getPage(1), vp1 = p1.getViewport({scale:1});
+  const width = Math.max(260, Math.min(scroll.clientWidth-24, 1100)) * v.zoom;
+  const ratio = vp1.height/vp1.width;
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  const wraps = [];
+  for(let i=1;i<=v.doc.numPages;i++){
+    const w = document.createElement("div"); w.className = "pdf-page"; w.dataset.page = i;
+    w.style.width = width+"px"; w.style.height = Math.round(width*ratio)+"px";
+    scroll.appendChild(w); wraps.push(w);
+  }
+  const info = document.getElementById("pdfPageInfo");
+  const upd = ()=>{ const top = scroll.getBoundingClientRect().top+60; let cur = 1;
+    wraps.forEach((w,i)=>{ if(w.getBoundingClientRect().bottom < top) cur = i+2; });
+    if(info) info.textContent = "Page "+Math.min(cur,wraps.length)+" / "+wraps.length; };
+  scroll.onscroll = upd; upd();
+  v.obs = new IntersectionObserver(async (entries)=>{
+    for(const en of entries){
+      if(!en.isIntersecting) continue;
+      const w = en.target; if(w.dataset.done) continue; w.dataset.done = "1";
+      try{
+        const pg = await v.doc.getPage(Number(w.dataset.page));
+        const base = pg.getViewport({scale:1}), scale = width/base.width, vp = pg.getViewport({scale:scale*dpr});
+        const cv = document.createElement("canvas"); cv.width = Math.floor(vp.width); cv.height = Math.floor(vp.height);
+        await pg.render({canvasContext:cv.getContext("2d"), viewport:vp}).promise;
+        w.style.height = "auto"; w.appendChild(cv);
+      }catch(e){ w.dataset.done = ""; }
+    }
+  }, {root:scroll, rootMargin:"600px 0px"});
+  wraps.forEach(w=>v.obs.observe(w));
+}
+function pdfZoom(d){ if(!pdfV) return; pdfV.zoom = d===0 ? 1 : Math.min(3, Math.max(0.5, pdfV.zoom + d)); pdfBuild(); }
+function closePdfViewer(){
+  const ov = document.getElementById("pdfOverlay"); if(ov) ov.remove();
+  if(pdfV){ if(pdfV.obs) pdfV.obs.disconnect(); try{ pdfV.doc.destroy(); }catch(e){} pdfV = null; }
+}
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closePdfViewer(); });
 
 (async function init(){
   await loadManifest();
