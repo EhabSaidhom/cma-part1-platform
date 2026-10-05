@@ -63,6 +63,23 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .nav-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:10px}
 .filters{display:flex; gap:6px; flex-wrap:wrap; font-size:.75rem; color:var(--muted)}
 .filters span{background:var(--bg); padding:4px 9px; border-radius:20px; border:1px solid var(--line)}
+.ai-box{margin:12px 0;border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:12px}
+.ai-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font-size:.88rem}
+.ai-left{font-size:.72rem;color:var(--muted)}
+.ai-btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.ai-btns button{padding:7px 13px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink);font:inherit;font-size:.8rem;cursor:pointer}
+.ai-btns button.ai-main{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.ai-btns button:disabled{opacity:.5;cursor:wait}
+.ai-msg{border-radius:10px;padding:9px 11px;margin:8px 0;font-size:.85rem;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.ai-msg.bot{background:var(--panel);border:1px solid var(--line)}
+.ai-msg.me{background:rgba(31,95,191,.1);margin-inline-start:24px}
+.ai-msg .tag{display:block;font-size:.68rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.ai-msg.err{color:var(--bad);border-color:var(--bad)}
+.ai-ask{display:flex;gap:8px;margin-top:6px}
+.ai-ask input{flex:1;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink);font:inherit;font-size:.85rem}
+.ai-note{font-size:.68rem;color:var(--muted);margin-top:8px}
+.ai-dots::after{content:"...";animation:aid 1s steps(4,end) infinite}
+@keyframes aid{0%{content:""}33%{content:"."}66%{content:".."}100%{content:"..."}}
 .qgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(38px,1fr)); gap:6px; margin-top:10px}
 .attach{margin-top:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
 .attach>summary{cursor:pointer;padding:10px 12px;font-weight:700;font-size:.88rem;list-style:none}
@@ -1252,6 +1269,7 @@ function render(){
     <div class="pick-label">Select your answer</div>
     <div class="options">${optsHtml}</div>
     ${bannerHtml}
+    ${aiPanelHtml(q)}
     <div class="explain-title ${isAns?'show':''}">Explanation &mdash; why each answer is right or wrong</div>
     <div class="explain ${isAns?'show':''}">
       <div class="qimg-wrap"><img src="${q.explainImage}" alt="Explanation (cropped from source PDF)"></div>
@@ -1271,6 +1289,7 @@ function render(){
   </div>`;
   updateProgress();
   attachAfterRender();
+  aiAfterRender();
 }
 
 function pick(qid, choiceIdx){
@@ -1790,6 +1809,101 @@ function closePdfViewer(){
   if(pdfV){ if(pdfV.obs) pdfV.obs.disconnect(); try{ pdfV.doc.destroy(); }catch(e){} pdfV = null; }
 }
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closePdfViewer(); });
+
+
+/* ===== AI Tutor (calls the Supabase Edge Function "ai-tutor") ===== */
+let aiThreads = {}, aiBusy = false, aiAskOpen = {}, aiUsedToday = null, aiLimitInfo = null, aiCountFetched = false;
+function aiEsc(t){ return String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function aiFmt(t){ return aiEsc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>"); }
+function aiRiyadhDay(){ return new Date(Date.now()+3*3600*1000).toISOString().slice(0,10); }
+function aiLeftText(){
+  if(aiLimitInfo){ return aiLimitInfo.limit==null ? "Unlimited (admin)" : aiLimitInfo.remaining+" of "+aiLimitInfo.limit+" requests left today"; }
+  if(aiUsedToday!=null) return aiUsedToday+" requests used today";
+  return "";
+}
+function aiPanelHtml(q){
+  if(!q) return "";
+  const done = isDone(q.id), open = !!aiAskOpen[q.id];
+  return `<div class="ai-box" id="aiBox">
+    <div class="ai-head"><b>&#129302; AI Tutor</b><span class="ai-left" id="aiLeft">${aiEsc(aiLeftText())}</span></div>
+    <div class="ai-btns">
+      ${done ? `<button class="ai-main" onclick="aiAsk('explain')">&#129504; Explain this question</button>`
+             : `<button class="ai-main" onclick="aiAsk('hint')">&#128161; Give me a hint</button>`}
+      <button onclick="aiToggleAsk(${q.id})">&#128172; Ask a question</button>
+    </div>
+    <div id="aiOut">${aiOutHtml(q.id)}</div>
+    <div class="ai-ask" id="aiAskRow" style="display:${open?"flex":"none"}">
+      <input id="aiInput" maxlength="600" placeholder="Ask anything about this question (Arabic or English)" onkeydown="if(event.key==='Enter')aiSend()">
+      <button class="ai-main" onclick="aiSend()" style="padding:8px 14px;border-radius:9px;border:0;background:var(--brand);color:#fff;font:inherit;font-weight:700;cursor:pointer">Send</button>
+    </div>
+    <div class="ai-note">AI can make mistakes. The official explanation below is the reference.</div>
+  </div>`;
+}
+function aiOutHtml(qid){
+  return (aiThreads[qid]||[]).map(m=>{
+    if(m.role==="user") return `<div class="ai-msg me" dir="auto">${aiEsc(m.content)}</div>`;
+    const tag = m.kind==="hint" ? "Hint" : m.kind==="explain" ? "Explanation" : "AI Tutor";
+    return `<div class="ai-msg bot${m.err?" err":""}" dir="auto"><span class="tag">${tag}</span>${aiFmt(m.content)}</div>`;
+  }).join("") + (aiBusy ? `<div class="ai-msg bot"><span class="ai-dots">Thinking</span></div>` : "");
+}
+function aiPaint(){
+  const o=document.getElementById("aiOut"); if(o) o.innerHTML = aiOutHtml(current);
+  const l=document.getElementById("aiLeft"); if(l) l.textContent = aiLeftText();
+  document.querySelectorAll("#aiBox .ai-btns button").forEach(b=>b.disabled = aiBusy);
+}
+async function aiAfterRender(){
+  aiPaint();
+  if(!aiCountFetched && userId){
+    aiCountFetched = true;
+    try{
+      const { count, error } = await sb.from("ai_usage").select("id",{count:"exact",head:true}).eq("user_id",userId).eq("day",aiRiyadhDay());
+      if(!error){ aiUsedToday = count||0; const l=document.getElementById("aiLeft"); if(l && !aiLimitInfo) l.textContent=aiLeftText(); }
+    }catch(e){}
+  }
+}
+function aiToggleAsk(qid){
+  aiAskOpen[qid] = !aiAskOpen[qid];
+  const r=document.getElementById("aiAskRow"); if(r) r.style.display = aiAskOpen[qid] ? "flex" : "none";
+  if(aiAskOpen[qid]){ const i=document.getElementById("aiInput"); if(i) i.focus(); }
+}
+function aiSend(){
+  const i=document.getElementById("aiInput"); if(!i) return;
+  const t=i.value.trim(); if(!t) return;
+  i.value=""; aiAsk("ask", t);
+}
+async function aiAsk(mode, text){
+  if(aiBusy) return;
+  const q = activeSet.find(x=>x.id===current); if(!q) return;
+  if(!String(q.image||"").startsWith("data:image")){ aiPush(q.id,{role:"assistant",kind:mode,content:"AI help is not available for this question.",err:true}); aiPaint(); return; }
+  const th = aiThreads[q.id] = aiThreads[q.id] || [];
+  let messages = [];
+  if(mode==="ask"){
+    th.push({role:"user",kind:"ask",content:text});
+    messages = th.filter(m=>m.kind==="ask").slice(-7).map(m=>({role:m.role,content:m.content}));
+  }
+  const letters=["A","B","C","D"], a=answered[q.id];
+  aiBusy = true; aiPaint();
+  try{
+    const { data, error } = await sb.functions.invoke("ai-tutor", { body:{
+      mode, qid:q.id, question_image:q.image, explain_image:q.explainImage||null, answered:isDone(q.id),
+      correct_letter:letters[q.correct], user_letter:(a&&a.choice!=null)?letters[a.choice]:null, messages } });
+    if(error){
+      let info = {}; try{ info = await error.context.json(); }catch(e){}
+      if(info.error==="limit") throw new Error("You reached today's AI limit ("+info.limit+" requests). It resets at midnight (Riyadh time).");
+      if(info.error==="not_configured") throw new Error("The AI tutor is not configured yet (missing API key).");
+      throw new Error(info.message || (/not found|404|Failed to send/i.test(error.message||"") ? "The AI tutor is not deployed yet." : (error.message||"AI request failed")));
+    }
+    if(!data || !data.text) throw new Error("Empty answer, please try again.");
+    th.push({role:"assistant",kind:mode,content:data.text});
+    aiLimitInfo = {limit:data.limit, remaining:data.remaining};
+    if(aiUsedToday!=null) aiUsedToday++;
+  }catch(e){
+    th.push({role:"assistant",kind:mode,content:String(e.message||e),err:true});
+    if(mode==="ask") th.splice(th.length-2,1);          // drop the unanswered question from the chat context
+  }
+  aiBusy = false; aiPaint();
+}
+function aiPush(qid,m){ (aiThreads[qid]=aiThreads[qid]||[]).push(m); }
 
 (async function init(){
   await loadManifest();
