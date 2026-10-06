@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CMA Part 1 Practice Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --ink:#1b2430; --muted:#6b7480; --line:#e3e6ea;
+  --brand:#0f5c4c; --brand-2:#12786a; --accent:#c9932f;
+  --ok:#1a8a5b; --bad:#c0392b; --flag:#a3402a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12161a; --panel:#1a2027; --ink:#e8ecef; --muted:#9aa4ad; --line:#2b333b;
+  }
+}
+:root[data-theme="dark"]{ --bg:#12161a; --panel:#1a2027; --ink:#e8ecef; --muted:#9aa4ad; --line:#2b333b; }
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink);
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+header.top{
+  background:linear-gradient(135deg,var(--brand),var(--brand-2)); color:#fff;
+  padding:14px 20px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+}
+header.top h1{font-size:1.05rem; margin:0; font-weight:700}
+header.top .sub{font-size:.78rem; opacity:.85}
+.layout{display:flex; gap:14px; padding:14px; max-width:1400px; margin:0 auto; align-items:flex-start}
+.tree-panel{
+  width:500px; flex:0 0 500px; background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:12px; max-height:calc(100vh - 90px); overflow-y:auto; position:sticky; top:10px;
+}
+.tree-panel h2{font-size:.85rem; color:var(--muted); margin:0 0 10px; text-transform:uppercase; letter-spacing:.03em}
+.unit{border-bottom:1px solid var(--line); padding:2px 0}
+.unit:last-child{border-bottom:none}
+.unit > summary{
+  cursor:pointer; padding:9px 8px; border-radius:8px; font-weight:500; font-size:.78rem;
+  display:flex; flex-direction:column; gap:2px; list-style:none; line-height:1.3;
+}
+.unit > summary::-webkit-details-marker{display:none}
+.unit > summary:hover{background:var(--bg)}
+.unit .badge{font-size:.68rem; color:var(--muted); font-weight:400}
+.unit .unit-title{color:#1a7f4e; font-weight:600; letter-spacing:.01em}
+.unit.group > summary .unit-title{color:#1f5fbf; font-weight:700}
+.group-body{padding-left:10px; border-left:2px solid var(--line); margin:2px 0 6px 6px}
+.unit.unavailable > summary{opacity:.45; cursor:default}
+.sub-list{padding:2px 0 8px 4px; margin:0}
+.sub-item{
+  display:block; width:100%; text-align:left; background:none; border:none; color:var(--ink);
+  font-family:inherit; font-size:.76rem; font-weight:400; padding:7px 10px; border-radius:7px; cursor:pointer;
+}
+.sub-item:hover{background:var(--bg)}
+.sub-item.active{background:var(--brand); color:#fff}
+.sub-item .cnt{color:var(--muted); font-size:.72rem}
+.sub-item.active .cnt{color:#d8ece7}
+
+.main{flex:1; min-width:0}
+.card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:14px}
+.nav-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:10px}
+.filters{display:flex; gap:6px; flex-wrap:wrap; font-size:.75rem; color:var(--muted)}
+.filters span{background:var(--bg); padding:4px 9px; border-radius:20px; border:1px solid var(--line)}
+.ai-box{margin:12px 0;border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:12px}
+.ai-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font-size:.88rem}
+.ai-left{font-size:.72rem;color:var(--muted)}
+.ai-btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.ai-btns button{padding:7px 13px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink);font:inherit;font-size:.8rem;cursor:pointer}
+.ai-btns button.ai-main{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.ai-btns button:disabled{opacity:.5;cursor:wait}
+.ai-msg{border-radius:10px;padding:9px 11px;margin:8px 0;font-size:.85rem;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.ai-msg.bot{background:var(--panel);border:1px solid var(--line)}
+.ai-msg.me{background:rgba(31,95,191,.1);margin-inline-start:24px}
+.ai-msg .tag{display:block;font-size:.68rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.ai-msg.err{color:var(--bad);border-color:var(--bad)}
+.ai-ask{display:flex;gap:8px;margin-top:6px}
+.ai-ask input{flex:1;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink);font:inherit;font-size:.85rem}
+.ai-note{font-size:.68rem;color:var(--muted);margin-top:8px}
+.ai-dots::after{content:"...";animation:aid 1s steps(4,end) infinite}
+@keyframes aid{0%{content:""}33%{content:"."}66%{content:".."}100%{content:"..."}}
+.qgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(38px,1fr)); gap:6px; margin-top:10px}
+.attach{margin-top:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.attach>summary{cursor:pointer;padding:10px 12px;font-weight:700;font-size:.88rem;list-style:none}
+.attach>summary .cnt{color:var(--muted);font-weight:500}
+.attach-body{padding:0 12px 12px}
+.attach-note{font-size:.74rem;color:var(--muted);margin-bottom:8px;line-height:1.5}
+.attach-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+.attach-form input[type=text]{flex:1;min-width:160px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.8rem}
+.attach-form label{font-size:.8rem;display:flex;gap:5px;align-items:center}
+.attach button{padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.78rem;cursor:pointer}
+.attach button.att-view{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}
+#pdfOverlay{position:fixed;inset:0;z-index:10001;background:rgba(15,20,25,.92);display:flex;flex-direction:column;-webkit-user-select:none;user-select:none}
+#pdfOverlay .pdf-bar{display:flex;gap:8px;align-items:center;padding:8px 12px;background:#1f2933;color:#fff;font-size:.82rem;flex-wrap:wrap}
+#pdfOverlay .pdf-title{flex:1;min-width:120px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pdfOverlay .pdf-bar button{padding:5px 11px;border:1px solid #52606d;border-radius:7px;background:#323f4b;color:#fff;font:inherit;cursor:pointer}
+#pdfOverlay .pdf-scroll{flex:1;overflow:auto;padding:12px;text-align:center}
+#pdfOverlay .pdf-page{margin:0 auto 12px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+#pdfOverlay canvas{display:block;width:100%;height:auto;pointer-events:none}
+#pdfOverlay .pdf-msg{color:#fff;margin-top:40px;font-size:.9rem}
+@media print{#pdfOverlay{display:none!important}}
+.attach button.att-up{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}
+.attach button.att-del{color:var(--bad);border-color:var(--bad)}
+.attach button:disabled{opacity:.5;cursor:wait}
+.attach-status{font-size:.78rem;min-height:1.1em;margin-bottom:6px;color:var(--muted)}
+.attach-status.err{color:var(--bad)}
+.att-grp{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:10px 0 4px}
+.att-item{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.att-ic{font-size:1.3rem}
+.att-main{flex:1;min-width:0}
+.att-name{font-size:.84rem;font-weight:600;word-break:break-word}
+.att-meta{font-size:.7rem;color:var(--muted)}
+.att-act{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;font-size:.75rem}
+.qbtn{
+  aspect-ratio:1; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink);
+  font-family:inherit; font-weight:700; font-size:.8rem; cursor:pointer;
+}
+.qbtn.current{border:2px solid var(--brand); background:#eaf3f0}
+.qbtn.correct{background:#e5f5ec; color:var(--ok); border-color:var(--ok)}
+.qbtn.wrong{background:#fbeae8; color:var(--bad); border-color:var(--bad)}
+.qbtn.flagged{outline:2px solid var(--flag)}
+.qbtn{position:relative}
+.qbtn.has-note::after{content:"";position:absolute;top:3px;right:3px;width:6px;height:6px;border-radius:50%;background:var(--brand)}
+#noteTip{position:fixed;z-index:9999;max-width:300px;background:#1f2933;color:#fff;font-size:.8rem;line-height:1.5;padding:8px 11px;border-radius:9px;box-shadow:0 6px 20px rgba(0,0,0,.25);pointer-events:none;white-space:pre-wrap;word-break:break-word;display:none}
+#noteTip b{display:block;font-size:.7rem;opacity:.7;margin-bottom:3px}
+
+.qhead{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
+.qhead h3{margin:0; font-size:1rem}
+.qhead .tools{display:flex; gap:8px}
+.tools button{
+  border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:8px;
+  padding:6px 12px; font-family:inherit; font-size:.78rem; cursor:pointer;
+}
+.tools button.flag-on{background:var(--flag); color:#fff; border-color:var(--flag)}
+.tag-row{display:flex; gap:8px; margin:8px 0 14px; flex-wrap:wrap}
+.tag{font-size:.72rem; background:var(--bg); border:1px solid var(--line); padding:4px 9px; border-radius:6px; color:var(--muted); text-decoration:none}
+.tag.link{color:var(--brand-2); font-weight:600}
+.tag.link:hover{text-decoration:underline}
+
+.qimg-wrap{border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff; padding:14px; text-align:center}
+.qimg-wrap img{display:inline-block; max-width:90%; height:auto}
+.pick-label{font-size:.82rem; color:var(--muted); margin:16px 0 8px}
+.options{display:grid; grid-template-columns:repeat(4,1fr); gap:9px}
+.opt{
+  display:flex; align-items:center; justify-content:center; gap:8px; border:1.5px solid var(--line); border-radius:10px;
+  padding:13px 10px; cursor:pointer; background:var(--panel); font-size:.95rem; font-weight:700;
+}
+.opt:hover{border-color:var(--brand)}
+.opt.tried{opacity:.45;text-decoration:line-through;cursor:not-allowed;border-color:var(--bad)}
+#retryVeil{position:fixed;inset:0;background:rgba(10,15,12,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10000}
+#retryVeil .box{background:var(--panel);border-radius:14px;padding:24px;max-width:360px;width:100%;text-align:center;border-top:5px solid var(--bad);animation:rpop .18s ease-out}
+#retryVeil h2{margin:0 0 8px;font-size:1.1rem;color:var(--bad)}
+#retryVeil p{margin:0 0 16px;font-size:.88rem;color:var(--muted);line-height:1.5}
+#retryVeil button{padding:9px 22px;border:0;border-radius:9px;background:var(--brand);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+@keyframes rpop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+.opt.correct{border-color:var(--ok); background:#e9f7ef; color:var(--ok)}
+.opt.wrong{border-color:var(--bad); background:#fdecea; color:var(--bad)}
+@media(max-width:520px){ .options{grid-template-columns:repeat(2,1fr)} }
+
+.result-banner{margin-top:14px; padding:12px 14px; border-radius:10px; font-size:.9rem; font-weight:600; display:none}
+.result-banner.show{display:block}
+.result-banner.correct{background:#e9f7ef; color:var(--ok); border:1px solid var(--ok)}
+.result-banner.wrong{background:#fdecea; color:var(--bad); border:1px solid var(--bad)}
+
+.explain-title{margin:18px 0 8px; font-size:.85rem; color:var(--muted); font-weight:700; display:none}
+.explain-title.show{display:block}
+.explain{display:none}
+.explain.show{display:block}
+
+.source-box{margin-top:14px; padding:12px 14px; background:var(--bg); border-radius:10px}
+.source-box h4{margin:0 0 8px; font-size:.82rem; color:var(--muted)}
+.source-box a{color:var(--brand-2); font-size:.85rem; display:block; margin-bottom:4px; text-decoration:none}
+.source-box a:hover{text-decoration:underline}
+.notes{width:100%; min-height:70px; border:1px solid var(--line); border-radius:9px; padding:10px;
+  font-family:inherit; font-size:.85rem; background:var(--panel); color:var(--ink); resize:vertical}
+.footer-nav{display:flex; justify-content:space-between; margin-top:14px; gap:8px}
+.footer-nav .right{display:flex; gap:8px}
+.footer-nav button{
+  background:var(--brand); color:#fff; border:none; border-radius:9px; padding:9px 18px;
+  font-family:inherit; font-weight:700; cursor:pointer; font-size:.85rem;
+}
+.footer-nav button.secondary{background:var(--panel); color:var(--ink); border:1px solid var(--line)}
+.footer-nav button:disabled{opacity:.4; cursor:default}
+.empty{padding:40px 20px; text-align:center; color:var(--muted)}
+.empty b{color:var(--ink)}
+.spinner{display:inline-block; width:14px; height:14px; border:2px solid var(--line); border-top-color:var(--brand);
+  border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:820px){
+  .layout{flex-direction:column}
+  .tree-panel{width:100%; flex:none; position:static; max-height:none}
+}
+.user-bar{display:flex; align-items:center; gap:10px; font-size:.78rem}
+.user-bar button{background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.4); color:#fff;
+  border-radius:7px; padding:5px 10px; font-family:inherit; font-size:.72rem; cursor:pointer}
+.tree-actions{display:flex; gap:6px; margin-bottom:10px}
+.tree-actions button{flex:1; font-size:.72rem; padding:7px 4px; border-radius:7px; border:1px solid var(--line);
+  background:var(--bg); color:var(--ink); font-family:inherit; cursor:pointer}
+.tree-actions button.on{background:var(--flag); color:#fff; border-color:var(--flag)}
+.modal-veil{position:fixed; inset:0; background:rgba(10,15,12,.6); display:flex; align-items:center;
+  justify-content:center; z-index:50; padding:16px}
+.modal-veil.hidden{display:none}
+.hidden{display:none !important}
+.modal-box{background:var(--panel); border-radius:14px; padding:24px; max-width:380px; width:100%; text-align:center}
+.modal-box h2{margin:0 0 8px; font-size:1.05rem}
+.modal-box p{color:var(--muted); font-size:.85rem; margin:0 0 16px}
+.modal-box input{width:100%; padding:11px; border:1px solid var(--line); border-radius:9px; font-family:inherit;
+  font-size:.9rem; margin-bottom:10px; background:var(--bg); color:var(--ink); text-align:center}
+.modal-box button.primary{width:100%; background:var(--brand); color:#fff; border:none; border-radius:9px;
+  padding:11px; font-family:inherit; font-weight:700; cursor:pointer; font-size:.9rem}
+.cert-btn{background:var(--accent); color:#fff; border:none; border-radius:8px; padding:6px 12px;
+  font-family:inherit; font-size:.78rem; font-weight:700; cursor:pointer}
+#certModal{display:none}
+#certModal.open{display:flex; position:fixed; inset:0; background:rgba(10,15,12,.7); z-index:60;
+  align-items:center; justify-content:center; padding:16px}
+.cert-close{position:absolute; top:16px; left:16px; background:#fff; border:1px solid var(--line);
+  border-radius:8px; padding:6px 12px; cursor:pointer; font-family:inherit; z-index:2}
+.cert-print{position:absolute; top:16px; right:16px; background:var(--brand); color:#fff; border:none;
+  border-radius:8px; padding:8px 16px; cursor:pointer; font-family:inherit; font-weight:700; z-index:2}
+.cert-sheet{background:#fdfaf3; width:760px; max-width:100%; aspect-ratio:1.4/1; border:10px solid var(--brand);
+  outline:2px solid var(--accent); outline-offset:-16px; border-radius:6px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; padding:40px; position:relative; font-family:'Inter',serif}
+.cert-sheet .kicker{color:var(--accent); letter-spacing:.15em; font-size:.8rem; font-weight:700}
+.cert-sheet h1{color:var(--brand); font-size:2rem; margin:6px 0 18px}
+.cert-sheet .name{font-size:1.6rem; font-weight:900; margin:10px 0; border-bottom:2px solid var(--accent); padding-bottom:8px}
+.cert-sheet .body{font-size:.95rem; color:#333; line-height:2}
+.cert-sheet .score{font-size:1.8rem; font-weight:900; color:var(--brand); margin:10px 0}
+.cert-sheet .foot{display:flex; justify-content:space-between; width:100%; margin-top:26px; font-size:.75rem; color:#666}
+@media print{
+  body *{visibility:hidden}
+  #certModal, #certModal *{visibility:visible}
+  #certModal{position:fixed; inset:0; background:#fff}
+  .cert-close, .cert-print{display:none}
+  .cert-sheet{border-width:6px; box-shadow:none}
+}
+.srcbar{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:10px; font-size:.78rem; color:var(--muted)}
+.srcbtn{border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:20px; padding:4px 11px; font-family:inherit; font-size:.75rem; cursor:pointer; opacity:.55}
+.srcbtn.on{opacity:1; box-shadow:0 0 0 2px rgba(0,0,0,.12) inset}
+.srcbtn-target{background:#e8eefc; color:#2b4a9e; border-color:#c4d2f5}
+.srcbtn-mcq{background:#fff1dc; color:#a35a00; border-color:#f3d3a0}
+.tag.src{font-weight:700}
+.tag.src-target{background:#e8eefc; color:#2b4a9e; border-color:#c4d2f5}
+.tag.src-mcq{background:#fff1dc; color:#a35a00; border-color:#f3d3a0}
+.sub-item.extra{color:#b00020; border-color:#f3b3bd; background:#fff2f4}
+.sub-item.extra:hover{background:#ffe3e7}
+.extra-flag{display:inline-block; font-size:.62rem; font-weight:800; letter-spacing:.03em; color:#fff; background:#d32f2f; border-radius:4px; padding:1px 5px; margin:0 4px}
+
+.modal-veil.dash-veil{align-items:flex-start; padding:26px 12px; overflow-y:auto}
+.dash-box{background:var(--panel); border-radius:14px; padding:22px; max-width:980px; width:100%; text-align:left; margin:10px auto}
+.dash-box h2{margin:0 0 4px; font-size:1.25rem}
+.dash-box .sub{color:var(--muted); font-size:.85rem; margin:0 0 18px}
+.dash-cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:20px}
+.time-note{font-size:.7rem;color:var(--muted);margin:-10px 0 14px}
+.act-bars{display:flex;align-items:flex-end;gap:6px;height:64px;margin:6px 0 4px}
+.act-bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:.62rem;color:var(--muted);height:100%}
+.act-bars i{display:block;width:100%;background:var(--brand);border-radius:4px 4px 0 0;min-height:2px}
+.dash-card{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center}
+.dash-card.click{cursor:pointer; transition:border-color .12s, transform .12s}
+.dash-card.click:hover{border-color:var(--brand); transform:translateY(-1px)}
+.dash-card.click .lbl::after{content:" \203A"; color:var(--brand)}
+.dash-card .num{font-size:1.5rem; font-weight:900; color:var(--brand)}
+.dash-card .lbl{font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin-top:2px}
+.dash-row{display:flex; gap:22px; flex-wrap:wrap; margin-bottom:22px; align-items:center}
+.donut{width:150px; height:150px; border-radius:50%; flex:0 0 150px; position:relative}
+.donut::after{content:""; position:absolute; inset:22px; border-radius:50%; background:var(--panel)}
+.donut-center{position:absolute; inset:22px; display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem; font-weight:900; color:var(--ink); z-index:1}
+.legend{font-size:.8rem; display:flex; flex-direction:column; gap:6px}
+.legend .dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-inline-end:6px}
+.dash-section-title{font-size:.85rem; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin:0 0 10px; font-weight:700}
+.unit-bar-row{margin-bottom:9px}
+.unit-bar-top{display:flex; justify-content:space-between; font-size:.78rem; margin-bottom:3px}
+.unit-bar-top .name{color:var(--ink); font-weight:600}
+.unit-bar-top .stat{color:var(--muted)}
+.unit-bar{height:9px; border-radius:5px; background:var(--bg); overflow:hidden; display:flex}
+.unit-bar span{height:100%}
+.dash-actions{display:flex; justify-content:flex-end; margin-top:6px}
+.dash-actions button{background:var(--brand); color:#fff; border:none; border-radius:9px; padding:11px 22px;
+  font-family:inherit; font-size:.95rem; font-weight:700; cursor:pointer}
+.dash-link{background:none; border:none; color:#fff; text-decoration:underline; cursor:pointer; font-family:inherit; font-size:.82rem; padding:0}
+@media(max-width:640px){ .dash-row{flex-direction:column; align-items:flex-start} }
+
+.admin-box{max-width:1180px}
+.admin-kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:18px}
+.admin-controls{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px}
+.admin-controls input, .admin-controls select{padding:8px 10px; border:1px solid var(--line); border-radius:8px;
+  background:var(--bg); color:var(--ink); font-family:inherit; font-size:.85rem}
+.admin-controls input{flex:1; min-width:160px}
+.admin-table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:10px; margin-bottom:20px}
+table.admin-table{width:100%; border-collapse:collapse; font-size:.82rem}
+table.admin-table th, table.admin-table td{padding:8px 10px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap}
+table.admin-table th{cursor:pointer; user-select:none; color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.03em; background:var(--bg)}
+table.admin-table tbody tr{cursor:pointer}
+table.admin-table tbody tr:hover{background:var(--bg)}
+.status-pill{display:inline-block; padding:2px 9px; border-radius:20px; font-size:.72rem; font-weight:700}
+.status-excellent{background:#e3f7e8; color:#1d7a35}
+.status-good{background:#e8eefc; color:#2b4a9e}
+.status-support{background:#fdeaea; color:#b3261e}
+.status-inactive{background:#f1f1f1; color:#666}
+.status-new{background:#fff3cd; color:#7a5b00}
+.admin-two-col{display:flex; gap:22px; flex-wrap:wrap; margin-bottom:20px}
+.admin-col{flex:1; min-width:260px}
+.admin-list{list-style:none; margin:0; padding:0; font-size:.83rem}
+.admin-list li{display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line)}
+.back-link{background:none; border:none; color:var(--brand); text-decoration:underline; cursor:pointer; font-family:inherit; font-size:.85rem; padding:0; margin-bottom:12px}
+
+.src-global-row{display:flex; align-items:center; gap:6px; font-size:.74rem; color:var(--muted); margin:2px 0 10px}
+.src-global-row select{flex:1; padding:5px 6px; border:1px solid var(--line); border-radius:7px;
+  background:var(--panel); color:var(--ink); font-family:inherit; font-size:.76rem}
+</style>
+</head>
+<body>
+
+<div class="modal-veil hidden" id="loginVeil">
+  <div class="modal-box">
+    <h2>Welcome</h2>
+    <p>Sign in to save your progress and mistake log. It syncs across all your devices.</p>
+    <input type="text" id="nameInput" placeholder="Full name (for new accounts)" autocomplete="name">
+    <input type="email" id="emailInput" placeholder="name@example.com" autocomplete="email" style="margin-top:8px">
+    <input type="password" id="passInput" placeholder="Password (min 6 characters)" autocomplete="current-password" style="margin-top:8px">
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="primary" onclick="doAuth('in')">Sign In</button>
+      <button onclick="doAuth('up')">Create Account</button>
+    </div>
+    <div id="authMsg" style="margin-top:8px;font-size:.85rem;color:#b00020"></div>
+  </div>
+</div>
+
+<div class="modal-veil hidden dash-veil" id="dashboardVeil">
+  <div class="dash-box" id="dashboardBox"></div>
+</div>
+
+<div class="modal-veil hidden dash-veil" id="adminVeil">
+  <div class="dash-box admin-box" id="adminBox"></div>
+</div>
+
+<header class="top">
+  <div>
+    <h1>CMA Part 1 Practice Platform</h1>
+    <div class="sub">Nonprofit educational platform &middot; Financial Planning, Performance, and Analytics</div>
+  </div>
+  <div class="user-bar">
+    <span id="userEmailLbl"></span>
+    <button class="dash-link" onclick="openDashboard()">&#128202; My Performance</button>
+    <button class="dash-link" onclick="exportProgress()" title="Download your solving history as a file">&#11015; Export History</button>
+    <button class="dash-link" onclick="document.getElementById('histFile').click()" title="Upload a previously exported solving history">&#11014; Import History</button>
+    <input type="file" id="histFile" accept=".json,application/json" hidden onchange="importProgress(this)">
+    <button class="dash-link hidden" id="adminBtn" onclick="openAdminDashboard()">&#128737; Admin Dashboard</button>
+    <button onclick="switchUser()">Sign Out</button>
+  </div>
+</header>
+<div style="text-align:center;padding:6px;font-size:.78rem;color:var(--muted)" id="progressLine">Loading...</div>
+<div id="nameBanner" class="hidden" style="background:#fff3cd;color:#7a5b00;text-align:center;padding:8px;font-size:.82rem;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap">
+  <span>Add your name so it appears correctly on your certificates:</span>
+  <input id="nameBannerInput" placeholder="Full name" style="padding:5px 8px;border:1px solid #e0c46a;border-radius:6px;font-family:inherit">
+  <button onclick="saveMyName()" style="padding:5px 12px;border:none;border-radius:6px;background:#7a5b00;color:#fff;cursor:pointer;font-family:inherit">Save</button>
+</div>
+
+<div class="layout">
+  <aside class="tree-panel">
+    <div class="tree-actions">
+      <button id="wrongBtn" onclick="reviewList('wrong')">Review Mistakes</button>
+      <button id="flaggedBtn" onclick="reviewList('flagged')">&#9873; Flagged</button>
+      <button id="commentBtn" onclick="reviewList('comment')">&#128221; Comments</button>
+      <button id="allBtn" onclick="clearReview()">All Units</button>
+    </div>
+    <h2>Units (20)</h2>
+    <div class="src-global-row">
+      <label for="globalSrcSelect">Source:</label>
+      <select id="globalSrcSelect" onchange="setGlobalSource(this.value)"></select>
+    </div>
+    <div id="tree"></div>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<div id="certModal">
+  <button class="cert-close" onclick="closeCert()">&#10005; Close</button>
+  <button class="cert-print" onclick="window.print()">&#128424; Print Certificate</button>
+  <div class="cert-sheet" id="certSheet"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================================================
+   CMA Part 1 Practice Platform
+   ------------------------------------------------------------
+   MULTI-FILE ARCHITECTURE (for GitHub Pages hosting):
+   - This file (index.html) holds ONLY the app shell, the UNITS
+     metadata (titles/sub-unit names), and the logic.
+   - Each unit's actual questions live in their own JSON file
+     under /data/, e.g. data/unit-14.json, loaded on demand
+     (fetch) the first time the user opens that unit. This keeps
+     index.html small forever, no matter how many units you add.
+   - IMPORTANT: fetch() only works when this site is served over
+     http/https (GitHub Pages, Netlify, a local `python -m http.server`,
+     etc.) -- NOT when you just double-click index.html and open it
+     as a file:// URL. Always test via a local server or the live
+     GitHub Pages URL.
+
+   TO ADD A NEW UNIT:
+   1. Crop each question + its explanation from the source PDF as
+      two PNGs, convert both to Base64.
+   2. Add objects to a new data/unit-<N>.json file, same shape as
+      the existing ones:
+      [{ "id":<globally unique int>, "unit":<N>, "sub":"<sub-unit name>",
+         "qpage":<int>, "apage":<int>,
+         "image":"data:image/png;base64,...", "correct":0-3,
+         "explainImage":"data:image/png;base64,...",
+         "links":[{"label":"Video Explanation","url":"..."}] }, ...]
+   3. Add/update that unit's entry below in UNITS with a matching
+      dataFile path and the real sub-unit names/titles.
+   4. Keep "id" globally unique across ALL unit files (never reuse
+      an id another unit file already used) -- progress and the
+      wrong-answer review are keyed by id.
+============================================================ */
+const UNITS = [
+ {n:1, title:"External Financial Statements", subs:[
+   "1.1 Concepts of Financial Accounting",
+   "1.2 Statement of Financial Position",
+   "1.3 Income Statement and Statement of Comprehensive Income",
+   "1.4 Statement of Changes in Equity and Equity Transactions",
+   "1.5 Statement of Cash Flows",
+   "1.6 Consolidation Accounting"]},
+ {n:2, title:"Measurement, Valuation, and Disclosure: Assets -- Short-Term Items", subs:[
+   "2.1 Accounts Receivable",
+   "2.2 Inventory -- Fundamentals",
+   "2.3 Inventory -- Cost Flow Methods",
+   "2.4 Measurement of Inventory Subsequent to Initial Recognition"]},
+ {n:3, title:"Measurement, Valuation, and Disclosure: Assets -- Long-Term Items", subs:[
+   "3.1 Investments in Equity Securities",
+   "3.2 Equity Method",
+   "3.3 Investments in Debt Securities",
+   "3.4 Property, Plant, and Equipment",
+   "3.5 Intangible Assets"]},
+ {n:4, title:"Measurement, Valuation, and Disclosure: Liabilities", subs:[
+   "4.1 Contingencies and Warranties",
+   "4.2 Leases",
+   "4.3 Income Taxes",
+   "4.4 Accounting for Bonds Payable"]},
+ {n:5, title:"Revenue and Impairment Recognition", subs:[
+   "5.1 Revenue from Contracts with Customers",
+   "5.2 Recognition of Revenue over Time",
+   "5.3 Impairment and Disposal of Long-Lived Assets"]},
+ {n:6, title:"Integrated Reporting", subs:[
+   "6.1 Integrated Reporting, Integrated Thinking, and the Integrated Report",
+   "6.2 Fundamental Concepts of Integrated Reporting",
+   "6.3 Guiding Principles and Content Elements of the Integrated Report",
+   "6.4 Adoption of Integrated Reporting"]},
+ {n:7, title:"Cost Management Concepts", subs:[
+   "7.1 Cost Management Terminology",
+   "7.2 Cost Behavior and Relevant Range",
+   "7.3 Costing Techniques",
+   "7.4 Absorption and Variable Costing"]},
+ {n:8, title:"Cost Accumulation Systems", subs:[
+   "8.1 Job-Order Costing",
+   "8.2 Process Costing",
+   "8.3 Activity-Based Costing",
+   "8.4 Life-Cycle Costing"]},
+ {n:9, title:"Cost Allocation Techniques", subs:[
+   "9.1 Joint Product and By-Product Costing",
+   "9.2 Overhead Allocation and Normal Costing",
+   "9.3 Allocating Service Department Costs"]},
+ {n:10, title:"Supply Chain Management", subs:[
+   "10.1 Just-in-Time Inventory and Lean Resource Management",
+   "10.2 Enterprise Resource Planning and Outsourcing",
+   "10.3 Capacity Management"]},
+ {n:11, title:"Business Process Improvement", subs:[
+   "11.1 Value-Chain Analysis",
+   "11.2 Other Process Improvement Tools"]},
+ {n:12, title:"Analysis, Forecasting, and Strategy", dataFile:"data/unit-12.json", subs:[
+   "12.1 Correlation and Regression",
+   "12.2 Learning Curve Analysis",
+   "12.3 Expected Value and Sensitivity Analysis",
+   "12.4 Strategic Management",
+   "12.5 Strategic Planning"]},
+ {n:13, title:"Budgeting -- Concepts and Methodologies", dataFile:"data/unit-13.json", subs:[
+   "13.1 Roles of Budgets and the Budgeting Process",
+   "13.2 Budgeting and Standard Costs",
+   "13.3 The Master Budget",
+   "13.4 Budget Methodologies"]},
+ {n:14, title:"Budgeting -- Calculations and Pro Forma Financial Statements", dataFile:"data/unit-14.json", subs:[
+   "14.1 Sales Forecasts and the Sales Budget",
+   "14.2 Operating Budget Calculations -- Production and Direct Materials",
+   "14.3 Operating Budget Calculations -- Others",
+   "14.4 The Capital Budget and Projecting Cash Collections",
+   "14.5 Cash Disbursements and the Cash Budget",
+   "14.6 Pro Forma Financial Statements"]},
+ {n:15, title:"Cost and Variance Measures", subs:[
+   "15.1 Variance Analysis Overview",
+   "15.2 Static and Flexible Budget Variances",
+   "15.3 Direct Materials Variances",
+   "15.4 Direct Labor Variances",
+   "15.5 Mix and Yield Variances",
+   "15.6 Overhead Variances",
+   "15.7 Comprehensive Example",
+   "15.8 Sales Variances"]},
+ {n:16, title:"Responsibility Accounting and Performance Measures", subs:[
+   "16.1 Responsibility Centers",
+   "16.2 Performance Measures -- Cost, Revenue, and Profit Centers",
+   "16.3 Performance Measures -- Investment Centers",
+   "16.4 The Balanced Scorecard",
+   "16.5 Transfer Pricing"]},
+ {n:17, title:"Internal Controls -- Corporate Governance", subs:[
+   "17.1 Corporate Governance and Regulations Relating to Internal Control",
+   "17.2 Risk and Internal Control"]},
+ {n:18, title:"Internal Controls -- Controls and Security Measures", subs:[
+   "18.1 Control Procedures",
+   "18.2 Systems Controls and Information Security",
+   "18.3 Security Measures and Business Continuity Planning"]},
+ {n:19, title:"Information Systems and Data Governance", subs:[
+   "19.1 Accounting Information Systems",
+   "19.2 Data Governance and the Data Life Cycle",
+   "19.3 COSO Framework -- Internal Control for Data Governance"]},
+ {n:20, title:"Systems Development and Data Analytics", subs:[
+   "20.1 Technology-Enabled Finance Transformation",
+   "20.2 Analytics and Big Data",
+   "20.3 Data Visualization"]},
+ {n:21, title:"Section A: External Financial Reporting Decisions", bare:true, group:"Exam Test", subs:[
+   "A.1 Financial statements",
+   "A.2 Recognition, measurement, valuation, and disclosure"]},
+ {n:22, title:"Section B: Planning, Budgeting and Forecasting", bare:true, group:"Exam Test", subs:[
+   "B.2 Budgeting concepts",
+   "B.3 Forecasting techniques",
+   "B.4 Budget methodologies",
+   "B.5 Annual profit plan and supporting schedules"]},
+ {n:23, title:"Section C: Performance Management", bare:true, group:"Exam Test", subs:[
+   "C.1 Cost and variance measures",
+   "C.2 Responsibility centers and reporting segments",
+   "C.3 Performance measures"]},
+ {n:24, title:"Section D: Cost Management", bare:true, group:"Exam Test", subs:[
+   "D.1 Measurement concepts",
+   "D.2 Costing systems",
+   "D.3 Overhead costs",
+   "D.4 Supply chain management",
+   "D.5 Business process improvement"]},
+ {n:25, title:"Section E: Internal Controls", bare:true, group:"Exam Test", subs:[
+   "E.1 Governance, risk, and compliance",
+   "E.2 Internal auditing",
+   "E.3 Systems controls and security measures"]},
+ {n:26, title:"Support Package — Section A: External Financial Reporting Decisions", bare:true, group:"Exam Test", subs:[
+   "A.1 Financial statements",
+   "A.2 Recognition, measurement, valuation, and disclosure"]},
+ {n:27, title:"Support Package — Section B: Planning, Budgeting and Forecasting", bare:true, group:"Exam Test", subs:[
+   "B.1 Strategic planning",
+   "B.2 Budgeting concepts",
+   "B.3 Forecasting techniques",
+   "B.4 Budget methodologies",
+   "B.5 Annual profit plan and supporting schedules",
+   "B.6 Top-level planning and analysis"]},
+ {n:28, title:"Support Package — Section C: Performance Management", bare:true, group:"Exam Test", subs:[
+   "C.1 Cost and variance measures",
+   "C.2 Responsibility centers and reporting segments",
+   "C.3 Performance measures"]},
+ {n:29, title:"Support Package — Section D: Cost Management", bare:true, group:"Exam Test", subs:[
+   "D.1 Measurement concepts",
+   "D.2 Costing systems",
+   "D.3 Overhead costs",
+   "D.4 Supply chain management",
+   "D.5 Business process improvement"]},
+ {n:30, title:"Support Package — Section E: Internal Controls", bare:true, group:"Exam Test", subs:[
+   "E.1 Governance, risk, and compliance",
+   "E.2 Internal auditing"]},
+ {n:31, title:"Support Package — Section F: Technology and Analytics", bare:true, group:"Exam Test", subs:[
+   "F.1 Information systems",
+   "F.2 Data governance",
+   "F.3 Technology-enabled finance transformation",
+   "F.4 Data analytics"]},
+];
+
+let userEmail = "";
+let current = null;
+let answered = {};
+let flagged = {};
+let reviewMode = false;
+let activeSet = [];
+let subAll = [];
+let srcFilter = "all";
+const unitCache = {};      // unit number -> array of question objects (once loaded)
+const loadingUnits = {};   // unit number -> true while a fetch is in flight
+
+const SUPABASE_URL = "https://yvsiacxcjcsshymfuhwo.supabase.co";
+const SUPABASE_KEY = "sb_publishable_HJGeENBXWbpXSp94A12Dfg_1rrQZVVp";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let userId = "";
+let myProfile = null;
+
+function lsKey(){ return "cma_state__" + userEmail; }
+function readLocal(){
+  try{ return JSON.parse(localStorage.getItem(lsKey()) || "{}"); }catch(e){ return {}; }
+}
+async function loadUserData(){
+  const local = readLocal();
+  answered = local.answered || {}; flagged = local.flagged || {};
+  try{
+    const { data, error } = await sb.from("user_progress").select("state").eq("user_id", userId).maybeSingle();
+    if(error) throw error;
+    if(data && data.state && (data.state.answered || data.state.flagged)){
+      // merge: server data wins on conflicts, local-only items are kept
+      answered = Object.assign({}, answered, data.state.answered || {});
+      flagged = Object.assign({}, flagged, data.state.flagged || {});
+    }
+    persist();   // push merged result back (also migrates old local progress)
+  }catch(e){ console.warn("Load from server failed, using local copy", e); }
+}
+let saveTimer = null;
+function persist(){
+  try{ localStorage.setItem(lsKey(), JSON.stringify({answered, flagged})); }catch(e){}
+  if(!userId) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    const { error } = await sb.from("user_progress").upsert(
+      { user_id: userId, state: {answered, flagged}, updated_at: new Date().toISOString() });
+    if(error) console.warn("Save failed", error);
+  }, 600);
+}
+async function startSession(user){
+  userId = user.id; userEmail = (user.email || "").toLowerCase();
+  document.getElementById("loginVeil").classList.add("hidden");
+  document.getElementById("userEmailLbl").textContent = userEmail;
+  await loadUserData();
+  await loadManifest();
+  await loadMyProfile();
+  buildTree(); render();
+  openDashboard();
+}
+
+// ---------- Dashboard ----------
+const SRC_COLORS = {"Sameh Allithy Target":"#2b4a9e", "MCQ Book":"#a35a00", "Gleim 2025 Vol. 1":"#1a7f4e", "Gleim 2025 Vol. 2":"#7b3fa0", "ICMA Retired Questions 2016":"#c23838", "ICMA Exam Support Package 2025":"#0f766e"};
+function srcColor(name){ return SRC_COLORS[name] || "#6b7480"; }
+function dashStats(){
+  let total=0, correct=0, wrong=0, flaggedCt=0;
+  const bySource = {};     // source -> {total, correct, wrong}  (always unfiltered, for the source donut)
+  const perUnit = [];      // {n, title, total, correct, wrong}  (respects globalSourceFilter)
+  UNITS.forEach(u=>{
+    const ids = unitIdsFiltered(u);
+    let uCorrect=0, uWrong=0;
+    ids.forEach(id=>{
+      const a = answered[id];
+      if(a && a.choice!=null){ if(a.correct) uCorrect++; else uWrong++; }
+      if(flagged[id]) flaggedCt++;
+    });
+    total += ids.length; correct += uCorrect; wrong += uWrong;
+    perUnit.push({n:u.n, title:u.title, total:ids.length, correct:uCorrect, wrong:uWrong});
+    const m = manifest && manifest[u.n];
+    if(m) Object.values(m).forEach(subEntry=>{
+      (subEntry.files||[]).forEach(f=>{
+        const s = bySource[f.source] || (bySource[f.source]={total:0,correct:0,wrong:0});
+        s.total += f.ids.length;
+        f.ids.forEach(id=>{ const a=answered[id]; if(a){ if(a.correct) s.correct++; else s.wrong++; } });
+      });
+    });
+  });
+  return {total, correct, wrong, notAttempted: total-correct-wrong, flaggedCt, bySource, perUnit};
+}
+function donutGradient(parts){
+  // parts: [{color, value}], value in same units; builds a conic-gradient string
+  const sum = parts.reduce((a,p)=>a+p.value,0) || 1;
+  let acc = 0, segs = [];
+  parts.forEach(p=>{
+    const start = acc/sum*360; acc += p.value; const end = acc/sum*360;
+    if(p.value>0) segs.push(`${p.color} ${start}deg ${end}deg`);
+  });
+  return segs.length ? `conic-gradient(${segs.join(",")})` : "var(--bg)";
+}
+function openDashboard(){
+  const st = dashStats();
+  const dashIds = new Set(UNITS.flatMap(u=>unitIdsFiltered(u)));
+  const commentCt = Object.keys(answered).filter(id=>dashIds.has(+id) && hasNote(id)).length;
+  const acc = (st.correct+st.wrong) ? Math.round(st.correct/(st.correct+st.wrong)*100) : 0;
+  const donut1 = donutGradient([
+    {color:"var(--ok)", value:st.correct}, {color:"var(--bad)", value:st.wrong},
+    {color:"var(--line)", value:st.notAttempted}
+  ]);
+  const srcEntries = Object.entries(st.bySource);
+  const donut2 = donutGradient(srcEntries.map(([name,s])=>({color:srcColor(name), value:s.total})));
+  const legend1 = `
+    <div class="legend">
+      <div><span class="dot" style="background:var(--ok)"></span>Correct (${st.correct})</div>
+      <div><span class="dot" style="background:var(--bad)"></span>Wrong (${st.wrong})</div>
+      <div><span class="dot" style="background:var(--line)"></span>Not attempted (${st.notAttempted})</div>
+    </div>`;
+  const legend2 = `<div class="legend">` + srcEntries.map(([name,s])=>
+      `<div><span class="dot" style="background:${srcColor(name)}"></span>${name} (${s.total})</div>`
+    ).join("") + `</div>`;
+  const unitRows = st.perUnit.map(u=>{
+    const na = u.total - u.correct - u.wrong;
+    const pc = u.total ? (u.correct/u.total*100) : 0;
+    const pw = u.total ? (u.wrong/u.total*100) : 0;
+    const pn = 100-pc-pw;
+    const doneStr = u.total ? `${u.correct+u.wrong}/${u.total} answered` : "no questions yet";
+    return `<div class="unit-bar-row">
+      <div class="unit-bar-top"><span class="name">${uName(u,"&middot;")}</span><span class="stat">${doneStr}</span></div>
+      <div class="unit-bar">
+        <span style="width:${pc}%;background:var(--ok)"></span>
+        <span style="width:${pw}%;background:var(--bad)"></span>
+        <span style="width:${pn}%;background:var(--line)"></span>
+      </div>
+    </div>`;
+  }).join("");
+  document.getElementById("dashboardBox").innerHTML = `
+    <h2>Welcome back${userEmail ? ", " + userEmail : ""}</h2>
+    <p class="sub">Your progress and the platform's question library at a glance.${globalSourceFilter!=="all" ? ` <b>(filtered to ${globalSourceFilter})</b>` : ""}</p>
+    <div class="dash-cards">
+      <div class="dash-card"><div class="num">${st.total}</div><div class="lbl">Total Questions</div></div>
+      <div class="dash-card"><div class="num">${st.correct+st.wrong}</div><div class="lbl">Answered</div></div>
+      <div class="dash-card"><div class="num">${acc}%</div><div class="lbl">Accuracy</div></div>
+      <div class="dash-card click" onclick="openReviewFromDash('wrong')" title="Open the questions you answered wrong"><div class="num">${st.wrong}</div><div class="lbl">To Review</div></div>
+      <div class="dash-card click" onclick="openReviewFromDash('flagged')" title="Open flagged questions"><div class="num">${st.flaggedCt}</div><div class="lbl">Flagged</div></div>
+      <div class="dash-card click" onclick="openReviewFromDash('comment')" title="Open questions that have your comments"><div class="num">${commentCt}</div><div class="lbl">Has Comment</div></div>
+    </div>
+    <div class="dash-row">
+      <div class="donut" style="background:${donut1}"><div class="donut-center">${acc}%</div></div>
+      ${legend1}
+      <div class="donut" style="background:${donut2}"></div>
+      ${legend2}
+    </div>
+    ${timeSectionHtml()}
+    <div class="dash-section-title">Progress by Unit</div>
+    ${unitRows}
+    <div class="dash-actions"><button onclick="closeDashboard()">Start Studying &rarr;</button></div>
+  `;
+  document.getElementById("dashboardVeil").classList.remove("hidden");
+}
+function openReviewFromDash(kind){ closeDashboard(); reviewList(kind); }
+function closeDashboard(){ document.getElementById("dashboardVeil").classList.add("hidden"); }
+
+// ---------- Admin Dashboard ----------
+let adminStudents = null;   // cached after first load this session
+let adminSort = {key:"accuracy", dir:"desc"};
+let adminSearch = "";
+let adminUnitFilter = "all";
+const STATUS_LABEL = {excellent:"Excellent", good:"Good", support:"Needs Support", inactive:"Inactive", new:"Not Started"};
+const STATUS_CLASS = {excellent:"status-excellent", good:"status-good", support:"status-support", inactive:"status-inactive", new:"status-new"};
+
+function bankTotalQuestions(){
+  return UNITS.reduce((sum,u)=>sum+unitIds(u).length, 0);
+}
+function studentUnitStats(ans, u){
+  const ids = unitIds(u);
+  let correct=0, wrong=0;
+  ids.forEach(id=>{ const a = ans[id]; if(a && a.choice!=null){ if(a.correct) correct++; else wrong++; } });
+  return {total:ids.length, correct, wrong, answered:correct+wrong};
+}
+function studentOverallStats(ans){
+  let correct=0, wrong=0;
+  UNITS.forEach(u=>{ const s = studentUnitStats(ans,u); correct+=s.correct; wrong+=s.wrong; });
+  return {correct, wrong, answered:correct+wrong};
+}
+function classifyStudent(hasAnyRow, answeredCt, accuracy, lastActive){
+  if(!hasAnyRow || answeredCt===0) return "new";
+  const daysSince = lastActive ? (Date.now()-lastActive.getTime())/86400000 : Infinity;
+  if(daysSince > 7) return "inactive";
+  if(accuracy < 60) return "support";
+  if(accuracy >= 85) return "excellent";
+  return "good";
+}
+async function loadAllStudentsData(){
+  const [{data:profiles, error:e1}, {data:progress, error:e2}] = await Promise.all([
+    sb.from("profiles").select("user_id,email,display_name,role"),
+    sb.from("user_progress_admin").select("user_id,updated_at,answered,flagged")
+  ]);
+  if(e1) throw e1; if(e2) throw e2;
+  const progByUser = {}; (progress||[]).forEach(p=>progByUser[p.user_id]=p);
+  const bankTotal = bankTotalQuestions();
+  return (profiles||[]).map(p=>{
+    const row = progByUser[p.user_id];
+    const ans = (row && row.answered) || {};
+    const stats = studentOverallStats(ans);
+    const accuracy = stats.answered ? Math.round(stats.correct/stats.answered*100) : 0;
+    const completion = bankTotal ? Math.round(stats.answered/bankTotal*100) : 0;
+    const lastActive = row && row.updated_at ? new Date(row.updated_at) : null;
+    const status = classifyStudent(!!row, stats.answered, accuracy, lastActive);
+    return {
+      user_id:p.user_id, email:p.email||"", name:p.display_name||"", role:p.role||"student", answeredObj:ans,
+      correct:stats.correct, wrong:stats.wrong, answered:stats.answered,
+      accuracy, completion, lastActive, status
+    };
+  });
+}
+function fmtDate(d){ return d ? d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : "Never"; }
+function studentStatsForUnit(st, unitN){
+  if(unitN === "all") return {answered:st.answered, correct:st.correct, accuracy:st.accuracy};
+  const u = UNITS.find(x=>x.n===Number(unitN));
+  const s = studentUnitStats(st.answeredObj, u);
+  const accuracy = s.answered ? Math.round(s.correct/s.answered*100) : 0;
+  return {answered:s.answered, correct:s.correct, accuracy};
+}
+async function openAdminDashboard(){
+  const box = document.getElementById("adminBox");
+  box.innerHTML = `<p>Loading student data&hellip;</p>`;
+  document.getElementById("adminVeil").classList.remove("hidden");
+  try{
+    adminStudents = await loadAllStudentsData();
+  }catch(e){
+    box.innerHTML = `<p>Could not load student data: ${e.message||e}</p><div class="dash-actions"><button onclick="closeAdmin()">Close</button></div>`;
+    return;
+  }
+  renderAdminDashboard();
+}
+function closeAdmin(){ document.getElementById("adminVeil").classList.add("hidden"); }
+
+function renderAdminDashboard(){
+  const box = document.getElementById("adminBox");
+  const students = adminStudents || [];
+  const n = students.length;
+  const active7 = students.filter(s=>s.lastActive && (Date.now()-s.lastActive.getTime())<=7*86400000).length;
+  const withAnswers = students.filter(s=>s.answered>0);
+  const avgAcc = withAnswers.length ? Math.round(withAnswers.reduce((a,s)=>a+s.accuracy,0)/withAnswers.length) : 0;
+  const totalAnswered = students.reduce((a,s)=>a+s.answered,0);
+  const avgCompletion = n ? Math.round(students.reduce((a,s)=>a+s.completion,0)/n) : 0;
+
+  // per-unit average accuracy (only counting students who attempted that unit)
+  const unitAvg = UNITS.map(u=>{
+    const vals = students.map(s=>studentStatsForUnit(s,String(u.n))).filter(v=>v.answered>0);
+    const avg = vals.length ? Math.round(vals.reduce((a,v)=>a+v.accuracy,0)/vals.length) : null;
+    return {n:u.n, title:u.title, avg, attempted:vals.length};
+  }).filter(x=>x.attempted>0);
+
+  const eligible = withAnswers.filter(s=>s.answered>=10);
+  const top3 = [...eligible].sort((a,b)=>b.accuracy-a.accuracy || b.answered-a.answered).slice(0,3);
+
+  const watchlist = students.filter(s=>{
+    if(s.status==="new") return false;
+    return s.accuracy<60 || s.status==="inactive";
+  });
+
+  const unitOptions = `<option value="all">All Units</option>` +
+    UNITS.map(u=>`<option value="${u.n}">${uName(u,"--")}</option>`).join("");
+
+  box.innerHTML = buildAdminHtml({n,active7,avgAcc,totalAnswered,avgCompletion,unitAvg,top3,watchlist,unitOptions,timeHtml:weeklyTimeHtml(students)});
+  attachAdminHandlers();
+  renderAdminTable();
+}
+function buildAdminHtml(d){
+  return `
+    <h2>Admin Dashboard</h2>
+    <p class="sub">All users' performance across the platform, admins included. Personal notes are never included here.</p>
+    <div class="admin-kpis">
+      <div class="dash-card"><div class="num">${d.n}</div><div class="lbl">Users (incl. admins)</div></div>
+      <div class="dash-card"><div class="num">${d.active7}</div><div class="lbl">Active last 7 days</div></div>
+      <div class="dash-card"><div class="num">${d.avgAcc}%</div><div class="lbl">Avg Accuracy</div></div>
+      <div class="dash-card"><div class="num">${d.totalAnswered}</div><div class="lbl">Total Answered</div></div>
+      <div class="dash-card"><div class="num">${d.avgCompletion}%</div><div class="lbl">Avg Completion</div></div>
+    </div>
+    <div class="admin-two-col">
+      <div class="admin-col">
+        <div class="dash-section-title">Average Accuracy by Unit</div>
+        <ul class="admin-list">${d.unitAvg.map(u=>`<li><span>${uName(u,"&middot;")}</span><b>${u.avg}%</b></li>`).join("") || "<li>No data yet</li>"}</ul>
+      </div>
+      <div class="admin-col">
+        <div class="dash-section-title">Top 3 Students</div>
+        <ul class="admin-list">${d.top3.map((s,i)=>`<li><span>${i+1}. ${s.name||s.email}</span><b>${s.accuracy}%</b></li>`).join("") || "<li>Not enough data yet</li>"}</ul>
+        <div class="dash-section-title" style="margin-top:14px">Needs Follow-up (${d.watchlist.length})</div>
+        <ul class="admin-list">${d.watchlist.slice(0,6).map(s=>`<li><span>${s.name||s.email}</span><b>${s.status==="inactive"?"Inactive":s.accuracy+"%"}</b></li>`).join("") || "<li>Nobody right now</li>"}</ul>
+      </div>
+    </div>
+    ${d.timeHtml||""}
+    <div class="admin-controls">
+      <input id="adminSearchInput" placeholder="Search by name or email&hellip;" oninput="adminSearch=this.value; renderAdminTable();">
+      <select id="adminUnitSelect" onchange="adminUnitFilter=this.value; renderAdminTable();">${d.unitOptions}</select>
+      <button onclick="exportAdminCsv()">&#11015; Export CSV</button>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr>
+          <th onclick="adminSortBy('name')">Name / Email</th>
+          <th onclick="adminSortBy('answered')">Answered</th>
+          <th onclick="adminSortBy('accuracy')">Accuracy</th>
+          <th onclick="adminSortBy('completion')">Completion</th>
+          <th onclick="adminSortBy('lastActive')">Last Active</th>
+          <th onclick="adminSortBy('status')">Status</th>
+        </tr></thead>
+        <tbody id="adminTbody"></tbody>
+      </table>
+    </div>
+    <div id="adminDetail"></div>
+    <div class="dash-actions"><button onclick="closeAdmin()">Close</button></div>
+  `;
+}
+function attachAdminHandlers(){
+  document.getElementById("adminSearchInput").value = adminSearch;
+  document.getElementById("adminUnitSelect").value = adminUnitFilter;
+}
+function adminSortBy(key){
+  if(adminSort.key===key) adminSort.dir = adminSort.dir==="asc" ? "desc" : "asc";
+  else adminSort = {key, dir:"desc"};
+  renderAdminTable();
+}
+function renderAdminTable(){
+  if(!adminStudents) return;
+  const q = (adminSearch||"").toLowerCase();
+  let rows = adminStudents.map(s=>{
+    const scoped = studentStatsForUnit(s, adminUnitFilter);
+    return Object.assign({}, s, {scopedAnswered:scoped.answered, scopedAccuracy:scoped.accuracy});
+  }).filter(s=> !q || (s.name||"").toLowerCase().includes(q) || (s.email||"").toLowerCase().includes(q));
+
+  const key = adminSort.key, dir = adminSort.dir==="asc" ? 1 : -1;
+  const getVal = (s)=>{
+    if(key==="name") return (s.name||s.email||"").toLowerCase();
+    if(key==="answered") return adminUnitFilter==="all" ? s.answered : s.scopedAnswered;
+    if(key==="accuracy") return adminUnitFilter==="all" ? s.accuracy : s.scopedAccuracy;
+    if(key==="completion") return s.completion;
+    if(key==="lastActive") return s.lastActive ? s.lastActive.getTime() : -1;
+    if(key==="status") return s.status;
+    return 0;
+  };
+  rows.sort((a,b)=>{ const va=getVal(a), vb=getVal(b); return va<vb?-1*dir:va>vb?1*dir:0; });
+
+  document.getElementById("adminTbody").innerHTML = rows.map(s=>`
+    <tr onclick="openStudentDetail('${s.user_id}')">
+      <td>${s.name ? s.name+`<br><span style="color:var(--muted);font-size:.75rem">${s.email}</span>` : s.email}${adminTag(s)}</td>
+      <td>${adminUnitFilter==="all" ? s.answered : s.scopedAnswered}</td>
+      <td>${adminUnitFilter==="all" ? s.accuracy : s.scopedAccuracy}%</td>
+      <td>${s.completion}%</td>
+      <td>${fmtDate(s.lastActive)}</td>
+      <td><span class="status-pill ${STATUS_CLASS[s.status]}">${STATUS_LABEL[s.status]}</span></td>
+    </tr>
+  `).join("") || `<tr><td colspan="6" style="text-align:center;color:var(--muted)">No users match</td></tr>`;
+}
+function openStudentDetail(uid){
+  const s = (adminStudents||[]).find(x=>x.user_id===uid);
+  if(!s) return;
+  const rows = UNITS.map(u=>{
+    const st = studentUnitStats(s.answeredObj, u);
+    if(st.total===0) return "";
+    const pc = st.total ? st.correct/st.total*100 : 0;
+    const pw = st.total ? st.wrong/st.total*100 : 0;
+    const pn = 100-pc-pw;
+    return `<div class="unit-bar-row">
+      <div class="unit-bar-top"><span class="name">${uName(u,"&middot;")}</span><span class="stat">${st.answered}/${st.total} answered</span></div>
+      <div class="unit-bar"><span style="width:${pc}%;background:var(--ok)"></span><span style="width:${pw}%;background:var(--bad)"></span><span style="width:${pn}%;background:var(--line)"></span></div>
+    </div>`;
+  }).join("");
+  document.getElementById("adminDetail").innerHTML = `
+    <button class="back-link" onclick="document.getElementById('adminDetail').innerHTML=''">&times; Close detail</button>
+    <div class="dash-section-title">${s.name || s.email} &mdash; Performance by Unit</div>
+    ${rows || "<p style='color:var(--muted)'>No questions answered yet.</p>"}
+    <div id="adminHist"></div>
+  `;
+  histUid = uid; renderStudentHistory();
+  document.getElementById("adminDetail").scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+function exportAdminCsv(){
+  const rows = [["Name","Email","Answered","Correct","Wrong","Accuracy %","Completion %","Last Active","Status"]];
+  (adminStudents||[]).forEach(s=>{
+    rows.push([s.name, s.email, s.answered, s.correct, s.wrong, s.accuracy, s.completion,
+      s.lastActive ? s.lastActive.toISOString().slice(0,10) : "", STATUS_LABEL[s.status]]);
+  });
+  const csv = rows.map(r=>r.map(v=>{
+    const str = String(v==null?"":v);
+    return /[",\n]/.test(str) ? '"'+str.replace(/"/g,'""')+'"' : str;
+  }).join(",")).join("\r\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "cma-platform-students-"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
+async function doAuth(mode){
+  const name = document.getElementById("nameInput").value.trim();
+  const email = document.getElementById("emailInput").value.trim();
+  const pass = document.getElementById("passInput").value;
+  const msg = document.getElementById("authMsg"); msg.textContent = "";
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.textContent = "Please enter a valid email address"; return; }
+  if(pass.length < 6){ msg.textContent = "Password must be at least 6 characters"; return; }
+  if(mode === "up" && !name){ msg.textContent = "Please enter your full name"; return; }
+  const res = mode === "up" ? await sb.auth.signUp({email, password: pass})
+                            : await sb.auth.signInWithPassword({email, password: pass});
+  if(res.error){ msg.textContent = res.error.message; return; }
+  if(!res.data.session){ msg.textContent = "Account created. Check your email to confirm, then sign in."; return; }
+  if(mode === "up" && name){
+    try{ await sb.from("profiles").update({display_name:name}).eq("user_id", res.data.session.user.id); }
+    catch(e){ console.warn("Could not save name", e); }
+  }
+  await startSession(res.data.session.user);
+}
+async function switchUser(){
+  await sb.auth.signOut();
+  userId = ""; userEmail = ""; answered = {}; flagged = {}; myProfile = null;
+  document.getElementById("passInput").value = "";
+  attachCache = {}; attachKeyLoaded = null;
+  document.getElementById("adminBtn").classList.add("hidden");
+  document.getElementById("nameBanner").classList.add("hidden");
+  document.getElementById("loginVeil").classList.remove("hidden");
+}
+async function loadMyProfile(){
+  try{
+    const { data, error } = await sb.from("profiles").select("display_name,email,role").eq("user_id", userId).maybeSingle();
+    if(error) throw error;
+    myProfile = data || null;
+  }catch(e){ console.warn("Could not load profile", e); myProfile = null; }
+  const nameOk = myProfile && myProfile.display_name && myProfile.display_name.trim();
+  document.getElementById("nameBanner").classList.toggle("hidden", !!nameOk);
+  document.getElementById("adminBtn").classList.toggle("hidden", !(myProfile && myProfile.role === "admin"));
+}
+async function saveMyName(){
+  const v = document.getElementById("nameBannerInput").value.trim();
+  if(!v) return;
+  try{
+    const { error } = await sb.from("profiles").update({display_name:v}).eq("user_id", userId);
+    if(error) throw error;
+    myProfile = myProfile || {}; myProfile.display_name = v;
+    document.getElementById("nameBanner").classList.add("hidden");
+  }catch(e){ console.error("saveMyName failed", e); alert("Could not save your name, please try again."); }
+}
+
+let openUnits = new Set();
+let openGroups = new Set();
+function uName(u, sep){ const x = UNITS.find(v=>v.n===u.n) || u; return x.bare ? x.title : `Unit ${u.n} ${sep} ${u.title}`; }
+let activeSubKey = null;
+
+function buildTree(){
+  populateGlobalSourceSelect();
+  const filtering = globalSourceFilter !== "all";
+  const root = document.getElementById("tree");
+  root.innerHTML = "";
+  const groups = {};
+  UNITS.forEach(u=>{
+    const cached = manifest ? (manifest[u.n] || {}) : null;
+    const count = cached ? unitIdsFiltered(u).length : null;
+    const totalCount = cached ? unitIds(u).length : null;
+
+    // When filtering to one source, a unit with zero questions in that
+    // source is skipped entirely; a unit that has no questions at all
+    // (any source) still shows, greyed out, same as before.
+    if(filtering && cached && !count) return;
+
+    const allSubs = u.subs.concat(extraSubs(u));
+    const visibleSubs = filtering ? allSubs.filter(s=>subIdsFiltered(u,s).length>0) : allSubs;
+
+    const det = document.createElement("details");
+    det.className = "unit" + ((manifest === null || (manifest[u.n] && unitIds(u).length)) ? "" : " unavailable");
+    det.open = openUnits.has(u.n);
+    const sum = document.createElement("summary");
+    let badgeText;
+    if(manifest === null) badgeText = '<span class="spinner"></span>loading...';
+    else if(!totalCount) badgeText = "not available yet";
+    else badgeText = count + " questions";
+    sum.innerHTML = `<span class="unit-title">${uName(u,"&mdash;")}</span><span class="badge">${badgeText}</span>`;
+    det.appendChild(sum);
+    const list = document.createElement("div");
+    list.className = "sub-list";
+    visibleSubs.forEach(s=>{
+      const isExtra = !u.subs.includes(s);
+      const sc = cached ? subIdsFiltered(u,s).length : null;
+      const btn = document.createElement("button");
+      btn.className = "sub-item" + (activeSubKey===(u.n+"::"+s) ? " active" : "") + (isExtra ? " extra" : "");
+      if(isExtra) btn.title = "Not in the official unit list -- may have been removed in the new syllabus";
+      btn.innerHTML = `${s} ${isExtra ? `<span class="extra-flag">NEW</span>` : ""} ${sc!==null ? `<span class="cnt">(${sc})</span>` : ""}`;
+      btn.onclick = ()=>selectSub(u, s, btn);
+      list.appendChild(btn);
+    });
+    det.appendChild(list);
+    det.addEventListener("toggle", ()=>{
+      if(det.open){
+        openUnits.add(u.n);
+      }else{
+        openUnits.delete(u.n);
+      }
+    });
+    if(u.group){
+      let g = groups[u.group];
+      if(!g){
+        const el = document.createElement("details");
+        el.className = "unit group";
+        el.open = openGroups.has(u.group);
+        const gs = document.createElement("summary");
+        el.appendChild(gs);
+        const body = document.createElement("div");
+        body.className = "group-body";
+        el.appendChild(body);
+        el.addEventListener("toggle", (ev)=>{ if(ev.target!==el) return; if(el.open) openGroups.add(u.group); else openGroups.delete(u.group); });
+        root.appendChild(el);
+        g = groups[u.group] = {el, gs, body, count:0, name:u.group};
+      }
+      g.body.appendChild(det);
+      g.count += (count||0);
+      det.addEventListener("toggle", ()=>{ if(det.open) openGroups.add(u.group); });
+    } else {
+      root.appendChild(det);
+    }
+  });
+  Object.values(groups).forEach(g=>{
+    g.gs.innerHTML = `<span class="unit-title">${g.name}</span><span class="badge">${manifest===null ? '<span class="spinner"></span>loading...' : g.count + " questions"}</span>`;
+  });
+}
+
+let manifest = null;   // {unit: {sub: {file, ids}}}
+const loadedSubs = {}; // "n::sub" -> promise
+async function loadManifest(){
+  if(manifest) return manifest;
+  try{
+    const r = await fetch("data/manifest.json");
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    manifest = await r.json();
+  }catch(e){ console.error("manifest load failed", e); manifest = {}; }
+  UNITS.forEach(u=>{ if(manifest[u.n]) unitCache[u.n] = unitCache[u.n] || []; });
+  return manifest;
+}
+function subIds(u, s){ return (manifest && manifest[u.n] && manifest[u.n][s] && manifest[u.n][s].ids) || []; }
+function extraSubs(u){
+  const m = manifest && manifest[u.n];
+  if(!m) return [];
+  return Object.keys(m).filter(s => !(u.subs||[]).includes(s));
+}
+function unitIds(u){ return (u.subs||[]).concat(extraSubs(u)).flatMap(s=>subIds(u,s)); }
+
+// ---------- Global source filter (affects tree counts + My Performance) ----------
+let globalSourceFilter = localStorage.getItem("cma_global_source") || "all";
+function allSources(){
+  const set = new Set();
+  if(manifest) Object.values(manifest).forEach(unitSubs=>
+    Object.values(unitSubs).forEach(subEntry=>
+      (subEntry.files||[]).forEach(f=>set.add(f.source || "Sameh Allithy Target"))));
+  return [...set].sort();
+}
+function subIdsForSource(u, s, src){
+  const m = manifest && manifest[u.n] && manifest[u.n][s];
+  if(!m) return [];
+  if(!src || src === "all") return m.ids || [];
+  return [].concat(...(m.files||[]).filter(f=>(f.source||"Sameh Allithy Target")===src).map(f=>f.ids));
+}
+function subIdsFiltered(u, s){ return subIdsForSource(u, s, globalSourceFilter); }
+function unitIdsFiltered(u){ return (u.subs||[]).concat(extraSubs(u)).flatMap(s=>subIdsFiltered(u,s)); }
+function populateGlobalSourceSelect(){
+  const sel = document.getElementById("globalSrcSelect");
+  if(!sel) return;
+  const srcs = allSources();
+  if(globalSourceFilter !== "all" && !srcs.includes(globalSourceFilter)) globalSourceFilter = "all";
+  sel.innerHTML = `<option value="all">All sources (${srcs.length})</option>` +
+    srcs.map(s=>`<option value="${s}">${s}</option>`).join("");
+  sel.value = globalSourceFilter;
+}
+function setGlobalSource(v){
+  globalSourceFilter = v;
+  localStorage.setItem("cma_global_source", v);
+  buildTree();
+  if(activeSubKey){            // refresh the open sub-unit so it follows the new filter
+    const parts = activeSubKey.split("::"), u = UNITS.find(x=>String(x.n)===parts[0]);
+    if(u && subIdsFiltered(u, parts[1]).length){ selectSub(u, parts[1], null); }
+    else { activeSubKey = null; subAll = []; activeSet = []; current = null;
+      document.getElementById("main").innerHTML = '<div class="card empty"><p>Pick a sub-unit from the list.</p></div>'; }
+  }
+  if(!document.getElementById("dashboardVeil").classList.contains("hidden")) openDashboard();
+}
+async function ensureSubLoaded(u, s){
+  await loadManifest();
+  const m = manifest[u.n] && manifest[u.n][s];
+  if(!m) return [];
+  const key = u.n + "::" + s;
+  if(!loadedSubs[key]){
+    loadedSubs[key] = Promise.all((m.files||[]).map(f =>
+      fetch(f.file)
+        .then(r=>{ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(data=>{ data.forEach(q=>{ if(!q.source) q.source = f.source || "Sameh Allithy Target"; }); return data; })
+    )).then(parts=>{
+      const all = [].concat(...parts);
+      unitCache[u.n] = (unitCache[u.n]||[]).concat(all);
+      return all;
+    }).catch(err=>{ console.error("Failed to load", s, err); delete loadedSubs[key]; return []; });
+  }
+  await loadedSubs[key];
+  return (unitCache[u.n]||[]).filter(q=>q.sub===s);
+}
+
+async function selectSub(u, sub, btnEl){
+  document.querySelectorAll(".sub-item.active").forEach(el=>el.classList.remove("active"));
+  if(btnEl) btnEl.classList.add("active");
+  activeSubKey = u.n + "::" + sub;
+  openUnits.add(u.n); if(u.group) openGroups.add(u.group);
+  reviewMode = false;
+  Object.values(REVIEW_BTN).forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove("on"); });
+  document.getElementById("main").innerHTML = `<div class="card empty"><p><span class="spinner"></span>Loading questions...</p></div>`;
+  const qs = await ensureSubLoaded(u, sub);
+  buildTree();
+  subAll = qs;
+  if(globalSourceFilter !== "all"){
+    // global Source filter is active: keep only that source so counts/tabs match the tree
+    subAll = qs.filter(x => (x.source||"Sameh Allithy Target") === globalSourceFilter);
+    srcFilter = globalSourceFilter;
+  } else {
+    const srcs = [...new Set(qs.map(x=>x.source||"Sameh Allithy Target"))];
+    srcFilter = srcs[0] || "Sameh Allithy Target";
+  }
+  activeSet = subAll.filter(q => (q.source || "Sameh Allithy Target") === srcFilter);
+  current = activeSet.length ? activeSet[0].id : null;
+  render();
+}
+function setSrc(v){
+  if(reviewMode) return;
+  srcFilter = v;
+  activeSet = subAll.filter(q => (q.source || "Sameh Allithy Target") === v);
+  current = activeSet.length ? activeSet[0].id : null;
+  render();
+}
+
+function isDone(id){ const a=answered[id]; return !!(a && a.choice!=null); }
+function statusOf(q){
+  if(!isDone(q.id)) return "not";
+  return answered[q.id].correct ? "correct" : "wrong";
+}
+
+function render(){
+  const main = document.getElementById("main");
+  if(!activeSet.length){
+    main.innerHTML = `<div class="card empty">
+      <p>Select a <b>sub-unit</b> from the panel to view its questions.</p>
+      <p>Note: only units with a data file populated are available so far &mdash; more units will be added as their source PDFs are processed.</p>
+    </div>`;
+    updateProgress();
+    return;
+  }
+  const q = activeSet.find(x=>x.id===current) || activeSet[0];
+  current = q.id;
+  if(!isDone(q.id)) timerSync(q.id);
+  const idx = activeSet.indexOf(q);
+
+  const total = activeSet.length, notAtt = activeSet.filter(x=>!isDone(x.id)).length;
+  const corr = activeSet.filter(x=>isDone(x.id) && answered[x.id].correct).length;
+  const wrong = activeSet.filter(x=>isDone(x.id) && !answered[x.id].correct).length;
+  const flg = activeSet.filter(x=>flagged[x.id]).length;
+
+  let grid = "";
+  activeSet.forEach((x,i)=>{
+    const st = statusOf(x);
+    grid += `<button class="qbtn ${st!=="not"?st:""} ${x.id===q.id?"current":""} ${flagged[x.id]?"flagged":""} ${hasNote(x.id)?"has-note":""}" data-qid="${x.id}" onclick="jumpTo(${x.id})">${i+1}</button>`;
+  });
+
+  const isAns = isDone(q.id);
+  const letters = ["A","B","C","D"];
+  let optsHtml = "";
+  letters.forEach((letter,i)=>{
+    let cls = "opt";
+    if(isAns){
+      if(i===q.correct) cls += " correct";
+      else if(i===answered[q.id].choice) cls += " wrong";
+    } else if(triedWrong[q.id]===i) cls += " tried";
+    optsHtml += `<div class="${cls}" onclick="pick(${q.id},${i})">${letter}</div>`;
+  });
+
+  let bannerHtml = "";
+  if(isAns){
+    const userLetter = letters[answered[q.id].choice];
+    const correctLetter = letters[q.correct];
+    if(answered[q.id].correct){
+      bannerHtml = `<div class="result-banner show correct">&#10003; Correct!${timeTag(answered[q.id])}</div>`;
+    }else{
+      bannerHtml = `<div class="result-banner show wrong">&#10007; Incorrect. Your answer: ${userLetter} &middot; Correct answer: ${correctLetter}${timeTag(answered[q.id])}</div>`;
+    }
+  }
+
+  let srcBar = "";
+  if(!reviewMode){
+    const srcs = [...new Set(subAll.map(x=>x.source||"Sameh Allithy Target"))];
+    if(srcs.length > 1){
+      const cls = (v)=> v==="Sameh Allithy Target" ? "srcbtn-target" : "srcbtn-mcq";
+      const opt = (v,n)=>`<button class="srcbtn ${cls(v)} ${srcFilter===v?"on":""}" onclick="setSrc('${v}')">${v} (${n})</button>`;
+      srcBar = `<div class="srcbar"><span>Source:</span>` +
+        srcs.map(x=>opt(x,subAll.filter(y=>(y.source||"Sameh Allithy Target")===x).length)).join("") + `</div>`;
+    }
+  }
+  const linksHtml = (q.links||[]).map(l=>`<a href="${l.url}" target="_blank" rel="noopener">&#9654; ${l.label}</a>`).join("");
+  const srcName = q.source || "Sameh Allithy Target";
+  const pageBadges = `<span class="tag src ${srcName==="Sameh Allithy Target"?"src-target":"src-mcq"}">${srcName}</span>` +
+    (srcName==="Sameh Allithy Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : `<span class="tag">Book p.${q.qpage}</span>`) +
+    ((q.links&&q.links[0]) ? `<a class="tag link" href="${q.links[0].url}" target="_blank" rel="noopener">&#9654; Video Explanation</a>` : "");
+
+  main.innerHTML = `
+  <div class="card">
+    <div class="nav-row">
+      <div class="filters">
+        ${reviewMode ? `<span style="color:var(--flag);font-weight:700">${REVIEW_LABEL[reviewKind]||"Review"}</span>` : ''}
+        <span>All ${total}</span><span>Not Attempted ${notAtt}</span>
+        <span>Correct ${corr}</span><span>Wrong ${wrong}</span><span>Flagged ${flg}</span>
+      </div>
+      <div style="font-size:.8rem;color:var(--muted)">Question ${idx+1} of ${total}</div>
+    </div>
+    ${srcBar}
+    <div class="qgrid">${grid}</div>
+    ${attachPanelHtml()}
+  </div>
+
+  <div class="card">
+    <div class="qhead">
+      <h3>Question ${idx+1} of ${total}</h3>
+      <div class="tools">
+        <button class="${flagged[q.id]?'flag-on':''}" onclick="toggleFlag(${q.id})">${flagged[q.id]?'&#9733; Flagged':'&#9734; Flag'}</button>
+        ${!reviewMode ? `<button class="cert-btn" onclick="openCertificate(${q.unit})">&#127891; Unit Certificate</button>` : ''}
+      </div>
+    </div>
+    <div class="tag-row">${pageBadges}</div>
+    <div class="qimg-wrap"><img src="${q.image}" alt="Question text (cropped from source PDF)"></div>
+    <div class="pick-label">Select your answer</div>
+    <div class="options">${optsHtml}</div>
+    ${bannerHtml}
+    ${aiPanelHtml(q)}
+    <div class="explain-title ${isAns?'show':''}">Explanation &mdash; why each answer is right or wrong</div>
+    <div class="explain ${isAns?'show':''}">
+      <div class="qimg-wrap"><img src="${q.explainImage}" alt="Explanation (cropped from source PDF)"></div>
+    </div>
+    ${linksHtml ? `<div class="source-box"><h4>From the source file</h4>${linksHtml}</div>` : ""}
+    <div class="source-box">
+      <h4>My notes for this question</h4>
+      <textarea class="notes" placeholder="Write your own notes, formulas, mistakes to remember..." onchange="saveNote(${q.id}, this.value)">${(answered[q.id] && answered[q.id].note) || ""}</textarea>
+    </div>
+    <div class="footer-nav">
+      <button class="secondary" onclick="step(-1)" ${idx<=0?"disabled":""}>&larr; Previous</button>
+      <div class="right">
+        <button class="secondary" onclick="retry(${q.id})">&#8635; Retry</button>
+        <button onclick="step(1)" ${idx>=total-1?"disabled":""}>Next &rarr;</button>
+      </div>
+    </div>
+  </div>`;
+  updateProgress();
+  attachAfterRender();
+  aiAfterRender();
+}
+
+function pick(qid, choiceIdx){
+  if(isDone(qid)) return;
+  const q = activeSet.find(x=>x.id===qid);
+  // First wrong attempt: warn and allow one more try (not recorded)
+  if(q && choiceIdx!==q.correct && !(qid in triedWrong)){
+    triedWrong[qid] = choiceIdx;
+    render(); showRetryPopup();
+    return;
+  }
+  if(triedWrong[qid]===choiceIdx) return;
+  const note = (answered[qid] && answered[qid].note) || "";
+  const secs = (qTimer.id===qid) ? Math.min(timerElapsed(), TIME_CAP) : 0;
+  answered[qid] = {choice:choiceIdx, correct: choiceIdx===q.correct, note, at: new Date().toISOString()};
+  if(secs>0) answered[qid].time = secs;
+  persist(); render();
+}
+function retry(qid){
+  delete answered[qid]; delete triedWrong[qid];
+  persist(); render();
+}
+function saveNote(qid, val){
+  if(!answered[qid]) answered[qid] = {choice:null, correct:false, note:val};
+  else answered[qid].note = val;
+  const nb=document.querySelector('.qbtn[data-qid="'+qid+'"]'); if(nb) nb.classList.toggle("has-note", hasNote(qid));
+  persist();
+}
+function toggleFlag(qid){ flagged[qid] = !flagged[qid]; persist(); render(); }
+function jumpTo(qid){ current = qid; render(); }
+function step(dir){
+  const idx = activeSet.findIndex(x=>x.id===current);
+  const next = activeSet[idx+dir];
+  if(next){ current = next.id; render(); }
+}
+function updateProgress(){
+  const doneQ = Object.keys(answered).filter(isDone).length;
+  document.getElementById("progressLine").textContent = `${doneQ} questions answered so far`;
+}
+
+let reviewKind = "wrong";
+const REVIEW_LABEL = {wrong:"Mistake Review Mode", flagged:"Flagged Questions", comment:"Questions with Comments"};
+const REVIEW_BTN = {wrong:"wrongBtn", flagged:"flaggedBtn", comment:"commentBtn"};
+function reviewTest(kind, id){
+  if(kind==="flagged") return !!flagged[id];
+  if(kind==="comment") return hasNote(id);
+  return isDone(id) && !answered[id].correct;
+}
+function reviewWrong(){ return reviewList("wrong"); }
+async function reviewList(kind){
+  reviewMode = true; reviewKind = kind;
+  activeSubKey = null;
+  Object.values(REVIEW_BTN).forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove("on"); });
+  const bt = document.getElementById(REVIEW_BTN[kind]); if(bt) bt.classList.add("on");
+  document.querySelectorAll(".sub-item.active").forEach(el=>el.classList.remove("active"));
+  document.getElementById("main").innerHTML = `<div class="card empty"><p><span class="spinner"></span>Loading all units...</p></div>`;
+  await loadManifest();
+  const jobs = [];
+  UNITS.forEach(u=>(u.subs||[]).concat(extraSubs(u)).forEach(sb=>{
+    if(subIdsFiltered(u,sb).some(id=>reviewTest(kind,id))) jobs.push(ensureSubLoaded(u,sb));
+  }));
+  await Promise.all(jobs);
+  buildTree();
+  const all = Object.values(unitCache).flat();
+  const seen = new Set();
+  activeSet = all.filter(q => {
+    if(seen.has(q.id)) return false; seen.add(q.id);
+    if(globalSourceFilter!=="all" && (q.source||"Sameh Allithy Target")!==globalSourceFilter) return false;
+    return reviewTest(kind, q.id);
+  });
+  current = activeSet.length ? activeSet[0].id : null;
+  if(!activeSet.length){
+    const msg = {wrong:"No mistakes to review.", flagged:"No flagged questions.", comment:"No questions have comments yet."}[kind];
+    document.getElementById("main").innerHTML = `<div class="card empty"><p>${msg}</p></div>`;
+    updateProgress(); return;
+  }
+  render();
+}
+function clearReview(){
+  reviewMode = false;
+  Object.values(REVIEW_BTN).forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove("on"); });
+  activeSet = [];
+  current = null;
+  render();
+}
+
+function openCertificate(unitN){
+  const u = UNITS.find(x=>x.n===unitN);
+  const ids = u ? unitIds(u) : [];
+  if(ids.length === 0){ alert("This unit has no questions loaded yet."); return; }
+  const attempted = ids.filter(isDone);
+  if(attempted.length < ids.length){
+    alert("Complete all questions in this unit first (" + attempted.length + " of " + ids.length + ") before generating a certificate.");
+    return;
+  }
+  const correct = ids.filter(id=>answered[id].correct).length;
+  const unitQs = ids;
+  const pct = Math.round((correct/unitQs.length)*100);
+  const today = new Date().toLocaleDateString('en-US');
+  document.getElementById("certSheet").innerHTML = `
+    <div class="kicker">CMA PART 1 &middot; FINANCIAL PLANNING, PERFORMANCE, AND ANALYTICS</div>
+    <h1>Certificate of Completion</h1>
+    <div class="body">This certifies that</div>
+    <div class="name">${(myProfile && myProfile.display_name) || userEmail}</div>
+    <div class="body">has successfully completed the questions for<br><b>${u ? (u.bare ? u.title : "Unit "+unitN+": "+u.title) : "Unit "+unitN}</b></div>
+    <div class="score">${correct} / ${unitQs.length} &mdash; ${pct}%</div>
+    <div class="foot"><span>Date: ${today}</span><span>Nonprofit Educational Platform</span></div>
+  `;
+  document.getElementById("certModal").classList.add("open");
+}
+function closeCert(){ document.getElementById("certModal").classList.remove("open"); }
+
+
+/* ===== Note tooltip on question-number hover ===== */
+function hasNote(id){ return !!(answered[id] && answered[id].note && String(answered[id].note).trim()); }
+(function(){
+  const tip=document.createElement("div"); tip.id="noteTip"; document.body.appendChild(tip);
+  function show(btn){
+    const id=+btn.dataset.qid; if(!hasNote(id)){ tip.style.display="none"; return; }
+    tip.innerHTML="<b>Question "+btn.textContent+" \u2014 My note</b>";
+    const t=document.createElement("div"); t.dir="auto"; t.textContent=answered[id].note; tip.appendChild(t);
+    tip.style.display="block";
+    const r=btn.getBoundingClientRect(), w=tip.offsetWidth, h=tip.offsetHeight;
+    let x=Math.min(Math.max(8,r.left+r.width/2-w/2), window.innerWidth-w-8);
+    let y=r.top-h-8; if(y<8) y=r.bottom+8;
+    tip.style.left=x+"px"; tip.style.top=y+"px";
+  }
+  document.addEventListener("mouseover",e=>{ const b=e.target.closest&&e.target.closest(".qbtn"); if(b) show(b); });
+  document.addEventListener("mouseout",e=>{ const b=e.target.closest&&e.target.closest(".qbtn"); if(b) tip.style.display="none"; });
+  document.addEventListener("scroll",()=>{tip.style.display="none"},true);
+})();
+
+
+/* ===== Incorrect answer -> warning popup + one more chance ===== */
+let triedWrong = {};
+function showRetryPopup(){
+  closeRetryPopup();
+  const v=document.createElement("div"); v.id="retryVeil";
+  v.innerHTML='<div class="box" role="alertdialog" aria-modal="true"><div style="font-size:2rem">&#9888;&#65039;</div><h2>Incorrect answer</h2><p>That is not the correct answer.<br>You have <b>one more chance</b> &mdash; think again and choose another option.</p><button id="retryBtn">Try again</button></div>';
+  v.addEventListener("click",e=>{ if(e.target===v) closeRetryPopup(); });
+  document.body.appendChild(v);
+  const rb=document.getElementById("retryBtn"); rb.onclick=closeRetryPopup; rb.focus();
+}
+function closeRetryPopup(){ const v=document.getElementById("retryVeil"); if(v) v.remove(); }
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"||e.key==="Enter") closeRetryPopup(); });
+
+/* ===== Export / Import solving history ===== */
+function exportProgress(){
+  const data={app:"cma-part1",email:userEmail,exportedAt:new Date().toISOString(),answered:answered,flagged:flagged};
+  const a=document.createElement("a");
+  a.href="data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(data));
+  a.download="cma-history-"+(userEmail||"user").replace(/[^a-z0-9@._-]/gi,"_")+".json";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function importProgress(inp){
+  const f=inp.files&&inp.files[0]; inp.value=""; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=function(){
+    let src;
+    try{ src=JSON.parse(rd.result); }catch(e){ alert("Invalid file: it is not a valid JSON file."); return; }
+    if(src&&src.state) src=src.state;
+    const ia=(src&&src.answered&&typeof src.answered==="object")?src.answered:null;
+    const iflag=(src&&src.flagged&&typeof src.flagged==="object")?src.flagged:{};
+    if(!ia){ alert("Invalid file: no solving history (\"answered\") found in it."); return; }
+    let add=0,keep=0,bad=0,noteOnly=0; const merged={};
+    Object.keys(ia).forEach(k=>{
+      const id=String(k), e=ia[k];
+      if(!/^\d+$/.test(id)||!e||typeof e!=="object"){ bad++; return; }
+      const ch=(e.choice===null||e.choice===undefined)?null:Number(e.choice);
+      if(ch!==null&&!(Number.isInteger(ch)&&ch>=0&&ch<=3)){ bad++; return; }
+      const cur=answered[id];
+      if(cur&&cur.choice!=null){ keep++; return; }          // already solved here: keep existing answer
+      if(ch===null){ if(typeof e.note==="string"&&e.note.trim()&&!(cur&&cur.note)){ merged[id]={choice:null,correct:false,note:e.note}; noteOnly++; } return; }
+      merged[id]={choice:ch,correct:!!e.correct,note:(cur&&cur.note)||(typeof e.note==="string"?e.note:""),at:e.at||undefined, time:(Number.isFinite(+e.time)&&+e.time>0)?Math.round(+e.time):undefined};
+      add++;
+    });
+    if(!add&&!noteOnly){ alert("Nothing new to import.\n\nAlready solved here (kept): "+keep+"\nInvalid entries: "+bad); return; }
+    if(!confirm("Import solving history?\n\nNew answers to add: "+add+(noteOnly?"\nNotes to add: "+noteOnly:"")+"\nAlready solved here (kept as is): "+keep+(bad?"\nSkipped invalid entries: "+bad:"")+"\n\nYour existing answers will not be overwritten.")) return;
+    Object.keys(merged).forEach(id=>{ answered[id]=Object.assign({},answered[id]||{},merged[id]); });
+    Object.keys(iflag).forEach(id=>{ if(/^\d+$/.test(id)&&iflag[id]&&!(id in flagged)) flagged[id]=true; });
+    persist(); render();
+    alert("Done. "+add+" answers imported.");
+  };
+  rd.readAsText(f);
+}
+
+
+
+/* ===== Solve time tracking + study-time stats ===== */
+const TIME_CAP = 900;                       // seconds; one question counts at most 15 min (idle protection)
+let qTimer = {id:null, acc:0, since:null};
+function timerSync(id){
+  if(qTimer.id!==id) qTimer = {id:id, acc:0, since:document.hidden?null:Date.now()};
+}
+function timerElapsed(){
+  let t = qTimer.acc; if(qTimer.since) t += Date.now()-qTimer.since;
+  return Math.round(t/1000);
+}
+document.addEventListener("visibilitychange", ()=>{
+  if(!qTimer.id) return;
+  if(document.hidden){ if(qTimer.since){ qTimer.acc += Date.now()-qTimer.since; qTimer.since=null; } }
+  else if(!qTimer.since){ qTimer.since = Date.now(); }
+});
+function fmtDur(sec){
+  sec = Math.round(sec||0);
+  if(sec<=0) return "0s";
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+  if(h) return h+"h "+String(m).padStart(2,"0")+"m";
+  if(m) return m+"m "+String(s).padStart(2,"0")+"s";
+  return s+"s";
+}
+function timeTag(a){ return (a && a.time) ? ` &middot; &#9201; ${fmtDur(a.time)}` : ""; }
+function timeStats(hours){
+  const ids = new Set(UNITS.flatMap(u=>unitIdsFiltered(u)));
+  const cutoff = hours ? Date.now()-hours*3600*1000 : 0;
+  let n=0, timed=0, secs=0, corr=0;
+  Object.keys(answered).forEach(id=>{
+    const a = answered[id];
+    if(!ids.has(+id) || !a || a.choice==null) return;
+    const t = a.at ? Date.parse(a.at) : NaN;
+    if(hours && !(t>=cutoff)) return;
+    n++; if(a.correct) corr++;
+    if(a.time>0){ timed++; secs += a.time; }
+  });
+  return {n, timed, secs, avg: timed ? secs/timed : 0, acc: n ? Math.round(corr/n*100) : 0};
+}
+function timeSectionHtml(){
+  const d2 = timeStats(48), all = timeStats(0);
+  const card = (v,l)=>`<div class="dash-card"><div class="num">${v}</div><div class="lbl">${l}</div></div>`;
+  // last 7 days activity
+  const days = [];
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-i); days.push({d, n:0}); }
+  Object.values(answered).forEach(a=>{
+    const t = a && a.at ? new Date(a.at) : null; if(!t || a.choice==null) return;
+    const day = new Date(t); day.setHours(0,0,0,0);
+    const slot = days.find(x=>x.d.getTime()===day.getTime()); if(slot) slot.n++;
+  });
+  const mx = Math.max(1, ...days.map(x=>x.n));
+  const bars = days.map(x=>`<div title="${x.d.toLocaleDateString()}: ${x.n}"><span>${x.n||""}</span><i style="height:${Math.round(x.n/mx*44)+2}px"></i><span>${x.d.toLocaleDateString("en-US",{weekday:"short"})}</span></div>`).join("");
+  return `
+    <div class="dash-section-title">Study Time &mdash; Last 48 Hours</div>
+    <div class="dash-cards">
+      ${card(d2.n, "Solved (48h)")}
+      ${card(fmtDur(d2.secs), "Total Time (48h)")}
+      ${card(d2.timed ? fmtDur(d2.avg) : "&ndash;", "Avg / Question (48h)")}
+      ${card(d2.n ? d2.acc+"%" : "&ndash;", "Accuracy (48h)")}
+    </div>
+    <div class="dash-cards">
+      ${card(fmtDur(all.secs), "Total Time (all)")}
+      ${card(all.timed ? fmtDur(all.avg) : "&ndash;", "Avg / Question (all)")}
+    </div>
+    <div class="time-note">Timing is measured while this tab is open and visible (max 15 min per question). Answers saved before timing was added have no time.</div>
+    <div class="dash-section-title">Activity &mdash; Last 7 Days</div>
+    <div class="act-bars">${bars}</div>`;
+}
+
+
+/* ===== Admin: study time per day, last 7 days (minutes) ===== */
+let weeklyCache = null;
+function dayKeyOf(d){ return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function weeklyTime(students){
+  const days = [];
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-i); days.push(d); }
+  const idx = {}; days.forEach((d,i)=>idx[dayKeyOf(d)]=i);
+  const rows = students.map(st=>{
+    const secs = new Array(7).fill(0), qn = new Array(7).fill(0);
+    Object.values(st.answeredObj||{}).forEach(a=>{
+      if(!a || a.choice==null || !a.at) return;
+      const t = new Date(a.at); if(isNaN(t)) return;
+      const i = idx[dayKeyOf(t)]; if(i===undefined) return;
+      qn[i]++; if(a.time>0) secs[i]+=a.time;
+    });
+    return {st, secs, qn, total:secs.reduce((x,y)=>x+y,0), solved:qn.reduce((x,y)=>x+y,0)};
+  });
+  const sum = (arr)=>arr.reduce((x,y)=>x+y,0);
+  return {days, rows,
+    dayTot: days.map((_,i)=>sum(rows.map(r=>r.secs[i]))),
+    dayQ:   days.map((_,i)=>sum(rows.map(r=>r.qn[i]))),
+    dayActive: days.map((_,i)=>rows.filter(r=>r.qn[i]>0).length)};
+}
+function fmtMin(sec){ if(!sec) return "0"; const m=sec/60; return m<1 ? "<1" : String(Math.round(m)); }
+function weeklyTimeHtml(students){
+  const w = weeklyCache = weeklyTime(students||[]);
+  const totSecs = w.dayTot.reduce((x,y)=>x+y,0), totQ = w.dayQ.reduce((x,y)=>x+y,0);
+  const timedAny = totSecs>0;
+  const dn = (d)=>d.toLocaleDateString("en-US",{weekday:"short"})+" "+d.getDate();
+  const mx = Math.max(1, ...w.dayTot);
+  const bars = w.days.map((d,i)=>`<div title="${d.toLocaleDateString()}: ${Math.round(w.dayTot[i]/60)} min, ${w.dayQ[i]} questions, ${w.dayActive[i]} active"><span>${w.dayTot[i] ? fmtMin(w.dayTot[i]) : ""}</span><i style="height:${Math.round(w.dayTot[i]/mx*52)+2}px"></i><span>${dn(d)}</span></div>`).join("");
+  const rows = w.rows.filter(r=>r.solved>0).sort((a,b)=>b.total-a.total);
+  const idle = w.rows.length - rows.length;
+  const body = rows.map(r=>`<tr><td>${r.st.name ? r.st.name : r.st.email}${adminTag(r.st)}</td>${r.secs.map((x,i)=>`<td title="${r.qn[i]} questions">${r.qn[i] ? fmtMin(x) : "&ndash;"}</td>`).join("")}<td><b>${fmtMin(r.total)}</b></td></tr>`).join("")
+    || `<tr><td colspan="9" style="text-align:center;color:var(--muted)">No activity in the last 7 days</td></tr>`;
+  const totRow = `<tr style="background:var(--bg);font-weight:700"><td>Total (all users)</td>${w.dayTot.map(x=>`<td>${fmtMin(x)}</td>`).join("")}<td>${fmtMin(totSecs)}</td></tr>`;
+  return `
+    <div class="dash-section-title">Study Time per Day &mdash; Last 7 Days (minutes)</div>
+    <div class="dash-cards">
+      <div class="dash-card"><div class="num">${fmtMin(totSecs)}</div><div class="lbl">Total minutes (7 days)</div></div>
+      <div class="dash-card"><div class="num">${totQ}</div><div class="lbl">Questions solved (7 days)</div></div>
+      <div class="dash-card"><div class="num">${totSecs && totQ ? fmtDur(totSecs/Math.max(1,w.rows.reduce((a,r)=>a+r.qn.reduce((x,y)=>x+y,0),0))) : "&ndash;"}</div><div class="lbl">Avg time / question</div></div>
+      <div class="dash-card"><div class="num">${w.rows.filter(r=>r.solved>0).length}</div><div class="lbl">Active users</div></div>
+    </div>
+    <div class="act-bars" style="height:80px">${bars}</div>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>User</th>${w.days.map(d=>`<th>${dn(d)}</th>`).join("")}<th>Total</th></tr></thead><tbody>${body}${totRow}</tbody></table></div>
+    <div class="time-note" style="margin-top:-12px">${timedAny ? "" : "No timed answers found yet: timing is recorded only for answers solved after this update. "}Minutes are counted per day (admin's local date) from the time each answer was solved; ${idle} student(s) had no activity. <a href="#" onclick="exportWeeklyTimeCsv();return false">Export CSV</a></div>`;
+}
+function exportWeeklyTimeCsv(){
+  const w = weeklyCache; if(!w) return;
+  const head = ["Name","Email"].concat(w.days.map(d=>d.toISOString().slice(0,10)+" (min)"), ["Total (min)","Questions"]);
+  const rows = w.rows.filter(r=>r.solved>0).sort((a,b)=>b.total-a.total).map(r=>[r.st.name||"", r.st.email||""].concat(r.secs.map(x=>(x/60).toFixed(1)), [(r.total/60).toFixed(1), r.solved]));
+  const csv = "\ufeff"+[head].concat(rows).map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+  const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+  a.download = "study-time-last-7-days.csv"; document.body.appendChild(a); a.click(); a.remove();
+}
+
+
+/* ===== Attachments (files shared / private per sub-unit) ===== */
+const ATT_MAX = 20*1024*1024;
+const ATT_EXT = ["pdf","doc","docx","xls","xlsx","ppt","pptx","txt","csv","epub","zip","png","jpg","jpeg","webp"];
+let attachOpen = false, attachCache = {}, attachKeyLoaded = null, attMsg = {t:"", err:false};
+function attEsc(t){ return String(t==null?"":t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function attFmtSize(b){ return b>=1048576 ? (b/1048576).toFixed(1)+" MB" : Math.max(1,Math.round(b/1024))+" KB"; }
+function attIcon(name){
+  const e=(name.split(".").pop()||"").toLowerCase();
+  if(e==="pdf") return "&#128213;"; if(["doc","docx","txt"].includes(e)) return "&#128196;";
+  if(["xls","xlsx","csv"].includes(e)) return "&#128202;"; if(["ppt","pptx"].includes(e)) return "&#128191;";
+  if(["png","jpg","jpeg","webp"].includes(e)) return "&#128247;"; if(e==="epub") return "&#128218;"; return "&#128206;";
+}
+function attSub(){ if(!activeSubKey) return null; const i=activeSubKey.indexOf("::"); return {n:Number(activeSubKey.slice(0,i)), sub:activeSubKey.slice(i+2)}; }
+function attIsAdmin(){ return !!(myProfile && myProfile.role==="admin"); }
+function attStatus(t, err){
+  attMsg = {t:t||"", err:!!err};
+  const el=document.getElementById("attachStatus"); if(el){ el.textContent=attMsg.t; el.className="attach-status"+(attMsg.err?" err":""); }
+}
+function attachPanelHtml(){
+  if(!activeSubKey) return "";
+  return `
+    <details class="attach" id="attachBox" ${attachOpen?"open":""} ontoggle="attachOpen=this.open">
+      <summary>&#128206; Attachments <span class="cnt" id="attachCount"></span></summary>
+      <div class="attach-body">
+        <div class="attach-note">Upload a book or file for this sub-unit (max 20 MB: PDF, Word, Excel, PowerPoint, text, EPUB, ZIP, images).
+          <b>Shared</b> files are visible to all students; <b>private</b> files are visible only to you and the platform admin.</div>
+        <div class="attach-form">
+          <input type="file" id="attachFile" accept=".${ATT_EXT.join(",.")}">
+          <input type="text" id="attachDesc" maxlength="120" placeholder="Short description (optional)">
+          <label><input type="checkbox" id="attachShare"> Share with other students</label>
+          <button class="att-up" id="attachUpBtn" onclick="uploadAttachment()">Upload</button>
+        </div>
+        <div class="attach-status${attMsg.err?" err":""}" id="attachStatus">${attEsc(attMsg.t)}</div>
+        <div id="attachList"></div>
+      </div>
+    </details>`;
+}
+function attachAfterRender(){
+  if(!document.getElementById("attachBox")) return;
+  if(attachKeyLoaded!==activeSubKey){ attachKeyLoaded=activeSubKey; attMsg={t:"",err:false}; attachLoad(); }
+  else attachPaint();
+}
+async function attachLoad(){
+  const k=attSub(); if(!k) return; const key=activeSubKey;
+  const { data, error } = await sb.from("attachments").select("*").eq("unit_n",k.n).eq("sub",k.sub).order("created_at",{ascending:false});
+  if(error){
+    attStatus(/relation|does not exist|schema cache/i.test(error.message) ? "Attachments are not set up yet (run supabase-attachments.sql)." : "Could not load attachments: "+error.message, true);
+    return;
+  }
+  attachCache[key]=data||[];
+  if(key===activeSubKey) attachPaint();
+}
+function attItem(r, mine){
+  const when = new Date(r.created_at).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  const canDel = mine || attIsAdmin();
+  return `<div class="att-item"><span class="att-ic">${attIcon(r.file_name)}</span>
+    <div class="att-main"><div class="att-name">${attEsc(r.file_name)}</div>
+      <div class="att-meta">${attFmtSize(r.size_bytes)} &middot; ${attEsc(r.owner_name||"Student")} &middot; ${when}${r.description?" &middot; "+attEsc(r.description):""}</div></div>
+    <div class="att-act">${/\.pdf$/i.test(r.file_name)?`<button class="att-view" onclick="attView('${r.id}')">&#128065; View</button>`:""}<button onclick="attDownload('${r.id}')">&#11015; Download</button>
+      ${mine?`<label><input type="checkbox" ${r.shared?"checked":""} onchange="attToggle('${r.id}',this.checked)"> Shared</label>`:""}
+      ${canDel?`<button class="att-del" onclick="attDelete('${r.id}')">Delete</button>`:""}</div></div>`;
+}
+function attachPaint(){
+  const rows = attachCache[activeSubKey]||[];
+  const cnt=document.getElementById("attachCount"); if(cnt) cnt.textContent = rows.length ? "("+rows.length+")" : "";
+  const box=document.getElementById("attachList"); if(!box) return;
+  const shared = rows.filter(r=>r.shared);
+  const mine = rows.filter(r=>!r.shared && r.owner_id===userId);
+  const others = attIsAdmin() ? rows.filter(r=>!r.shared && r.owner_id!==userId) : [];   // admins only (server RLS enforces this too)
+  let h="";
+  if(shared.length) h += `<div class="att-grp">Shared with everyone (${shared.length})</div>` + shared.map(r=>attItem(r, r.owner_id===userId)).join("");
+  if(mine.length)   h += `<div class="att-grp">My private files (${mine.length})</div>` + mine.map(r=>attItem(r,true)).join("");
+  if(others.length) h += `<div class="att-grp">Private files of other students (admin view)</div>` + others.map(r=>attItem(r,false)).join("");
+  box.innerHTML = h || `<div class="attach-note">No files for this sub-unit yet.</div>`;
+}
+async function uploadAttachment(){
+  const k=attSub(); if(!k) return;
+  const f=(document.getElementById("attachFile").files||[])[0];
+  if(!f){ attStatus("Choose a file first.", true); return; }
+  if(f.size===0){ attStatus("This file is empty.", true); return; }
+  if(f.size>ATT_MAX){ attStatus("File is too large ("+attFmtSize(f.size)+"). Maximum is 20 MB.", true); return; }
+  const ext=(f.name.split(".").pop()||"").toLowerCase();
+  if(!ATT_EXT.includes(ext)){ attStatus("This file type is not allowed. Allowed: "+ATT_EXT.join(", "), true); return; }
+  const share=document.getElementById("attachShare").checked;
+  const desc=document.getElementById("attachDesc").value.trim().slice(0,120);
+  const btn=document.getElementById("attachUpBtn"); btn.disabled=true;
+  attStatus("Uploading "+f.name+" ("+attFmtSize(f.size)+")... please wait", false);
+  const id=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2);
+  const path=userId+"/"+id+"-"+f.name.replace(/[^\w.\-]+/g,"_").slice(-80);
+  try{
+    const up=await sb.storage.from("attachments").upload(path, f, {contentType:f.type||undefined, upsert:false});
+    if(up.error) throw up.error;
+    const ins=await sb.from("attachments").insert({unit_n:k.n, sub:k.sub, file_name:f.name.slice(0,200), description:desc||null,
+      size_bytes:f.size, mime_type:f.type||null, storage_path:path, shared:share,
+      owner_name:(myProfile&&myProfile.display_name)||userEmail});
+    if(ins.error){ await sb.storage.from("attachments").remove([path]); throw ins.error; }
+    const fi=document.getElementById("attachFile"); if(fi) fi.value="";
+    const de=document.getElementById("attachDesc"); if(de) de.value="";
+    const sh=document.getElementById("attachShare"); if(sh) sh.checked=false;
+    attStatus("Uploaded \u2713"+(share?" (shared with all students)":" (private)"), false);
+    await attachLoad();
+  }catch(e){ attStatus("Upload failed: "+(e.message||e), true); }
+  const b2=document.getElementById("attachUpBtn"); if(b2) b2.disabled=false;
+}
+async function attDownload(id){
+  const r=(attachCache[activeSubKey]||[]).find(x=>x.id===id); if(!r) return;
+  const { data, error } = await sb.storage.from("attachments").createSignedUrl(r.storage_path, 60, {download:r.file_name});
+  if(error){ attStatus("Could not open the file: "+error.message, true); return; }
+  const a=document.createElement("a"); a.href=data.signedUrl; a.rel="noopener"; document.body.appendChild(a); a.click(); a.remove();
+}
+async function attToggle(id, on){
+  const { error } = await sb.from("attachments").update({shared:!!on}).eq("id",id);
+  if(error) attStatus("Could not change sharing: "+error.message, true); else attStatus(on?"Now shared with all students.":"Now private.", false);
+  attachLoad();
+}
+async function attDelete(id){
+  const r=(attachCache[activeSubKey]||[]).find(x=>x.id===id); if(!r) return;
+  if(!confirm("Delete \""+r.file_name+"\"? This cannot be undone.")) return;
+  const rm=await sb.storage.from("attachments").remove([r.storage_path]);
+  if(rm.error){ attStatus("Could not delete the file: "+rm.error.message, true); return; }
+  const { error } = await sb.from("attachments").delete().eq("id",id);
+  if(error){ attStatus("Could not delete: "+error.message, true); return; }
+  attStatus("Deleted.", false); attachLoad();
+}
+
+
+/* ===== In-page PDF viewer (no new tab, no download button) ===== */
+const PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+const PDFJS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+let pdfLibPromise = null, pdfV = null;
+function loadPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(!pdfLibPromise) pdfLibPromise = new Promise((res,rej)=>{
+    const sc = document.createElement("script"); sc.src = PDFJS_URL;
+    sc.onload = ()=>{ window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER; res(window.pdfjsLib); };
+    sc.onerror = ()=>{ pdfLibPromise = null; rej(new Error("Could not load the PDF viewer. Check your connection.")); };
+    document.head.appendChild(sc);
+  });
+  return pdfLibPromise;
+}
+async function attView(id){
+  const r = (attachCache[activeSubKey]||[]).find(x=>x.id===id); if(!r) return;
+  closePdfViewer();
+  const ov = document.createElement("div"); ov.id = "pdfOverlay";
+  ov.innerHTML = `<div class="pdf-bar"><span class="pdf-title">${attEsc(r.file_name)}</span><span id="pdfPageInfo"></span>
+      <button onclick="pdfZoom(-0.2)" title="Zoom out">&minus;</button><button onclick="pdfZoom(0.2)" title="Zoom in">+</button>
+      <button onclick="pdfZoom(0)" title="Fit width">Fit</button><button onclick="closePdfViewer()">&#10005; Close</button></div>
+    <div class="pdf-scroll" id="pdfScroll"><div class="pdf-msg">Loading...</div></div>`;
+  ov.addEventListener("contextmenu", e=>e.preventDefault());
+  document.body.appendChild(ov);
+  const scroll = document.getElementById("pdfScroll");
+  try{
+    const sg = await sb.storage.from("attachments").createSignedUrl(r.storage_path, 300);
+    if(sg.error) throw sg.error;
+    const [lib, resp] = await Promise.all([loadPdfJs(), fetch(sg.data.signedUrl)]);
+    if(!resp.ok) throw new Error("Could not fetch the file ("+resp.status+")");
+    const buf = await resp.arrayBuffer();
+    const doc = await lib.getDocument({data:buf}).promise;
+    if(!document.getElementById("pdfOverlay")){ doc.destroy(); return; }       // closed while loading
+    pdfV = {doc, zoom:1, obs:null};
+    await pdfBuild();
+  }catch(e){ scroll.innerHTML = `<div class="pdf-msg">Could not open this PDF: ${attEsc(e.message||e)}</div>`; }
+}
+async function pdfBuild(){
+  const v = pdfV; if(!v) return;
+  const scroll = document.getElementById("pdfScroll"); if(!scroll) return;
+  if(v.obs) v.obs.disconnect();
+  scroll.innerHTML = "";
+  const p1 = await v.doc.getPage(1), vp1 = p1.getViewport({scale:1});
+  const width = Math.max(260, Math.min(scroll.clientWidth-24, 1100)) * v.zoom;
+  const ratio = vp1.height/vp1.width;
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  const wraps = [];
+  for(let i=1;i<=v.doc.numPages;i++){
+    const w = document.createElement("div"); w.className = "pdf-page"; w.dataset.page = i;
+    w.style.width = width+"px"; w.style.height = Math.round(width*ratio)+"px";
+    scroll.appendChild(w); wraps.push(w);
+  }
+  const info = document.getElementById("pdfPageInfo");
+  const upd = ()=>{ const top = scroll.getBoundingClientRect().top+60; let cur = 1;
+    wraps.forEach((w,i)=>{ if(w.getBoundingClientRect().bottom < top) cur = i+2; });
+    if(info) info.textContent = "Page "+Math.min(cur,wraps.length)+" / "+wraps.length; };
+  scroll.onscroll = upd; upd();
+  v.obs = new IntersectionObserver(async (entries)=>{
+    for(const en of entries){
+      if(!en.isIntersecting) continue;
+      const w = en.target; if(w.dataset.done) continue; w.dataset.done = "1";
+      try{
+        const pg = await v.doc.getPage(Number(w.dataset.page));
+        const base = pg.getViewport({scale:1}), scale = width/base.width, vp = pg.getViewport({scale:scale*dpr});
+        const cv = document.createElement("canvas"); cv.width = Math.floor(vp.width); cv.height = Math.floor(vp.height);
+        await pg.render({canvasContext:cv.getContext("2d"), viewport:vp}).promise;
+        w.style.height = "auto"; w.appendChild(cv);
+      }catch(e){ w.dataset.done = ""; }
+    }
+  }, {root:scroll, rootMargin:"600px 0px"});
+  wraps.forEach(w=>v.obs.observe(w));
+}
+function pdfZoom(d){ if(!pdfV) return; pdfV.zoom = d===0 ? 1 : Math.min(3, Math.max(0.5, pdfV.zoom + d)); pdfBuild(); }
+function closePdfViewer(){
+  const ov = document.getElementById("pdfOverlay"); if(ov) ov.remove();
+  if(pdfV){ if(pdfV.obs) pdfV.obs.disconnect(); try{ pdfV.doc.destroy(); }catch(e){} pdfV = null; }
+}
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closePdfViewer(); });
+
+
+/* ===== AI Tutor (calls the Supabase Edge Function "ai-tutor") ===== */
+let aiThreads = {}, aiBusy = false, aiAskOpen = {}, aiUsedToday = null, aiLimitInfo = null, aiCountFetched = false;
+function aiEsc(t){ return String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function aiFmt(t){ return aiEsc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>"); }
+function aiRiyadhDay(){ return new Date(Date.now()+3*3600*1000).toISOString().slice(0,10); }
+function aiLeftText(){
+  if(aiLimitInfo){ return aiLimitInfo.limit==null ? "Unlimited (admin)" : aiLimitInfo.remaining+" of "+aiLimitInfo.limit+" requests left today"; }
+  if(aiUsedToday!=null) return aiUsedToday+" requests used today";
+  return "";
+}
+function aiPanelHtml(q){
+  if(!q) return "";
+  const done = isDone(q.id), open = !!aiAskOpen[q.id];
+  return `<div class="ai-box" id="aiBox">
+    <div class="ai-head"><b>&#129302; AI Tutor</b><span class="ai-left" id="aiLeft">${aiEsc(aiLeftText())}</span></div>
+    <div class="ai-btns">
+      ${done ? `<button class="ai-main" onclick="aiAsk('explain')">&#129504; Explain this question</button>`
+             : `<button class="ai-main" onclick="aiAsk('hint')">&#128161; Give me a hint</button>`}
+      <button onclick="aiToggleAsk(${q.id})">&#128172; Ask a question</button>
+    </div>
+    <div id="aiOut">${aiOutHtml(q.id)}</div>
+    <div class="ai-ask" id="aiAskRow" style="display:${open?"flex":"none"}">
+      <input id="aiInput" maxlength="600" placeholder="Ask anything about this question (Arabic or English)" onkeydown="if(event.key==='Enter')aiSend()">
+      <button class="ai-main" onclick="aiSend()" style="padding:8px 14px;border-radius:9px;border:0;background:var(--brand);color:#fff;font:inherit;font-weight:700;cursor:pointer">Send</button>
+    </div>
+    <div class="ai-note">AI can make mistakes. The official explanation below is the reference.</div>
+  </div>`;
+}
+function aiOutHtml(qid){
+  return (aiThreads[qid]||[]).map(m=>{
+    if(m.role==="user") return `<div class="ai-msg me" dir="auto">${aiEsc(m.content)}</div>`;
+    const tag = m.kind==="hint" ? "Hint" : m.kind==="explain" ? "Explanation" : "AI Tutor";
+    return `<div class="ai-msg bot${m.err?" err":""}" dir="auto"><span class="tag">${tag}</span>${aiFmt(m.content)}</div>`;
+  }).join("") + (aiBusy ? `<div class="ai-msg bot"><span class="ai-dots">Thinking</span></div>` : "");
+}
+function aiPaint(){
+  const o=document.getElementById("aiOut"); if(o) o.innerHTML = aiOutHtml(current);
+  const l=document.getElementById("aiLeft"); if(l) l.textContent = aiLeftText();
+  document.querySelectorAll("#aiBox .ai-btns button").forEach(b=>b.disabled = aiBusy);
+}
+async function aiAfterRender(){
+  aiPaint();
+  if(!aiCountFetched && userId){
+    aiCountFetched = true;
+    try{
+      const { count, error } = await sb.from("ai_usage").select("id",{count:"exact",head:true}).eq("user_id",userId).eq("day",aiRiyadhDay());
+      if(!error){ aiUsedToday = count||0; const l=document.getElementById("aiLeft"); if(l && !aiLimitInfo) l.textContent=aiLeftText(); }
+    }catch(e){}
+  }
+}
+function aiToggleAsk(qid){
+  aiAskOpen[qid] = !aiAskOpen[qid];
+  const r=document.getElementById("aiAskRow"); if(r) r.style.display = aiAskOpen[qid] ? "flex" : "none";
+  if(aiAskOpen[qid]){ const i=document.getElementById("aiInput"); if(i) i.focus(); }
+}
+function aiSend(){
+  const i=document.getElementById("aiInput"); if(!i) return;
+  const t=i.value.trim(); if(!t) return;
+  i.value=""; aiAsk("ask", t);
+}
+async function aiAsk(mode, text){
+  if(aiBusy) return;
+  const q = activeSet.find(x=>x.id===current); if(!q) return;
+  if(!String(q.image||"").startsWith("data:image")){ aiPush(q.id,{role:"assistant",kind:mode,content:"AI help is not available for this question.",err:true}); aiPaint(); return; }
+  const th = aiThreads[q.id] = aiThreads[q.id] || [];
+  let messages = [];
+  if(mode==="ask"){
+    th.push({role:"user",kind:"ask",content:text});
+    messages = th.filter(m=>m.kind==="ask").slice(-7).map(m=>({role:m.role,content:m.content}));
+  }
+  const letters=["A","B","C","D"], a=answered[q.id];
+  aiBusy = true; aiPaint();
+  try{
+    const { data, error } = await sb.functions.invoke("ai-tutor", { body:{
+      mode, qid:q.id, question_image:q.image, explain_image:q.explainImage||null, answered:isDone(q.id),
+      correct_letter:letters[q.correct], user_letter:(a&&a.choice!=null)?letters[a.choice]:null, messages } });
+    if(error){
+      let info = {}; try{ info = await error.context.json(); }catch(e){}
+      if(info.error==="limit") throw new Error("You reached today's AI limit ("+info.limit+" requests). It resets at midnight (Riyadh time).");
+      if(info.error==="not_configured") throw new Error("The AI tutor is not configured yet (missing API key).");
+      throw new Error(info.message || (/not found|404|Failed to send/i.test(error.message||"") ? "The AI tutor is not deployed yet." : (error.message||"AI request failed")));
+    }
+    if(!data || !data.text) throw new Error("Empty answer, please try again.");
+    th.push({role:"assistant",kind:mode,content:data.text});
+    aiLimitInfo = {limit:data.limit, remaining:data.remaining};
+    if(aiUsedToday!=null) aiUsedToday++;
+  }catch(e){
+    th.push({role:"assistant",kind:mode,content:String(e.message||e),err:true});
+    if(mode==="ask") th.splice(th.length-2,1);          // drop the unanswered question from the chat context
+  }
+  aiBusy = false; aiPaint();
+}
+function aiPush(qid,m){ (aiThreads[qid]=aiThreads[qid]||[]).push(m); }
+
+
+/* ===== Admin: per-student solving history ===== */
+let histRange = 7, histUid = null;
+function adminTag(s){ return s && s.role==="admin" ? ' <span style="display:inline-block;margin-inline-start:4px;padding:1px 7px;border-radius:10px;background:#1f5fbf;color:#fff;font-size:.65rem;font-weight:700;vertical-align:middle">ADMIN</span>' : ""; }
+function histIdMap(){
+  if(!manifest) return {};
+  if(histIdMap.cache) return histIdMap.cache;
+  const m = {};
+  UNITS.forEach(u=>(u.subs||[]).concat(extraSubs(u)).forEach(sn=>subIds(u,sn).forEach(id=>{ if(!m[id]) m[id]={u, sub:sn}; })));
+  return histIdMap.cache = m;
+}
+function studentHistoryRows(s){
+  const idx = histIdMap(), rows = [];
+  Object.keys(s.answeredObj||{}).forEach(id=>{
+    const a = s.answeredObj[id]; if(!a || a.choice==null) return;
+    const loc = idx[id], t = a.at ? Date.parse(a.at) : NaN;
+    rows.push({id, t, choice:"ABCD"[a.choice]||"?", ok:!!a.correct, secs:a.time||0,
+      unit: loc ? uName(loc.u,"&middot;") : "(question no longer in the bank)", sub: loc ? loc.sub : ""});
+  });
+  const tv = r => isNaN(r.t) ? -1e15 : r.t;
+  rows.sort((x,y)=>tv(y)-tv(x));
+  return rows;
+}
+function histFiltered(s){
+  const rows = studentHistoryRows(s);
+  if(!histRange) return rows;
+  const cut = Date.now()-histRange*86400000;
+  return rows.filter(r=>r.t>=cut);
+}
+function renderStudentHistory(){
+  const box = document.getElementById("adminHist"); if(!box) return;
+  const s = (adminStudents||[]).find(x=>x.user_id===histUid); if(!s){ box.innerHTML=""; return; }
+  const rows = histFiltered(s), shown = rows.slice(0,300);
+  const when = t => isNaN(t) ? "&ndash;" : new Date(t).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+  const body = shown.map(r=>`<tr><td>${when(r.t)}</td><td>${r.unit}</td><td>${aiEsc(r.sub)}</td><td>#${r.id}</td><td>${r.choice}</td>
+      <td style="color:${r.ok?"var(--ok)":"var(--bad)"};font-weight:700">${r.ok?"&#10003; Correct":"&#10007; Wrong"}</td><td>${r.secs?fmtDur(r.secs):"&ndash;"}</td></tr>`).join("")
+    || `<tr><td colspan="7" style="text-align:center;color:var(--muted)">No answers in this period</td></tr>`;
+  const opt = (v,l)=>`<option value="${v}" ${histRange===v?"selected":""}>${l}</option>`;
+  box.innerHTML = `
+    <div class="dash-section-title" style="margin-top:18px">Solving History &mdash; ${aiEsc(s.name||s.email)}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+      <select onchange="histRange=Number(this.value);renderStudentHistory()" style="padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.8rem">
+        ${opt(1,"Last 24 hours")}${opt(7,"Last 7 days")}${opt(30,"Last 30 days")}${opt(0,"All time")}</select>
+      <span style="font-size:.78rem;color:var(--muted)">${rows.length} answers${rows.length>300?" (showing the latest 300; export for all)":""}</span>
+      <button onclick="exportStudentHistoryCsv()" style="padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.78rem;cursor:pointer">Export CSV</button>
+    </div>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>When</th><th>Unit</th><th>Sub-unit</th><th>Question</th><th>Answer</th><th>Result</th><th>Time</th></tr></thead><tbody>${body}</tbody></table></div>
+    <div class="time-note">Answers saved before date tracking have no timestamp and appear only under &ldquo;All time&rdquo;. Notes are not shown here.</div>`;
+}
+function exportStudentHistoryCsv(){
+  const s = (adminStudents||[]).find(x=>x.user_id===histUid); if(!s) return;
+  const rows = [["Date","Unit","Sub-unit","Question ID","Student answer","Result","Seconds"]].concat(histFiltered(s).map(r=>[
+    isNaN(r.t) ? "" : new Date(r.t).toISOString().replace("T"," ").slice(0,19), r.unit.replace(/&middot;/g,"-"), r.sub, r.id, r.choice, r.ok?"Correct":"Wrong", r.secs||""]));
+  const csv = "\ufeff"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+  const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+  a.download = "history-"+(s.email||"student").replace(/[^a-z0-9@._-]/gi,"_")+".csv"; document.body.appendChild(a); a.click(); a.remove();
+}
+
+(async function init(){
+  await loadManifest();
+  buildTree();
+  const { data } = await sb.auth.getSession();
+  if(data.session){ await startSession(data.session.user); }
+  else{ document.getElementById("loginVeil").classList.remove("hidden"); }
+})();
+</script>
+</body>
+</html>
