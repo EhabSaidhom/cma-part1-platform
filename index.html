@@ -540,6 +540,34 @@ const UNITS = [
    "E.1 Governance, risk, and compliance",
    "E.2 Internal auditing",
    "E.3 Systems controls and security measures"]},
+ {n:26, title:"Support Package — Section A: External Financial Reporting Decisions", bare:true, group:"Exam Test", subs:[
+   "A.1 Financial statements",
+   "A.2 Recognition, measurement, valuation, and disclosure"]},
+ {n:27, title:"Support Package — Section B: Planning, Budgeting and Forecasting", bare:true, group:"Exam Test", subs:[
+   "B.1 Strategic planning",
+   "B.2 Budgeting concepts",
+   "B.3 Forecasting techniques",
+   "B.4 Budget methodologies",
+   "B.5 Annual profit plan and supporting schedules",
+   "B.6 Top-level planning and analysis"]},
+ {n:28, title:"Support Package — Section C: Performance Management", bare:true, group:"Exam Test", subs:[
+   "C.1 Cost and variance measures",
+   "C.2 Responsibility centers and reporting segments",
+   "C.3 Performance measures"]},
+ {n:29, title:"Support Package — Section D: Cost Management", bare:true, group:"Exam Test", subs:[
+   "D.1 Measurement concepts",
+   "D.2 Costing systems",
+   "D.3 Overhead costs",
+   "D.4 Supply chain management",
+   "D.5 Business process improvement"]},
+ {n:30, title:"Support Package — Section E: Internal Controls", bare:true, group:"Exam Test", subs:[
+   "E.1 Governance, risk, and compliance",
+   "E.2 Internal auditing"]},
+ {n:31, title:"Support Package — Section F: Technology and Analytics", bare:true, group:"Exam Test", subs:[
+   "F.1 Information systems",
+   "F.2 Data governance",
+   "F.3 Technology-enabled finance transformation",
+   "F.4 Data analytics"]},
 ];
 
 let userEmail = "";
@@ -600,7 +628,7 @@ async function startSession(user){
 }
 
 // ---------- Dashboard ----------
-const SRC_COLORS = {"Sameh Allithy Target":"#2b4a9e", "MCQ Book":"#a35a00", "Gleim 2025 Vol. 1":"#1a7f4e", "Gleim 2025 Vol. 2":"#7b3fa0", "ICMA Retired Questions 2016":"#c23838"};
+const SRC_COLORS = {"Sameh Allithy Target":"#2b4a9e", "MCQ Book":"#a35a00", "Gleim 2025 Vol. 1":"#1a7f4e", "Gleim 2025 Vol. 2":"#7b3fa0", "ICMA Retired Questions 2016":"#c23838", "ICMA Exam Support Package 2025":"#0f766e"};
 function srcColor(name){ return SRC_COLORS[name] || "#6b7480"; }
 function dashStats(){
   let total=0, correct=0, wrong=0, flaggedCt=0;
