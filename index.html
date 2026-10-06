@@ -737,7 +737,7 @@ async function loadAllStudentsData(){
   if(e1) throw e1; if(e2) throw e2;
   const progByUser = {}; (progress||[]).forEach(p=>progByUser[p.user_id]=p);
   const bankTotal = bankTotalQuestions();
-  return (profiles||[]).filter(p=>p.role!=="admin").map(p=>{
+  return (profiles||[]).map(p=>{
     const row = progByUser[p.user_id];
     const ans = (row && row.answered) || {};
     const stats = studentOverallStats(ans);
@@ -746,7 +746,7 @@ async function loadAllStudentsData(){
     const lastActive = row && row.updated_at ? new Date(row.updated_at) : null;
     const status = classifyStudent(!!row, stats.answered, accuracy, lastActive);
     return {
-      user_id:p.user_id, email:p.email||"", name:p.display_name||"", answeredObj:ans,
+      user_id:p.user_id, email:p.email||"", name:p.display_name||"", role:p.role||"student", answeredObj:ans,
       correct:stats.correct, wrong:stats.wrong, answered:stats.answered,
       accuracy, completion, lastActive, status
     };
@@ -809,9 +809,9 @@ function renderAdminDashboard(){
 function buildAdminHtml(d){
   return `
     <h2>Admin Dashboard</h2>
-    <p class="sub">All students' performance across the platform. Personal notes are never included here.</p>
+    <p class="sub">All users' performance across the platform, admins included. Personal notes are never included here.</p>
     <div class="admin-kpis">
-      <div class="dash-card"><div class="num">${d.n}</div><div class="lbl">Students</div></div>
+      <div class="dash-card"><div class="num">${d.n}</div><div class="lbl">Users (incl. admins)</div></div>
       <div class="dash-card"><div class="num">${d.active7}</div><div class="lbl">Active last 7 days</div></div>
       <div class="dash-card"><div class="num">${d.avgAcc}%</div><div class="lbl">Avg Accuracy</div></div>
       <div class="dash-card"><div class="num">${d.totalAnswered}</div><div class="lbl">Total Answered</div></div>
@@ -883,14 +883,14 @@ function renderAdminTable(){
 
   document.getElementById("adminTbody").innerHTML = rows.map(s=>`
     <tr onclick="openStudentDetail('${s.user_id}')">
-      <td>${s.name ? s.name+`<br><span style="color:var(--muted);font-size:.75rem">${s.email}</span>` : s.email}</td>
+      <td>${s.name ? s.name+`<br><span style="color:var(--muted);font-size:.75rem">${s.email}</span>` : s.email}${adminTag(s)}</td>
       <td>${adminUnitFilter==="all" ? s.answered : s.scopedAnswered}</td>
       <td>${adminUnitFilter==="all" ? s.accuracy : s.scopedAccuracy}%</td>
       <td>${s.completion}%</td>
       <td>${fmtDate(s.lastActive)}</td>
       <td><span class="status-pill ${STATUS_CLASS[s.status]}">${STATUS_LABEL[s.status]}</span></td>
     </tr>
-  `).join("") || `<tr><td colspan="6" style="text-align:center;color:var(--muted)">No students match</td></tr>`;
+  `).join("") || `<tr><td colspan="6" style="text-align:center;color:var(--muted)">No users match</td></tr>`;
 }
 function openStudentDetail(uid){
   const s = (adminStudents||[]).find(x=>x.user_id===uid);
@@ -1582,19 +1582,19 @@ function weeklyTimeHtml(students){
   const bars = w.days.map((d,i)=>`<div title="${d.toLocaleDateString()}: ${Math.round(w.dayTot[i]/60)} min, ${w.dayQ[i]} questions, ${w.dayActive[i]} active"><span>${w.dayTot[i] ? fmtMin(w.dayTot[i]) : ""}</span><i style="height:${Math.round(w.dayTot[i]/mx*52)+2}px"></i><span>${dn(d)}</span></div>`).join("");
   const rows = w.rows.filter(r=>r.solved>0).sort((a,b)=>b.total-a.total);
   const idle = w.rows.length - rows.length;
-  const body = rows.map(r=>`<tr><td>${r.st.name ? r.st.name : r.st.email}</td>${r.secs.map((x,i)=>`<td title="${r.qn[i]} questions">${r.qn[i] ? fmtMin(x) : "&ndash;"}</td>`).join("")}<td><b>${fmtMin(r.total)}</b></td></tr>`).join("")
+  const body = rows.map(r=>`<tr><td>${r.st.name ? r.st.name : r.st.email}${adminTag(r.st)}</td>${r.secs.map((x,i)=>`<td title="${r.qn[i]} questions">${r.qn[i] ? fmtMin(x) : "&ndash;"}</td>`).join("")}<td><b>${fmtMin(r.total)}</b></td></tr>`).join("")
     || `<tr><td colspan="9" style="text-align:center;color:var(--muted)">No activity in the last 7 days</td></tr>`;
-  const totRow = `<tr style="background:var(--bg);font-weight:700"><td>Total (all students)</td>${w.dayTot.map(x=>`<td>${fmtMin(x)}</td>`).join("")}<td>${fmtMin(totSecs)}</td></tr>`;
+  const totRow = `<tr style="background:var(--bg);font-weight:700"><td>Total (all users)</td>${w.dayTot.map(x=>`<td>${fmtMin(x)}</td>`).join("")}<td>${fmtMin(totSecs)}</td></tr>`;
   return `
     <div class="dash-section-title">Study Time per Day &mdash; Last 7 Days (minutes)</div>
     <div class="dash-cards">
       <div class="dash-card"><div class="num">${fmtMin(totSecs)}</div><div class="lbl">Total minutes (7 days)</div></div>
       <div class="dash-card"><div class="num">${totQ}</div><div class="lbl">Questions solved (7 days)</div></div>
       <div class="dash-card"><div class="num">${totSecs && totQ ? fmtDur(totSecs/Math.max(1,w.rows.reduce((a,r)=>a+r.qn.reduce((x,y)=>x+y,0),0))) : "&ndash;"}</div><div class="lbl">Avg time / question</div></div>
-      <div class="dash-card"><div class="num">${w.rows.filter(r=>r.solved>0).length}</div><div class="lbl">Active students</div></div>
+      <div class="dash-card"><div class="num">${w.rows.filter(r=>r.solved>0).length}</div><div class="lbl">Active users</div></div>
     </div>
     <div class="act-bars" style="height:80px">${bars}</div>
-    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Student</th>${w.days.map(d=>`<th>${dn(d)}</th>`).join("")}<th>Total</th></tr></thead><tbody>${body}${totRow}</tbody></table></div>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>User</th>${w.days.map(d=>`<th>${dn(d)}</th>`).join("")}<th>Total</th></tr></thead><tbody>${body}${totRow}</tbody></table></div>
     <div class="time-note" style="margin-top:-12px">${timedAny ? "" : "No timed answers found yet: timing is recorded only for answers solved after this update. "}Minutes are counted per day (admin's local date) from the time each answer was solved; ${idle} student(s) had no activity. <a href="#" onclick="exportWeeklyTimeCsv();return false">Export CSV</a></div>`;
 }
 function exportWeeklyTimeCsv(){
@@ -1910,6 +1910,7 @@ function aiPush(qid,m){ (aiThreads[qid]=aiThreads[qid]||[]).push(m); }
 
 /* ===== Admin: per-student solving history ===== */
 let histRange = 7, histUid = null;
+function adminTag(s){ return s && s.role==="admin" ? ' <span style="display:inline-block;margin-inline-start:4px;padding:1px 7px;border-radius:10px;background:#1f5fbf;color:#fff;font-size:.65rem;font-weight:700;vertical-align:middle">ADMIN</span>' : ""; }
 function histIdMap(){
   if(!manifest) return {};
   if(histIdMap.cache) return histIdMap.cache;
