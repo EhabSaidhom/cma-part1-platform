@@ -423,7 +423,8 @@ const UNITS = [
    "1.3 Income Statement and Statement of Comprehensive Income",
    "1.4 Statement of Changes in Equity and Equity Transactions",
    "1.5 Statement of Cash Flows",
-   "1.6 Consolidation Accounting"]},
+   "1.6 Consolidation Accounting",
+   "Test-Amro Taison"]},
  {n:2, title:"Measurement, Valuation, and Disclosure: Assets -- Short-Term Items", subs:[
    "2.1 Accounts Receivable",
    "2.2 Inventory -- Fundamentals",
@@ -628,7 +629,7 @@ async function startSession(user){
 }
 
 // ---------- Dashboard ----------
-const SRC_COLORS = {"Sameh Allithy Target":"#2b4a9e", "MCQ Book":"#a35a00", "Gleim 2025 Vol. 1":"#1a7f4e", "Gleim 2025 Vol. 2":"#7b3fa0", "ICMA Retired Questions 2016":"#c23838", "ICMA Exam Support Package 2025":"#0f766e"};
+const SRC_COLORS = {"Sameh Allithy Target":"#2b4a9e", "MCQ Book":"#a35a00", "Gleim 2025 Vol. 1":"#1a7f4e", "Gleim 2025 Vol. 2":"#7b3fa0", "ICMA Retired Questions 2016":"#c23838", "ICMA Exam Support Package 2025":"#0f766e", "Amro Taison":"#be185d"};
 function srcColor(name){ return SRC_COLORS[name] || "#6b7480"; }
 function dashStats(){
   let total=0, correct=0, wrong=0, flaggedCt=0;
@@ -1268,7 +1269,7 @@ function render(){
   const linksHtml = (q.links||[]).map(l=>`<a href="${l.url}" target="_blank" rel="noopener">&#9654; ${l.label}</a>`).join("");
   const srcName = q.source || "Sameh Allithy Target";
   const pageBadges = `<span class="tag src ${srcName==="Sameh Allithy Target"?"src-target":"src-mcq"}">${srcName}</span>` +
-    (srcName==="Sameh Allithy Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : `<span class="tag">Book p.${q.qpage}</span>`) +
+    (srcName==="Sameh Allithy Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : (q.qpage!=null ? `<span class="tag">Book p.${q.qpage}</span>` : "")) +
     ((q.links&&q.links[0]) ? `<a class="tag link" href="${q.links[0].url}" target="_blank" rel="noopener">&#9654; Video Explanation</a>` : "");
 
   main.innerHTML = `
