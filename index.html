@@ -268,6 +268,20 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .unsolved-body .urow.sub{padding-inline-start:18px;cursor:pointer}
 .unsolved-body .urow.sub:hover{color:var(--brand)}
 .unsolved-body .urow span:last-child{margin-inline-start:auto;color:var(--muted)}
+.srcpick{position:relative;flex:1;min-width:0}
+.srcpick>button{width:100%;text-align:left;padding:8px 30px 8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font:inherit;font-size:.85rem;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+.srcpick>button::after{content:"\25BE";position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.srcpick>button.on{border-color:var(--brand);font-weight:700}
+.srcpanel{position:absolute;z-index:200;left:0;right:0;top:calc(100% + 4px);background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:8px;max-height:70vh;overflow:auto}
+.srcpanel.hidden{display:none}
+.srcpanel label.row{display:flex;gap:8px;align-items:center;padding:8px 6px;border-radius:8px;cursor:pointer;font-size:.84rem}
+.srcpanel label.row:hover{background:var(--bg)}
+.srcpanel label.row input{width:17px;height:17px;accent-color:var(--brand);flex:none}
+.srcpanel label.row .n{margin-inline-start:auto;color:var(--muted);font-size:.72rem}
+.srcpanel .acts{display:flex;gap:8px;margin-top:6px;border-top:1px solid var(--line);padding-top:8px}
+.srcpanel .acts button{flex:1;padding:8px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:.82rem;cursor:pointer}
+.srcpanel .acts button.apply{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.srcpanel .hint{font-size:.7rem;color:var(--muted);padding:2px 6px 6px}
 .dash-card.click{cursor:pointer; transition:border-color .12s, transform .12s}
 .dash-card.click:hover{border-color:var(--brand); transform:translateY(-1px)}
 .dash-card.click .lbl::after{content:" \203A"; color:var(--brand)}
@@ -379,8 +393,11 @@ table.admin-table tbody tr:hover{background:var(--bg)}
     </div>
     <h2>Units (20)</h2>
     <div class="src-global-row">
-      <label for="globalSrcSelect">Source:</label>
-      <select id="globalSrcSelect" onchange="setGlobalSource(this.value)"></select>
+      <label>Source:</label>
+      <div class="srcpick" id="srcPick">
+        <button type="button" id="srcPickBtn" onclick="toggleSrcPanel(event)"></button>
+        <div class="srcpanel hidden" id="srcPanel" onclick="event.stopPropagation()"></div>
+      </div>
     </div>
     <div id="tree"></div>
   </aside>
@@ -715,7 +732,7 @@ function openDashboard(){
   }).join("");
   document.getElementById("dashboardBox").innerHTML = `
     <h2>Welcome back${userEmail ? ", " + userEmail : ""}</h2>
-    <p class="sub">Your progress and the platform's question library at a glance.${globalSourceFilter!=="all" ? ` <b>(filtered to ${globalSourceFilter})</b>` : ""}</p>
+    <p class="sub">Your progress and the platform's question library at a glance.${globalSourceFilter!=="all" ? ` <b>(filtered to ${srcLabel()})</b>` : ""}</p>
     <div class="dash-cards">
       <div class="dash-card"><div class="num">${st.total}</div><div class="lbl">Total Questions</div></div>
       <div class="dash-card"><div class="num">${st.correct+st.wrong}</div><div class="lbl">Answered</div></div>
@@ -1129,7 +1146,10 @@ function extraSubs(u){
 function unitIds(u){ return (u.subs||[]).concat(extraSubs(u)).flatMap(s=>subIds(u,s)); }
 
 // ---------- Global source filter (affects tree counts + My Performance) ----------
-let globalSourceFilter = localStorage.getItem("cma_global_source") || "all";
+let globalSourceFilter = localStorage.getItem("cma_global_source") || "all";   // "all" or one/more sources joined by "||"
+let srcDraft = new Set();
+function srcMatch(src){ return globalSourceFilter==="all" || globalSourceFilter.split("||").includes(src||"Sameh Allithy Target"); }
+function srcLabel(){ return globalSourceFilter.split("||").join(" + "); }
 function allSources(){
   const set = new Set();
   if(manifest) Object.values(manifest).forEach(unitSubs=>
@@ -1141,19 +1161,55 @@ function subIdsForSource(u, s, src){
   const m = manifest && manifest[u.n] && manifest[u.n][s];
   if(!m) return [];
   if(!src || src === "all") return m.ids || [];
-  return [].concat(...(m.files||[]).filter(f=>(f.source||"Sameh Allithy Target")===src).map(f=>f.ids));
+  const set = new Set(String(src).split("||"));
+  return [].concat(...(m.files||[]).filter(f=>set.has(f.source||"Sameh Allithy Target")).map(f=>f.ids));
 }
 function subIdsFiltered(u, s){ return subIdsForSource(u, s, globalSourceFilter); }
 function unitIdsFiltered(u){ return (u.subs||[]).concat(extraSubs(u)).flatMap(s=>subIdsFiltered(u,s)); }
 function populateGlobalSourceSelect(){
-  const sel = document.getElementById("globalSrcSelect");
-  if(!sel) return;
+  const btn = document.getElementById("srcPickBtn"), panel = document.getElementById("srcPanel");
+  if(!btn || !panel) return;
   const srcs = allSources();
-  if(globalSourceFilter !== "all" && !srcs.includes(globalSourceFilter)) globalSourceFilter = "all";
-  sel.innerHTML = `<option value="all">All sources (${srcs.length})</option>` +
-    srcs.map(s=>`<option value="${s}">${s}</option>`).join("");
-  sel.value = globalSourceFilter;
+  if(globalSourceFilter !== "all"){
+    const keep = globalSourceFilter.split("||").filter(x=>srcs.includes(x));
+    globalSourceFilter = keep.length ? keep.join("||") : "all";
+  }
+  const sel = globalSourceFilter==="all" ? [] : globalSourceFilter.split("||");
+  btn.className = sel.length ? "on" : "";
+  btn.textContent = sel.length ? "\u2713 " + (sel.length===1 ? sel[0] : sel[0] + " +" + (sel.length-1)) : "All sources (" + srcs.length + ")";
+  btn.title = sel.length ? sel.join(" + ") : "All sources";
+  renderSrcPanel(srcs);
 }
+function srcCounts(){
+  const c = {};
+  if(manifest) Object.values(manifest).forEach(us=>Object.values(us).forEach(e=>(e.files||[]).forEach(f=>{ const k=f.source||"Sameh Allithy Target"; c[k]=(c[k]||0)+(f.ids||[]).length; })));
+  return c;
+}
+function renderSrcPanel(srcs){
+  const panel = document.getElementById("srcPanel"); if(!panel) return;
+  const counts = srcCounts();
+  panel.innerHTML = `<div class="hint">Tick one or more sources, then press &#10003; Apply.</div>` +
+    srcs.map(s=>`<label class="row"><input type="checkbox" value="${aiEsc(s)}" ${srcDraft.has(s)?"checked":""} onchange="srcDraftToggle(this)"><span>${aiEsc(s)}</span><span class="n">${counts[s]||0}</span></label>`).join("") +
+    `<div class="acts"><button type="button" onclick="srcDraftClear()">Clear (all)</button><button type="button" class="apply" onclick="srcApply()">&#10003; Apply</button></div>`;
+}
+function srcDraftToggle(el){ if(el.checked) srcDraft.add(el.value); else srcDraft.delete(el.value); }
+function srcDraftClear(){ srcDraft = new Set(); renderSrcPanel(allSources()); }
+function toggleSrcPanel(ev){
+  if(ev) ev.stopPropagation();
+  const panel = document.getElementById("srcPanel"); if(!panel) return;
+  if(panel.classList.contains("hidden")){
+    srcDraft = new Set(globalSourceFilter==="all" ? [] : globalSourceFilter.split("||"));
+    renderSrcPanel(allSources()); panel.classList.remove("hidden");
+  } else panel.classList.add("hidden");
+}
+function closeSrcPanel(){ const p=document.getElementById("srcPanel"); if(p) p.classList.add("hidden"); }
+function srcApply(){
+  const srcs = allSources(), list = srcs.filter(x=>srcDraft.has(x));
+  closeSrcPanel();
+  setGlobalSource(list.length && list.length<srcs.length ? list.join("||") : "all");
+}
+document.addEventListener("click", closeSrcPanel);
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSrcPanel(); });
 function setGlobalSource(v){
   globalSourceFilter = v;
   localStorage.setItem("cma_global_source", v);
@@ -1199,8 +1255,8 @@ async function selectSub(u, sub, btnEl){
   subAll = qs;
   if(globalSourceFilter !== "all"){
     // global Source filter is active: keep only that source so counts/tabs match the tree
-    subAll = qs.filter(x => (x.source||"Sameh Allithy Target") === globalSourceFilter);
-    srcFilter = globalSourceFilter;
+    subAll = qs.filter(x => srcMatch(x.source));
+    srcFilter = (subAll[0] && (subAll[0].source||"Sameh Allithy Target")) || globalSourceFilter.split("||")[0];
   } else {
     const srcs = [...new Set(qs.map(x=>x.source||"Sameh Allithy Target"))];
     srcFilter = srcs[0] || "Sameh Allithy Target";
@@ -1404,7 +1460,7 @@ async function reviewList(kind){
   const seen = new Set();
   activeSet = all.filter(q => {
     if(seen.has(q.id)) return false; seen.add(q.id);
-    if(globalSourceFilter!=="all" && (q.source||"Sameh Allithy Target")!==globalSourceFilter) return false;
+    if(!srcMatch(q.source)) return false;
     return reviewTest(kind, q.id);
   });
   current = activeSet.length ? activeSet[0].id : null;
