@@ -256,6 +256,18 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .act-bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:.62rem;color:var(--muted);height:100%}
 .act-bars i{display:block;width:100%;background:var(--brand);border-radius:4px 4px 0 0;min-height:2px}
 .dash-card{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center}
+.filters .chip{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.filters .chip:hover{color:var(--brand)}
+.unsolved-src{border:1px solid var(--line);border-radius:10px;margin:8px 0;background:var(--bg)}
+.unsolved-src>summary{cursor:pointer;padding:10px 12px;display:flex;gap:10px;align-items:center;font-size:.85rem;list-style:none}
+.unsolved-src .uname{flex:1;font-weight:700}
+.unsolved-src .ubar{flex:0 0 90px;height:7px;background:var(--line);border-radius:5px;overflow:hidden}
+.unsolved-src .ubar i{display:block;height:100%;background:var(--brand)}
+.unsolved-body{padding:0 12px 10px;font-size:.8rem}
+.unsolved-body .urow{display:flex;gap:8px;padding:3px 0;border-top:1px dashed var(--line)}
+.unsolved-body .urow.sub{padding-inline-start:18px;cursor:pointer}
+.unsolved-body .urow.sub:hover{color:var(--brand)}
+.unsolved-body .urow span:last-child{margin-inline-start:auto;color:var(--muted)}
 .dash-card.click{cursor:pointer; transition:border-color .12s, transform .12s}
 .dash-card.click:hover{border-color:var(--brand); transform:translateY(-1px)}
 .dash-card.click .lbl::after{content:" \203A"; color:var(--brand)}
@@ -718,6 +730,7 @@ function openDashboard(){
       <div class="donut" style="background:${donut2}"></div>
       ${legend2}
     </div>
+    ${unsolvedSectionHtml()}
     ${timeSectionHtml()}
     <div class="dash-section-title">Progress by Unit</div>
     ${unitRows}
@@ -1042,7 +1055,10 @@ function buildTree(){
     let badgeText;
     if(manifest === null) badgeText = '<span class="spinner"></span>loading...';
     else if(!totalCount) badgeText = "not available yet";
-    else badgeText = count + " questions";
+    else {
+      const leftU = unitIdsFiltered(u).filter(id=>!isDone(id)).length;
+      badgeText = count + " questions" + (leftU<count ? ` &middot; ${leftU} left` : "");
+    }
     sum.innerHTML = `<span class="unit-title">${uName(u,"&mdash;")}</span><span class="badge">${badgeText}</span>`;
     det.appendChild(sum);
     const list = document.createElement("div");
@@ -1053,7 +1069,7 @@ function buildTree(){
       const btn = document.createElement("button");
       btn.className = "sub-item" + (activeSubKey===(u.n+"::"+s) ? " active" : "") + (isExtra ? " extra" : "");
       if(isExtra) btn.title = "Not in the official unit list -- may have been removed in the new syllabus";
-      btn.innerHTML = `${s} ${isExtra ? `<span class="extra-flag">NEW</span>` : ""} ${sc!==null ? `<span class="cnt">(${sc})</span>` : ""}`;
+      btn.innerHTML = `${s} ${isExtra ? `<span class="extra-flag">NEW</span>` : ""} ${sc!==null ? `<span class="cnt">(${subLeftText(u,s,sc)})</span>` : ""}`;
       btn.onclick = ()=>selectSub(u, s, btn);
       list.appendChild(btn);
     });
@@ -1277,8 +1293,8 @@ function render(){
     <div class="nav-row">
       <div class="filters">
         ${reviewMode ? `<span style="color:var(--flag);font-weight:700">${REVIEW_LABEL[reviewKind]||"Review"}</span>` : ''}
-        <span>All ${total}</span><span>Not Attempted ${notAtt}</span>
-        <span>Correct ${corr}</span><span>Wrong ${wrong}</span><span>Flagged ${flg}</span>
+        <span>All ${total}</span><span class="chip" title="Jump to the next unsolved question" onclick="jumpNext('not')">Not Attempted ${notAtt}</span>
+        <span class="chip" title="Jump to the next correct answer" onclick="jumpNext('correct')">Correct ${corr}</span><span class="chip" title="Jump to the next wrong answer" onclick="jumpNext('wrong')">Wrong ${wrong}</span><span class="chip" title="Jump to the next flagged question" onclick="jumpNext('flagged')">Flagged ${flg}</span>
       </div>
       <div style="font-size:.8rem;color:var(--muted)">Question ${idx+1} of ${total}</div>
     </div>
@@ -1992,6 +2008,84 @@ function exportStudentHistoryCsv(){
   const csv = "\ufeff"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
   const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
   a.download = "history-"+(s.email||"student").replace(/[^a-z0-9@._-]/gi,"_")+".csv"; document.body.appendChild(a); a.click(); a.remove();
+}
+
+
+/* ===== What is NOT solved, per source ===== */
+function subLeftText(u, s, total){
+  const left = subIdsFiltered(u,s).filter(id=>!isDone(id)).length;
+  if(left===total) return String(total);
+  return left===0 ? "&#10003; "+total : left+" left / "+total;
+}
+function srcOf(f){ return f.source || "Sameh Allithy Target"; }
+function sourceBreakdown(){
+  const out = {};
+  if(!manifest) return out;
+  UNITS.forEach(u=>{
+    const subs = (u.subs||[]).concat(extraSubs(u));
+    subs.forEach(sn=>{
+      const e = manifest[u.n] && manifest[u.n][sn]; if(!e) return;
+      (e.files||[]).forEach(f=>{
+        const src = srcOf(f), ids = f.ids||[]; if(!ids.length) return;
+        const solved = ids.filter(isDone).length;
+        const S = out[src] = out[src] || {total:0, solved:0, units:{}};
+        S.total += ids.length; S.solved += solved;
+        const U = S.units[u.n] = S.units[u.n] || {u, total:0, solved:0, subs:[]};
+        U.total += ids.length; U.solved += solved; U.subs.push({sub:sn, total:ids.length, solved});
+      });
+    });
+  });
+  return out;
+}
+function unsolvedSectionHtml(){
+  const bd = sourceBreakdown(), names = Object.keys(bd);
+  if(!names.length) return "";
+  const rows = names.sort((a,b)=>(bd[b].total-bd[b].solved)-(bd[a].total-bd[a].solved)).map(src=>{
+    const S = bd[src], left = S.total-S.solved, pct = S.total ? Math.round(S.solved/S.total*100) : 0;
+    const color = (typeof SRC_COLORS!=="undefined" && SRC_COLORS[src]) || "#888";
+    const body = Object.values(S.units).filter(U=>U.total-U.solved>0).sort((a,b)=>a.u.n-b.u.n).map(U=>
+      `<div class="urow"><span><b>${uName(U.u,"&middot;")}</b></span><span>${U.total-U.solved} unsolved of ${U.total}</span></div>` +
+      U.subs.filter(x=>x.total-x.solved>0).map(x=>`<div class="urow sub" onclick="goUnsolved(${U.u.n},'${x.sub.replace(/'/g,"\\'")}','${src.replace(/'/g,"\\'")}')" title="Open and jump to the first unsolved question"><span>${x.sub}</span><span>${x.total-x.solved} of ${x.total}</span></div>`).join("")
+    ).join("") || `<div class="urow"><span>Everything in this source is solved &#127881;</span></div>`;
+    return `<details class="unsolved-src"><summary><span class="dot" style="width:10px;height:10px;border-radius:50%;background:${color};display:inline-block"></span>
+      <span class="uname">${aiEsc(src)}</span><span>${left} unsolved of ${S.total}</span><span class="ubar"><i style="width:${pct}%"></i></span><span style="width:34px;text-align:right">${pct}%</span></summary>
+      <div class="unsolved-body">${body}<div style="margin-top:6px"><button onclick="exportUnsolvedCsv('${src.replace(/'/g,"\\'")}')" style="padding:5px 11px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.75rem;cursor:pointer">Export unsolved list (CSV)</button></div></div></details>`;
+  }).join("");
+  return `<div class="dash-section-title">Unsolved Questions by Source</div>${rows}<div class="time-note">Open a source to see which units and sub-units still have unsolved questions; click a sub-unit to jump straight to its first unsolved question.</div>`;
+}
+async function goUnsolved(unitN, sub, src){
+  closeDashboard();
+  if(globalSourceFilter!==src) setGlobalSource(src);
+  const u = UNITS.find(x=>x.n===unitN); if(!u) return;
+  openUnits.add(u.n); if(u.group) openGroups.add(u.group);
+  buildTree();
+  await selectSub(u, sub, null);
+  jumpNext("not");
+}
+function jumpNext(kind){
+  if(!activeSet.length) return;
+  const test = kind==="not" ? q=>!isDone(q.id)
+    : kind==="wrong" ? q=>isDone(q.id) && !answered[q.id].correct
+    : kind==="flagged" ? q=>!!flagged[q.id]
+    : q=>isDone(q.id) && answered[q.id].correct;
+  const i0 = Math.max(0, activeSet.findIndex(x=>x.id===current));
+  for(let k=1;k<=activeSet.length;k++){
+    const q = activeSet[(i0+k)%activeSet.length];
+    if(test(q)){ current = q.id; render(); return; }
+  }
+}
+function exportUnsolvedCsv(src){
+  const rows = [["Source","Unit","Sub-unit","Question ID","Position in sub-unit"]];
+  UNITS.forEach(u=>(u.subs||[]).concat(extraSubs(u)).forEach(sn=>{
+    const e = manifest && manifest[u.n] && manifest[u.n][sn]; if(!e) return;
+    (e.files||[]).forEach(f=>{
+      if(srcOf(f)!==src) return;
+      (f.ids||[]).forEach((id,i)=>{ if(!isDone(id)) rows.push([src, uName(u,"-").replace(/&mdash;|&middot;/g,"-"), sn, id, (i+1)+" of "+f.ids.length]); });
+    });
+  }));
+  const csv = "\ufeff"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+  const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+  a.download = "unsolved-"+src.replace(/[^a-z0-9]+/gi,"_")+".csv"; document.body.appendChild(a); a.click(); a.remove();
 }
 
 (async function init(){
