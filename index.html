@@ -268,20 +268,8 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .unsolved-body .urow.sub{padding-inline-start:18px;cursor:pointer}
 .unsolved-body .urow.sub:hover{color:var(--brand)}
 .unsolved-body .urow span:last-child{margin-inline-start:auto;color:var(--muted)}
-.srcpick{position:relative;flex:1;min-width:0}
-.srcpick>button{width:100%;text-align:left;padding:8px 30px 8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font:inherit;font-size:.85rem;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
-.srcpick>button::after{content:"\25BE";position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted)}
-.srcpick>button.on{border-color:var(--brand);font-weight:700}
-.srcpanel{position:absolute;z-index:200;left:0;right:0;top:calc(100% + 4px);background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:8px;max-height:70vh;overflow:auto}
-.srcpanel.hidden{display:none}
-.srcpanel label.row{display:flex;gap:8px;align-items:center;padding:8px 6px;border-radius:8px;cursor:pointer;font-size:.84rem}
-.srcpanel label.row:hover{background:var(--bg)}
-.srcpanel label.row input{width:17px;height:17px;accent-color:var(--brand);flex:none}
-.srcpanel label.row .n{margin-inline-start:auto;color:var(--muted);font-size:.72rem}
-.srcpanel .acts{display:flex;gap:8px;margin-top:6px;border-top:1px solid var(--line);padding-top:8px}
-.srcpanel .acts button{flex:1;padding:8px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:.82rem;cursor:pointer}
-.srcpanel .acts button.apply{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
-.srcpanel .hint{font-size:.7rem;color:var(--muted);padding:2px 6px 6px}
+.only-un{display:flex;align-items:center;gap:9px;margin:-2px 0 12px 2px;font-size:.9rem;color:var(--muted);cursor:pointer;user-select:none}
+.only-un input{width:18px;height:18px;accent-color:var(--brand);cursor:pointer}
 .dash-card.click{cursor:pointer; transition:border-color .12s, transform .12s}
 .dash-card.click:hover{border-color:var(--brand); transform:translateY(-1px)}
 .dash-card.click .lbl::after{content:" \203A"; color:var(--brand)}
@@ -393,12 +381,10 @@ table.admin-table tbody tr:hover{background:var(--bg)}
     </div>
     <h2>Units (20)</h2>
     <div class="src-global-row">
-      <label>Source:</label>
-      <div class="srcpick" id="srcPick">
-        <button type="button" id="srcPickBtn" onclick="toggleSrcPanel(event)"></button>
-        <div class="srcpanel hidden" id="srcPanel" onclick="event.stopPropagation()"></div>
-      </div>
+      <label for="globalSrcSelect">Source:</label>
+      <select id="globalSrcSelect" onchange="setGlobalSource(this.value)"></select>
     </div>
+    <label class="only-un"><input type="checkbox" id="onlyUnanswered" onchange="setOnlyUnanswered(this.checked)"> Only Not answered Question</label>
     <div id="tree"></div>
   </aside>
 
@@ -1048,13 +1034,13 @@ let activeSubKey = null;
 
 function buildTree(){
   populateGlobalSourceSelect();
-  const filtering = globalSourceFilter !== "all";
+  const filtering = globalSourceFilter !== "all" || onlyUnanswered;
   const root = document.getElementById("tree");
   root.innerHTML = "";
   const groups = {};
   UNITS.forEach(u=>{
     const cached = manifest ? (manifest[u.n] || {}) : null;
-    const count = cached ? unitIdsFiltered(u).length : null;
+    const count = cached ? unitIdsView(u).length : null;
     const totalCount = cached ? unitIds(u).length : null;
 
     // When filtering to one source, a unit with zero questions in that
@@ -1063,7 +1049,7 @@ function buildTree(){
     if(filtering && cached && !count) return;
 
     const allSubs = u.subs.concat(extraSubs(u));
-    const visibleSubs = filtering ? allSubs.filter(s=>subIdsFiltered(u,s).length>0) : allSubs;
+    const visibleSubs = filtering ? allSubs.filter(s=>subIdsView(u,s).length>0) : allSubs;
 
     const det = document.createElement("details");
     det.className = "unit" + ((manifest === null || (manifest[u.n] && unitIds(u).length)) ? "" : " unavailable");
@@ -1074,7 +1060,7 @@ function buildTree(){
     else if(!totalCount) badgeText = "not available yet";
     else {
       const leftU = unitIdsFiltered(u).filter(id=>!isDone(id)).length;
-      badgeText = count + " questions" + (leftU<count ? ` &middot; ${leftU} left` : "");
+      badgeText = onlyUnanswered ? count + " not answered" : count + " questions" + (leftU<count ? ` &middot; ${leftU} left` : "");
     }
     sum.innerHTML = `<span class="unit-title">${uName(u,"&mdash;")}</span><span class="badge">${badgeText}</span>`;
     det.appendChild(sum);
@@ -1082,7 +1068,7 @@ function buildTree(){
     list.className = "sub-list";
     visibleSubs.forEach(s=>{
       const isExtra = !u.subs.includes(s);
-      const sc = cached ? subIdsFiltered(u,s).length : null;
+      const sc = cached ? subIdsView(u,s).length : null;
       const btn = document.createElement("button");
       btn.className = "sub-item" + (activeSubKey===(u.n+"::"+s) ? " active" : "") + (isExtra ? " extra" : "");
       if(isExtra) btn.title = "Not in the official unit list -- may have been removed in the new syllabus";
@@ -1147,7 +1133,10 @@ function unitIds(u){ return (u.subs||[]).concat(extraSubs(u)).flatMap(s=>subIds(
 
 // ---------- Global source filter (affects tree counts + My Performance) ----------
 let globalSourceFilter = localStorage.getItem("cma_global_source") || "all";   // "all" or one/more sources joined by "||"
-let srcDraft = new Set();
+// "Only Not answered Question": show only the questions you have not solved yet (inside the chosen source)
+let onlyUnanswered = localStorage.getItem("cma_only_unanswered") === "1";
+function subIdsView(u, s){ const ids = subIdsFiltered(u, s); return onlyUnanswered ? ids.filter(id=>!isDone(id)) : ids; }
+function unitIdsView(u){ return (u.subs||[]).concat(extraSubs(u)).flatMap(s=>subIdsView(u,s)); }
 function srcMatch(src){ return globalSourceFilter==="all" || globalSourceFilter.split("||").includes(src||"Sameh Allithy Target"); }
 function srcLabel(){ return globalSourceFilter.split("||").join(" + "); }
 function allSources(){
@@ -1167,58 +1156,33 @@ function subIdsForSource(u, s, src){
 function subIdsFiltered(u, s){ return subIdsForSource(u, s, globalSourceFilter); }
 function unitIdsFiltered(u){ return (u.subs||[]).concat(extraSubs(u)).flatMap(s=>subIdsFiltered(u,s)); }
 function populateGlobalSourceSelect(){
-  const btn = document.getElementById("srcPickBtn"), panel = document.getElementById("srcPanel");
-  if(!btn || !panel) return;
+  const sel = document.getElementById("globalSrcSelect");
+  if(!sel) return;
   const srcs = allSources();
-  if(globalSourceFilter !== "all"){
-    const keep = globalSourceFilter.split("||").filter(x=>srcs.includes(x));
-    globalSourceFilter = keep.length ? keep.join("||") : "all";
-  }
-  const sel = globalSourceFilter==="all" ? [] : globalSourceFilter.split("||");
-  btn.className = sel.length ? "on" : "";
-  btn.textContent = sel.length ? "\u2713 " + (sel.length===1 ? sel[0] : sel[0] + " +" + (sel.length-1)) : "All sources (" + srcs.length + ")";
-  btn.title = sel.length ? sel.join(" + ") : "All sources";
-  renderSrcPanel(srcs);
+  if(globalSourceFilter.includes("||")) globalSourceFilter = globalSourceFilter.split("||")[0];   // older multi-select value
+  if(globalSourceFilter !== "all" && !srcs.includes(globalSourceFilter)) globalSourceFilter = "all";
+  sel.innerHTML = `<option value="all">All sources (${srcs.length})</option>` +
+    srcs.map(s=>`<option value="${s}">${s}</option>`).join("");
+  sel.value = globalSourceFilter;
+  const cb = document.getElementById("onlyUnanswered"); if(cb) cb.checked = onlyUnanswered;
 }
-function srcCounts(){
-  const c = {};
-  if(manifest) Object.values(manifest).forEach(us=>Object.values(us).forEach(e=>(e.files||[]).forEach(f=>{ const k=f.source||"Sameh Allithy Target"; c[k]=(c[k]||0)+(f.ids||[]).length; })));
-  return c;
-}
-function renderSrcPanel(srcs){
-  const panel = document.getElementById("srcPanel"); if(!panel) return;
-  const counts = srcCounts();
-  panel.innerHTML = `<div class="hint">Tick one or more sources, then press &#10003; Apply.</div>` +
-    srcs.map(s=>`<label class="row"><input type="checkbox" value="${aiEsc(s)}" ${srcDraft.has(s)?"checked":""} onchange="srcDraftToggle(this)"><span>${aiEsc(s)}</span><span class="n">${counts[s]||0}</span></label>`).join("") +
-    `<div class="acts"><button type="button" onclick="srcDraftClear()">Clear (all)</button><button type="button" class="apply" onclick="srcApply()">&#10003; Apply</button></div>`;
-}
-function srcDraftToggle(el){ if(el.checked) srcDraft.add(el.value); else srcDraft.delete(el.value); }
-function srcDraftClear(){ srcDraft = new Set(); renderSrcPanel(allSources()); }
-function toggleSrcPanel(ev){
-  if(ev) ev.stopPropagation();
-  const panel = document.getElementById("srcPanel"); if(!panel) return;
-  if(panel.classList.contains("hidden")){
-    srcDraft = new Set(globalSourceFilter==="all" ? [] : globalSourceFilter.split("||"));
-    renderSrcPanel(allSources()); panel.classList.remove("hidden");
-  } else panel.classList.add("hidden");
-}
-function closeSrcPanel(){ const p=document.getElementById("srcPanel"); if(p) p.classList.add("hidden"); }
-function srcApply(){
-  const srcs = allSources(), list = srcs.filter(x=>srcDraft.has(x));
-  closeSrcPanel();
-  setGlobalSource(list.length && list.length<srcs.length ? list.join("||") : "all");
-}
-document.addEventListener("click", closeSrcPanel);
-document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSrcPanel(); });
 function setGlobalSource(v){
   globalSourceFilter = v;
   localStorage.setItem("cma_global_source", v);
+  refreshAfterFilter();
+}
+function setOnlyUnanswered(on){
+  onlyUnanswered = !!on;
+  localStorage.setItem("cma_only_unanswered", onlyUnanswered ? "1" : "0");
+  refreshAfterFilter();
+}
+function refreshAfterFilter(){
   buildTree();
   if(activeSubKey){            // refresh the open sub-unit so it follows the new filter
     const parts = activeSubKey.split("::"), u = UNITS.find(x=>String(x.n)===parts[0]);
-    if(u && subIdsFiltered(u, parts[1]).length){ selectSub(u, parts[1], null); }
+    if(u && subIdsView(u, parts[1]).length){ selectSub(u, parts[1], null); }
     else { activeSubKey = null; subAll = []; activeSet = []; current = null;
-      document.getElementById("main").innerHTML = '<div class="card empty"><p>Pick a sub-unit from the list.</p></div>'; }
+      document.getElementById("main").innerHTML = '<div class="card empty"><p>' + (onlyUnanswered ? "Nothing left unanswered here. Pick another sub-unit." : "Pick a sub-unit from the list.") + '</p></div>'; }
   }
   if(!document.getElementById("dashboardVeil").classList.contains("hidden")) openDashboard();
 }
@@ -1252,17 +1216,18 @@ async function selectSub(u, sub, btnEl){
   document.getElementById("main").innerHTML = `<div class="card empty"><p><span class="spinner"></span>Loading questions...</p></div>`;
   const qs = await ensureSubLoaded(u, sub);
   buildTree();
-  subAll = qs;
-  if(globalSourceFilter !== "all"){
-    // global Source filter is active: keep only that source so counts/tabs match the tree
-    subAll = qs.filter(x => srcMatch(x.source));
-    srcFilter = (subAll[0] && (subAll[0].source||"Sameh Allithy Target")) || globalSourceFilter.split("||")[0];
-  } else {
-    const srcs = [...new Set(qs.map(x=>x.source||"Sameh Allithy Target"))];
-    srcFilter = srcs[0] || "Sameh Allithy Target";
-  }
+  let base = qs;
+  if(globalSourceFilter !== "all") base = base.filter(x => srcMatch(x.source));
+  if(onlyUnanswered) base = base.filter(x => !isDone(x.id));       // snapshot when opened; questions you answer now stay until you leave
+  subAll = base;
+  const srcsHere = [...new Set(base.map(x=>x.source||"Sameh Allithy Target"))];
+  srcFilter = srcsHere[0] || (globalSourceFilter !== "all" ? globalSourceFilter.split("||")[0] : "Sameh Allithy Target");
   activeSet = subAll.filter(q => (q.source || "Sameh Allithy Target") === srcFilter);
   current = activeSet.length ? activeSet[0].id : null;
+  if(!activeSet.length){
+    document.getElementById("main").innerHTML = `<div class="card empty"><p>${onlyUnanswered ? "&#127881; Every question here is already answered." : "No questions in this sub-unit."}</p></div>`;
+    return;
+  }
   render();
 }
 function setSrc(v){
