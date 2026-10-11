@@ -482,7 +482,8 @@ const UNITS = [
  {n:10, title:"Supply Chain Management", subs:[
    "10.1 Just-in-Time Inventory and Lean Resource Management",
    "10.2 Enterprise Resource Planning and Outsourcing",
-   "10.3 Capacity Management"]},
+   "10.3 Capacity Management",
+   "Test-Amro Taison"]},
  {n:11, title:"Business Process Improvement", subs:[
    "11.1 Value-Chain Analysis",
    "11.2 Other Process Improvement Tools"]},
@@ -1306,7 +1307,7 @@ function render(){
   const linksHtml = (q.links||[]).map(l=>`<a href="${l.url}" target="_blank" rel="noopener">&#9654; ${l.label}</a>`).join("");
   const srcName = q.source || "Sameh Allithy Target";
   const pageBadges = `<span class="tag src ${srcName==="Sameh Allithy Target"?"src-target":"src-mcq"}">${srcName}</span>` +
-    (srcName==="Sameh Allithy Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : (q.qpage!=null ? `<span class="tag">Book p.${q.qpage}</span>` : "")) +
+    (srcName==="Sameh Allithy Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : (q.qpage!=null ? `<span class="tag">Book p.${q.qpage}</span>` : "") + (q.ref ? `<span class="tag">ID: ${aiEsc(q.ref)}</span>` : "")) +
     ((q.links&&q.links[0]) ? `<a class="tag link" href="${q.links[0].url}" target="_blank" rel="noopener">&#9654; Video Explanation</a>` : "");
 
   main.innerHTML = `
