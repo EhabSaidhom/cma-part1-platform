@@ -4,23 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CMA Part 1 Practice Platform</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f6f7f9; --panel:#ffffff; --ink:#1e293b; --muted:#64748b; --line:#e2e8f0;
-  --brand:#1a70e0; --brand-2:#1659b5; --accent:#f59e0b;
-  --ok:#059669; --bad:#dc2626; --flag:#d97706;
+  --bg:#f5f6f8; --panel:#ffffff; --ink:#1b2430; --muted:#6b7480; --line:#e3e6ea;
+  --brand:#0f5c4c; --brand-2:#12786a; --accent:#c9932f;
+  --ok:#1a8a5b; --bad:#c0392b; --flag:#a3402a;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#0f172a; --panel:#1e293b; --ink:#e2e8f0; --muted:#94a3b8; --line:#334155;
+    --bg:#12161a; --panel:#1a2027; --ink:#e8ecef; --muted:#9aa4ad; --line:#2b333b;
   }
 }
-:root[data-theme="dark"]{ --bg:#0f172a; --panel:#1e293b; --ink:#e2e8f0; --muted:#94a3b8; --line:#334155; }
+:root[data-theme="dark"]{ --bg:#12161a; --panel:#1a2027; --ink:#e8ecef; --muted:#9aa4ad; --line:#2b333b; }
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{
-  margin:0; font-family:'Tajawal','Inter',Tahoma,Arial,sans-serif; background:var(--bg); color:var(--ink);
+  margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink);
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 header.top{
@@ -44,7 +44,7 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .unit > summary::-webkit-details-marker{display:none}
 .unit > summary:hover{background:var(--bg)}
 .unit .badge{font-size:.68rem; color:var(--muted); font-weight:400}
-.unit .unit-title{color:var(--brand-2); font-weight:600; letter-spacing:.01em}
+.unit .unit-title{color:#1a7f4e; font-weight:600; letter-spacing:.01em}
 .unit.group > summary .unit-title{color:#1f5fbf; font-weight:700}
 .group-body{padding-left:10px; border-left:2px solid var(--line); margin:2px 0 6px 6px}
 .unit.unavailable > summary{opacity:.45; cursor:default}
@@ -56,7 +56,7 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .sub-item:hover{background:var(--bg)}
 .sub-item.active{background:var(--brand); color:#fff}
 .sub-item .cnt{color:var(--muted); font-size:.72rem}
-.sub-item.active .cnt{color:#d9edff}
+.sub-item.active .cnt{color:#d8ece7}
 
 .main{flex:1; min-width:0}
 .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:14px}
@@ -116,7 +116,7 @@ header.top .sub{font-size:.78rem; opacity:.85}
   aspect-ratio:1; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink);
   font-family:inherit; font-weight:700; font-size:.8rem; cursor:pointer;
 }
-.qbtn.current{border:2px solid var(--brand); background:#eef7ff; color:#1659b5}
+.qbtn.current{border:2px solid var(--brand); background:#eaf3f0}
 .qbtn.correct{background:#e5f5ec; color:var(--ok); border-color:var(--ok)}
 .qbtn.wrong{background:#fbeae8; color:var(--bad); border-color:var(--bad)}
 .qbtn.flagged{outline:2px solid var(--flag)}
@@ -322,101 +322,6 @@ table.admin-table tbody tr:hover{background:var(--bg)}
 .src-global-row{display:flex; align-items:center; gap:6px; font-size:.74rem; color:var(--muted); margin:2px 0 10px}
 .src-global-row select{flex:1; padding:5px 6px; border:1px solid var(--line); border-radius:7px;
   background:var(--panel); color:var(--ink); font-family:inherit; font-size:.76rem}
-
-/* =====================================================================
-   CMA_platform look & feel (Tajawal font, blue brand palette, rounded
-   cards, soft shadows, nav-style header, filter card)
-   ===================================================================== */
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --brand:#3b8cf0; --brand-2:#57b0ff; } }
-:root[data-theme="dark"]{ --brand:#3b8cf0; --brand-2:#57b0ff; }
-::selection{background:#bce0ff}
-html{scroll-behavior:smooth}
-
-/* header = CMA_platform navbar */
-header.top{position:sticky; top:0; z-index:40; background:var(--panel); color:var(--ink); padding:10px 20px;
-  border-bottom:1px solid var(--line)}
-@supports (backdrop-filter:blur(8px)){
-  header.top{background:color-mix(in srgb,var(--panel) 88%,transparent); backdrop-filter:blur(8px)}
-}
-header.top .brand{display:flex; align-items:center; gap:10px}
-header.top .logo{display:grid; place-items:center; width:38px; height:38px; border-radius:12px;
-  background:var(--brand); color:#fff; font-weight:900; font-size:.8rem; flex:none}
-header.top h1{font-size:1.05rem; font-weight:900; color:var(--ink)}
-header.top .sub{color:var(--muted); opacity:1; font-size:.74rem}
-header.top .user-bar{gap:4px; flex-wrap:wrap}
-header.top #userEmailLbl{color:var(--muted); margin-inline-end:6px}
-header.top .dash-link{color:var(--muted); text-decoration:none; font-weight:500; font-size:.82rem;
-  padding:8px 12px; border-radius:10px; transition:background .12s,color .12s}
-header.top .dash-link:hover{background:var(--bg); color:var(--ink)}
-header.top .user-bar button.dash-link:first-of-type{background:color-mix(in srgb,var(--brand) 10%,var(--panel)); color:var(--brand-2); font-weight:700}
-header.top .user-bar button:not(.dash-link){background:transparent; border:1px solid var(--line); color:var(--ink);
-  border-radius:10px; padding:7px 12px; font-size:.78rem}
-header.top .user-bar button:not(.dash-link):hover{background:var(--bg)}
-.tree-panel{top:76px; max-height:calc(100vh - 92px)}
-@media(max-width:820px){ header.top{position:static} .tree-panel{top:auto; max-height:none} }
-
-/* cards */
-.card,.tree-panel{border-radius:16px; box-shadow:0 2px 10px 0 rgba(15,39,74,.06)}
-.dash-box,.modal-box{border-radius:20px}
-.dash-card{border-radius:14px; background:var(--panel); box-shadow:0 2px 10px 0 rgba(15,39,74,.06)}
-.dash-card .num{font-weight:900; font-size:1.7rem}
-.dash-box h2{font-weight:900}
-.qimg-wrap{border-radius:14px}
-.result-banner{border-radius:12px}
-.source-box{border-radius:12px}
-
-/* buttons */
-.footer-nav button,.dash-actions button,.modal-box button.primary,.ai-btns button,.attach button,.tools button,.cert-btn{border-radius:12px}
-.footer-nav button:not(.secondary):not(:disabled):hover,.dash-actions button:hover,.modal-box button.primary:hover{background:var(--brand-2)}
-.footer-nav button.secondary{color:var(--brand-2); border-color:color-mix(in srgb,var(--brand) 30%,var(--line))}
-.footer-nav button.secondary:not(:disabled):hover,.tools button:not(.flag-on):hover{
-  background:color-mix(in srgb,var(--brand) 10%,var(--panel)); border-color:color-mix(in srgb,var(--brand) 45%,var(--line))}
-.tag{border-radius:999px; padding:4px 11px}
-.tag.link{background:color-mix(in srgb,var(--brand) 10%,var(--panel)); border-color:color-mix(in srgb,var(--brand) 30%,var(--line));
-  color:var(--brand-2); font-weight:700; padding:5px 13px}
-
-/* answer options (like CMA_platform choices) */
-.opt{border-width:2px; border-radius:12px; font-weight:900; font-size:1.05rem; transition:border-color .12s,background .12s}
-.opt:hover{border-color:#8dccff; background:color-mix(in srgb,var(--brand) 6%,var(--panel))}
-.opt.tried:hover{border-color:var(--bad); background:var(--panel)}
-.opt.correct{border-color:#34d399; background:#ecfdf5; color:#047857}
-.opt.wrong{border-color:#f87171; background:#fef2f2; color:#b91c1c}
-.result-banner.correct{background:#ecfdf5; color:#047857; border-color:#34d399}
-.result-banner.wrong{background:#fef2f2; color:#b91c1c; border-color:#f87171}
-
-/* inputs */
-.modal-box input,.admin-controls input,.admin-controls select,.ai-ask input,.attach-form input[type=text],.notes,.finput{border-radius:12px}
-.modal-box input:focus,.admin-controls input:focus,.admin-controls select:focus,.ai-ask input:focus,.notes:focus,.finput:focus{
-  outline:none; border-color:var(--brand); box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
-
-/* sidebar: quick actions + filter card */
-.tree-actions{flex-wrap:wrap}
-.tree-actions button{border-radius:10px; padding:8px 6px; font-weight:500}
-.tree-actions button:not(.on):hover{border-color:var(--brand); color:var(--brand-2)}
-.filter-card{border:1px solid var(--line); background:var(--bg); border-radius:14px; padding:12px; margin-bottom:12px}
-.filter-title{font-weight:900; font-size:.88rem; margin-bottom:2px}
-.flabel{display:block; font-size:.74rem; font-weight:500; color:var(--muted); margin:9px 0 4px}
-.finput{width:100%; padding:9px 11px; border:1px solid var(--line); background:var(--panel); color:var(--ink);
-  font-family:inherit; font-size:.82rem}
-.filter-card .only-un{margin:12px 0 10px; font-size:.8rem}
-.freset{width:100%; padding:9px; border-radius:12px; border:1px solid color-mix(in srgb,var(--brand) 30%,var(--line));
-  background:var(--panel); color:var(--brand-2); font:inherit; font-size:.8rem; font-weight:700; cursor:pointer}
-.freset:hover{background:color-mix(in srgb,var(--brand) 10%,var(--panel))}
-.tree-empty{padding:22px 10px; text-align:center; color:var(--muted); font-size:.82rem; line-height:1.7}
-.sub-item{border-radius:10px}
-.sub-item:not(.active):hover{background:color-mix(in srgb,var(--brand) 8%,var(--panel))}
-.unit > summary:hover{background:color-mix(in srgb,var(--brand) 6%,var(--panel))}
-
-/* dashboard: weak areas */
-.weak-hint{text-transform:none; letter-spacing:0; font-weight:400}
-.weak-list{margin-bottom:22px}
-.weak-row{margin-bottom:11px}
-.weak-top{display:flex; justify-content:space-between; gap:10px; font-size:.82rem; margin-bottom:4px}
-.weak-top span:last-child{color:var(--muted); white-space:nowrap}
-.weak-bar{height:8px; border-radius:999px; background:var(--line); overflow:hidden}
-.weak-bar span{display:block; height:100%}
-.weak-empty{color:var(--muted); font-size:.82rem; margin:0}
-
 </style>
 </head>
 <body>
@@ -445,12 +350,9 @@ header.top .user-bar button:not(.dash-link):hover{background:var(--bg)}
 </div>
 
 <header class="top">
-  <div class="brand">
-    <span class="logo">CMA</span>
-    <div>
-      <h1>CMA Part 1 Practice Platform</h1>
-      <div class="sub">Nonprofit educational platform &middot; Financial Planning, Performance, and Analytics</div>
-    </div>
+  <div>
+    <h1>CMA Part 1 Practice Platform</h1>
+    <div class="sub">Nonprofit educational platform &middot; Financial Planning, Performance, and Analytics</div>
   </div>
   <div class="user-bar">
     <span id="userEmailLbl"></span>
@@ -475,20 +377,15 @@ header.top .user-bar button:not(.dash-link):hover{background:var(--bg)}
       <button id="wrongBtn" onclick="reviewList('wrong')">Review Mistakes</button>
       <button id="flaggedBtn" onclick="reviewList('flagged')">&#9873; Flagged</button>
       <button id="commentBtn" onclick="reviewList('comment')">&#128221; Comments</button>
+      <button id="firstBtn" onclick="reviewList('first')">&#127942; First try</button>
       <button id="allBtn" onclick="clearReview()">All Units</button>
     </div>
-    <div class="filter-card">
-      <div class="filter-title">Find questions</div>
-      <label class="flabel" for="treeSearch">Search</label>
-      <input id="treeSearch" class="finput" type="search" placeholder="Search units or topics..." oninput="setTreeSearch(this.value)" autocomplete="off">
-      <label class="flabel" for="sectionSelect">Section</label>
-      <select id="sectionSelect" class="finput" onchange="setSection(this.value)"></select>
-      <label class="flabel" for="globalSrcSelect">Source</label>
-      <select id="globalSrcSelect" class="finput" onchange="setGlobalSource(this.value)"></select>
-      <label class="only-un"><input type="checkbox" id="onlyUnanswered" onchange="setOnlyUnanswered(this.checked)"> Only not answered questions</label>
-      <button class="freset" onclick="resetFilters()">Reset filters</button>
-    </div>
     <h2>Units (20)</h2>
+    <div class="src-global-row">
+      <label for="globalSrcSelect">Source:</label>
+      <select id="globalSrcSelect" onchange="setGlobalSource(this.value)"></select>
+    </div>
+    <label class="only-un"><input type="checkbox" id="onlyUnanswered" onchange="setOnlyUnanswered(this.checked)"> Only Not answered Question</label>
     <div id="tree"></div>
   </aside>
 
@@ -586,7 +483,8 @@ const UNITS = [
  {n:10, title:"Supply Chain Management", subs:[
    "10.1 Just-in-Time Inventory and Lean Resource Management",
    "10.2 Enterprise Resource Planning and Outsourcing",
-   "10.3 Capacity Management"]},
+   "10.3 Capacity Management",
+   "Test-Amro Taison"]},
  {n:11, title:"Business Process Improvement", subs:[
    "11.1 Value-Chain Analysis",
    "11.2 Other Process Improvement Tools"]},
@@ -769,7 +667,7 @@ function dashStats(){
       (subEntry.files||[]).forEach(f=>{
         const s = bySource[f.source] || (bySource[f.source]={total:0,correct:0,wrong:0});
         s.total += f.ids.length;
-        f.ids.forEach(id=>{ const a=answered[id]; if(a){ if(a.correct) s.correct++; else s.wrong++; } });
+        f.ids.forEach(id=>{ const a=answered[id]; if(a && a.choice!=null){ if(a.correct) s.correct++; else s.wrong++; } });
       });
     });
   });
@@ -785,32 +683,11 @@ function donutGradient(parts){
   });
   return segs.length ? `conic-gradient(${segs.join(",")})` : "var(--bg)";
 }
-function weakSectionsHtml(){
-  const agg = {};
-  UNITS.forEach(u=>{
-    (u.subs||[]).concat(extraSubs(u)).forEach(sn=>{
-      const L = sectionOf(u, sn); if(!CSO_SECTIONS[L]) return;
-      const a = agg[L] || (agg[L] = {c:0, w:0});
-      subIdsFiltered(u, sn).forEach(id=>{
-        const x = answered[id];
-        if(x && x.choice!=null){ if(x.correct) a.c++; else a.w++; }
-      });
-    });
-  });
-  const rows = Object.entries(agg).filter(([,a])=>a.c+a.w>0)
-    .map(([k,a])=>({name:CSO_SECTIONS[k], c:a.c, t:a.c+a.w, pct:a.c/(a.c+a.w)*100}))
-    .sort((x,y)=>x.pct-y.pct);
-  const body = rows.length ? rows.map(r=>{
-    const col = r.pct>=70 ? "var(--ok)" : r.pct>=50 ? "#f59e0b" : "var(--bad)";
-    return `<div class="weak-row"><div class="weak-top"><span>${r.name}</span><span>${r.c}/${r.t} (${Math.round(r.pct)}%)</span></div>
-      <div class="weak-bar"><span style="width:${r.pct}%;background:${col}"></span></div></div>`;
-  }).join("") : `<p class="weak-empty">Answer some questions and your weakest sections will show up here.</p>`;
-  return `<div class="dash-section-title">Weak areas by section <span class="weak-hint">(lowest accuracy first)</span></div><div class="weak-list">${body}</div>`;
-}
 function openDashboard(){
   const st = dashStats();
   const dashIds = new Set(UNITS.flatMap(u=>unitIdsFiltered(u)));
   const commentCt = Object.keys(answered).filter(id=>dashIds.has(+id) && hasNote(id)).length;
+  const fst = firstStatsFrom(answered, dashIds);
   const acc = (st.correct+st.wrong) ? Math.round(st.correct/(st.correct+st.wrong)*100) : 0;
   const donut1 = donutGradient([
     {color:"var(--ok)", value:st.correct}, {color:"var(--bad)", value:st.wrong},
@@ -852,14 +729,16 @@ function openDashboard(){
       <div class="dash-card click" onclick="openReviewFromDash('wrong')" title="Open the questions you answered wrong"><div class="num">${st.wrong}</div><div class="lbl">To Review</div></div>
       <div class="dash-card click" onclick="openReviewFromDash('flagged')" title="Open flagged questions"><div class="num">${st.flaggedCt}</div><div class="lbl">Flagged</div></div>
       <div class="dash-card click" onclick="openReviewFromDash('comment')" title="Open questions that have your comments"><div class="num">${commentCt}</div><div class="lbl">Has Comment</div></div>
+      <div class="dash-card click" onclick="openReviewFromDash('first')" title="Open the questions you answered correctly on the first try"><div class="num">${fst.ok}</div><div class="lbl">First-try Correct</div></div>
+      <div class="dash-card" title="Correct on the first attempt / questions attempted"><div class="num">${fst.tried ? fst.rate+"%" : "&ndash;"}</div><div class="lbl">First-try Rate</div></div>
     </div>
+    <div class="time-note">First try = your very first choice on a question (a wrong first choice that you then corrected still counts as a miss). Answers saved before this update are counted as first tries.</div>
     <div class="dash-row">
       <div class="donut" style="background:${donut1}"><div class="donut-center">${acc}%</div></div>
       ${legend1}
       <div class="donut" style="background:${donut2}"></div>
       ${legend2}
     </div>
-    ${weakSectionsHtml()}
     ${unsolvedSectionHtml()}
     ${timeSectionHtml()}
     <div class="dash-section-title">Progress by Unit</div>
@@ -1013,6 +892,7 @@ function buildAdminHtml(d){
           <th onclick="adminSortBy('name')">Name / Email</th>
           <th onclick="adminSortBy('answered')">Answered</th>
           <th onclick="adminSortBy('accuracy')">Accuracy</th>
+          <th onclick="adminSortBy('firstTry')">First-try</th>
           <th onclick="adminSortBy('completion')">Completion</th>
           <th onclick="adminSortBy('lastActive')">Last Active</th>
           <th onclick="adminSortBy('status')">Status</th>
@@ -1038,7 +918,8 @@ function renderAdminTable(){
   const q = (adminSearch||"").toLowerCase();
   let rows = adminStudents.map(s=>{
     const scoped = studentStatsForUnit(s, adminUnitFilter);
-    return Object.assign({}, s, {scopedAnswered:scoped.answered, scopedAccuracy:scoped.accuracy});
+    const ft = firstStatsFrom(s.answeredObj, adminUnitFilter==="all" ? null : new Set(unitIds(UNITS.find(x=>x.n===Number(adminUnitFilter))||{subs:[]})));
+    return Object.assign({}, s, {scopedAnswered:scoped.answered, scopedAccuracy:scoped.accuracy, ft});
   }).filter(s=> !q || (s.name||"").toLowerCase().includes(q) || (s.email||"").toLowerCase().includes(q));
 
   const key = adminSort.key, dir = adminSort.dir==="asc" ? 1 : -1;
@@ -1046,6 +927,7 @@ function renderAdminTable(){
     if(key==="name") return (s.name||s.email||"").toLowerCase();
     if(key==="answered") return adminUnitFilter==="all" ? s.answered : s.scopedAnswered;
     if(key==="accuracy") return adminUnitFilter==="all" ? s.accuracy : s.scopedAccuracy;
+    if(key==="firstTry") return s.ft.tried ? s.ft.rate : -1;
     if(key==="completion") return s.completion;
     if(key==="lastActive") return s.lastActive ? s.lastActive.getTime() : -1;
     if(key==="status") return s.status;
@@ -1058,15 +940,17 @@ function renderAdminTable(){
       <td>${s.name ? s.name+`<br><span style="color:var(--muted);font-size:.75rem">${s.email}</span>` : s.email}${adminTag(s)}</td>
       <td>${adminUnitFilter==="all" ? s.answered : s.scopedAnswered}</td>
       <td>${adminUnitFilter==="all" ? s.accuracy : s.scopedAccuracy}%</td>
+      <td title="${s.ft.ok} of ${s.ft.tried} correct on the first try">${s.ft.tried ? s.ft.rate+"%" : "&ndash;"}</td>
       <td>${s.completion}%</td>
       <td>${fmtDate(s.lastActive)}</td>
       <td><span class="status-pill ${STATUS_CLASS[s.status]}">${STATUS_LABEL[s.status]}</span></td>
     </tr>
-  `).join("") || `<tr><td colspan="6" style="text-align:center;color:var(--muted)">No users match</td></tr>`;
+  `).join("") || `<tr><td colspan="7" style="text-align:center;color:var(--muted)">No users match</td></tr>`;
 }
 function openStudentDetail(uid){
   const s = (adminStudents||[]).find(x=>x.user_id===uid);
   if(!s) return;
+  const fs0 = firstStatsFrom(s.answeredObj, null);
   const rows = UNITS.map(u=>{
     const st = studentUnitStats(s.answeredObj, u);
     if(st.total===0) return "";
@@ -1080,6 +964,10 @@ function openStudentDetail(uid){
   }).join("");
   document.getElementById("adminDetail").innerHTML = `
     <button class="back-link" onclick="document.getElementById('adminDetail').innerHTML=''">&times; Close detail</button>
+    <div class="dash-cards">
+      <div class="dash-card"><div class="num">${fs0.tried ? fs0.rate+"%" : "&ndash;"}</div><div class="lbl">First-try Rate</div></div>
+      <div class="dash-card"><div class="num">${fs0.ok} / ${fs0.tried}</div><div class="lbl">Correct on first try</div></div>
+    </div>
     <div class="dash-section-title">${s.name || s.email} &mdash; Performance by Unit</div>
     ${rows || "<p style='color:var(--muted)'>No questions answered yet.</p>"}
     <div id="adminHist"></div>
@@ -1159,42 +1047,8 @@ let openGroups = new Set();
 function uName(u, sep){ const x = UNITS.find(v=>v.n===u.n) || u; return x.bare ? x.title : `Unit ${u.n} ${sep} ${u.title}`; }
 let activeSubKey = null;
 
-// ---- CSO sections (same six sections used by the CMA_platform question bank) ----
-const CSO_SECTIONS = {
-  A:"A. External Financial Reporting Decisions", B:"B. Planning, Budgeting, and Forecasting",
-  C:"C. Performance Management", D:"D. Cost Management", E:"E. Internal Controls", F:"F. Technology and Analytics"
-};
-const UNIT_SECTION = {1:"A",2:"A",3:"A",4:"A",5:"A",6:"A",7:"D",8:"D",9:"D",10:"D",11:"D",12:"B",13:"B",14:"B",15:"C",16:"C",17:"E",18:"E",19:"F",20:"F"};
-function sectionOf(u, sub){
-  if(u.n <= 20) return UNIT_SECTION[u.n] || "";
-  return String(sub||"").trim().charAt(0).toUpperCase();   // units 21+: "A.1 ...", "B.2 ..."
-}
-let sectionFilter = localStorage.getItem("cma_section") || "all";
-let treeSearch = "";
-function populateSectionSelect(){
-  const sel = document.getElementById("sectionSelect");
-  if(!sel) return;
-  if(sectionFilter !== "all" && !CSO_SECTIONS[sectionFilter]) sectionFilter = "all";
-  sel.innerHTML = '<option value="all">All sections (6)</option>' +
-    Object.entries(CSO_SECTIONS).map(([k,n])=>`<option value="${k}">${n}</option>`).join("");
-  sel.value = sectionFilter;
-}
-function setTreeSearch(v){ treeSearch = String(v||"").trim().toLowerCase(); buildTree(); }
-function setSection(v){
-  sectionFilter = v;
-  try{ localStorage.setItem("cma_section", v); }catch(e){}
-  buildTree();
-}
-function resetFilters(){
-  treeSearch = ""; sectionFilter = "all"; globalSourceFilter = "all"; onlyUnanswered = false;
-  try{ localStorage.setItem("cma_section","all"); localStorage.setItem("cma_global_source","all"); localStorage.setItem("cma_only_unanswered","0"); }catch(e){}
-  const si = document.getElementById("treeSearch"); if(si) si.value = "";
-  refreshAfterFilter();
-}
-
 function buildTree(){
   populateGlobalSourceSelect();
-  populateSectionSelect();
   const filtering = globalSourceFilter !== "all" || onlyUnanswered;
   const root = document.getElementById("tree");
   root.innerHTML = "";
@@ -1210,17 +1064,11 @@ function buildTree(){
     if(filtering && cached && !count) return;
 
     const allSubs = u.subs.concat(extraSubs(u));
-    let visibleSubs = filtering ? allSubs.filter(s=>subIdsView(u,s).length>0) : allSubs;
-    if(sectionFilter !== "all") visibleSubs = visibleSubs.filter(s=>sectionOf(u,s)===sectionFilter);
-    if(treeSearch){
-      const unitHit = (uName(u,"") + " " + (u.group||"")).toLowerCase().includes(treeSearch);
-      if(!unitHit) visibleSubs = visibleSubs.filter(s=>s.toLowerCase().includes(treeSearch));
-    }
-    if((sectionFilter !== "all" || treeSearch) && !visibleSubs.length) return;
+    const visibleSubs = filtering ? allSubs.filter(s=>subIdsView(u,s).length>0) : allSubs;
 
     const det = document.createElement("details");
     det.className = "unit" + ((manifest === null || (manifest[u.n] && unitIds(u).length)) ? "" : " unavailable");
-    det.open = openUnits.has(u.n) || !!treeSearch;
+    det.open = openUnits.has(u.n);
     const sum = document.createElement("summary");
     let badgeText;
     if(manifest === null) badgeText = '<span class="spinner"></span>loading...';
@@ -1245,7 +1093,6 @@ function buildTree(){
     });
     det.appendChild(list);
     det.addEventListener("toggle", ()=>{
-      if(treeSearch) return;   // search auto-opens units; don't remember that
       if(det.open){
         openUnits.add(u.n);
       }else{
@@ -1257,24 +1104,23 @@ function buildTree(){
       if(!g){
         const el = document.createElement("details");
         el.className = "unit group";
-        el.open = openGroups.has(u.group) || !!treeSearch;
+        el.open = openGroups.has(u.group);
         const gs = document.createElement("summary");
         el.appendChild(gs);
         const body = document.createElement("div");
         body.className = "group-body";
         el.appendChild(body);
-        el.addEventListener("toggle", (ev)=>{ if(ev.target!==el || treeSearch) return; if(el.open) openGroups.add(u.group); else openGroups.delete(u.group); });
+        el.addEventListener("toggle", (ev)=>{ if(ev.target!==el) return; if(el.open) openGroups.add(u.group); else openGroups.delete(u.group); });
         root.appendChild(el);
         g = groups[u.group] = {el, gs, body, count:0, name:u.group};
       }
       g.body.appendChild(det);
       g.count += (count||0);
-      det.addEventListener("toggle", ()=>{ if(det.open && !treeSearch) openGroups.add(u.group); });
+      det.addEventListener("toggle", ()=>{ if(det.open) openGroups.add(u.group); });
     } else {
       root.appendChild(det);
     }
   });
-  if(!root.children.length) root.innerHTML = '<div class="tree-empty">No units match your filters.<br>Try clearing the search or press <b>Reset filters</b>.</div>';
   Object.values(groups).forEach(g=>{
     g.gs.innerHTML = `<span class="unit-title">${g.name}</span><span class="badge">${manifest===null ? '<span class="spinner"></span>loading...' : g.count + " questions"}</span>`;
   });
@@ -1456,7 +1302,7 @@ function render(){
     const userLetter = letters[answered[q.id].choice];
     const correctLetter = letters[q.correct];
     if(answered[q.id].correct){
-      bannerHtml = `<div class="result-banner show correct">&#10003; Correct!${timeTag(answered[q.id])}</div>`;
+      bannerHtml = `<div class="result-banner show correct">&#10003; Correct!${firstTag(answered[q.id])}${timeTag(answered[q.id])}</div>`;
     }else{
       bannerHtml = `<div class="result-banner show wrong">&#10007; Incorrect. Your answer: ${userLetter} &middot; Correct answer: ${correctLetter}${timeTag(answered[q.id])}</div>`;
     }
@@ -1475,7 +1321,7 @@ function render(){
   const linksHtml = (q.links||[]).map(l=>`<a href="${l.url}" target="_blank" rel="noopener">&#9654; ${l.label}</a>`).join("");
   const srcName = q.source || "Sameh Allithy Target";
   const pageBadges = `<span class="tag src ${srcName==="Sameh Allithy Target"?"src-target":"src-mcq"}">${srcName}</span>` +
-    (srcName==="Sameh Allithy Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : (q.qpage!=null ? `<span class="tag">Book p.${q.qpage}</span>` : "")) +
+    (srcName==="Sameh Allithy Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : (q.qpage!=null ? `<span class="tag">Book p.${q.qpage}</span>` : "") + (q.ref ? `<span class="tag">ID: ${aiEsc(q.ref)}</span>` : "")) +
     ((q.links&&q.links[0]) ? `<a class="tag link" href="${q.links[0].url}" target="_blank" rel="noopener">&#9654; Video Explanation</a>` : "");
 
   main.innerHTML = `
@@ -1533,20 +1379,28 @@ function pick(qid, choiceIdx){
   if(isDone(qid)) return;
   const q = activeSet.find(x=>x.id===qid);
   // First wrong attempt: warn and allow one more try (not recorded)
-  if(q && choiceIdx!==q.correct && !(qid in triedWrong)){
+  const firstKnown = answered[qid] && (answered[qid].first===true || answered[qid].first===false);
+  if(q && choiceIdx!==q.correct && !(qid in triedWrong) && !firstKnown){
     triedWrong[qid] = choiceIdx;
+    const cur0 = answered[qid] || (answered[qid] = {choice:null, correct:false, note:""});   // keeps the first attempt even if the page is closed now
+    cur0.first = false;
+    persist();
     render(); showRetryPopup();
     return;
   }
   if(triedWrong[qid]===choiceIdx) return;
   const note = (answered[qid] && answered[qid].note) || "";
+  const prevFirst = answered[qid] ? answered[qid].first : undefined;
   const secs = (qTimer.id===qid) ? Math.min(timerElapsed(), TIME_CAP) : 0;
-  answered[qid] = {choice:choiceIdx, correct: choiceIdx===q.correct, note, at: new Date().toISOString()};
+  answered[qid] = {choice:choiceIdx, correct: choiceIdx===q.correct, note, at: new Date().toISOString(),
+                   first: (prevFirst===true || prevFirst===false) ? prevFirst : (choiceIdx===q.correct)};
   if(secs>0) answered[qid].time = secs;
   persist(); render();
 }
 function retry(qid){
+  const old = answered[qid], f = firstOf(old);
   delete answered[qid]; delete triedWrong[qid];
+  if(old && (f!==undefined || (old.note && String(old.note).trim()))) answered[qid] = {choice:null, correct:false, note:old.note||"", first:f};   // the first attempt is never lost
   persist(); render();
 }
 function saveNote(qid, val){
@@ -1567,10 +1421,33 @@ function updateProgress(){
   document.getElementById("progressLine").textContent = `${doneQ} questions answered so far`;
 }
 
+
+/* ===== First-try tracking ===== */
+function firstOf(a){
+  if(!a) return undefined;
+  if(a.first===true || a.first===false) return a.first;
+  return a.choice!=null ? !!a.correct : undefined;       // older answers: assumed to be the first try
+}
+function firstStatsFrom(obj, idSet){
+  let tried=0, ok=0;
+  Object.keys(obj||{}).forEach(id=>{
+    if(idSet && !idSet.has(+id)) return;
+    const f = firstOf(obj[id]); if(f===undefined) return;
+    tried++; if(f) ok++;
+  });
+  return {tried, ok, rate: tried ? Math.round(ok/tried*100) : 0};
+}
+function firstTag(a){
+  if(!a) return "";
+  if(a.first===true) return " &middot; &#127942; first try";
+  if(a.first===false && a.correct) return " &middot; 2nd try";
+  return "";
+}
 let reviewKind = "wrong";
-const REVIEW_LABEL = {wrong:"Mistake Review Mode", flagged:"Flagged Questions", comment:"Questions with Comments"};
-const REVIEW_BTN = {wrong:"wrongBtn", flagged:"flaggedBtn", comment:"commentBtn"};
+const REVIEW_LABEL = {wrong:"Mistake Review Mode", flagged:"Flagged Questions", comment:"Questions with Comments", first:"Answered correctly on the first try"};
+const REVIEW_BTN = {wrong:"wrongBtn", flagged:"flaggedBtn", comment:"commentBtn", first:"firstBtn"};
 function reviewTest(kind, id){
+  if(kind==="first") return firstOf(answered[id])===true;
   if(kind==="flagged") return !!flagged[id];
   if(kind==="comment") return hasNote(id);
   return isDone(id) && !answered[id].correct;
@@ -1599,7 +1476,7 @@ async function reviewList(kind){
   });
   current = activeSet.length ? activeSet[0].id : null;
   if(!activeSet.length){
-    const msg = {wrong:"No mistakes to review.", flagged:"No flagged questions.", comment:"No questions have comments yet."}[kind];
+    const msg = {wrong:"No mistakes to review.", flagged:"No flagged questions.", comment:"No questions have comments yet.", first:"No first-try correct answers yet."}[kind];
     document.getElementById("main").innerHTML = `<div class="card empty"><p>${msg}</p></div>`;
     updateProgress(); return;
   }
@@ -1700,7 +1577,7 @@ function importProgress(inp){
       const cur=answered[id];
       if(cur&&cur.choice!=null){ keep++; return; }          // already solved here: keep existing answer
       if(ch===null){ if(typeof e.note==="string"&&e.note.trim()&&!(cur&&cur.note)){ merged[id]={choice:null,correct:false,note:e.note}; noteOnly++; } return; }
-      merged[id]={choice:ch,correct:!!e.correct,note:(cur&&cur.note)||(typeof e.note==="string"?e.note:""),at:e.at||undefined, time:(Number.isFinite(+e.time)&&+e.time>0)?Math.round(+e.time):undefined};
+      merged[id]={choice:ch,correct:!!e.correct,note:(cur&&cur.note)||(typeof e.note==="string"?e.note:""),first:(e.first===true||e.first===false)?e.first:undefined, at:e.at||undefined, time:(Number.isFinite(+e.time)&&+e.time>0)?Math.round(+e.time):undefined};
       add++;
     });
     if(!add&&!noteOnly){ alert("Nothing new to import.\n\nAlready solved here (kept): "+keep+"\nInvalid entries: "+bad); return; }
