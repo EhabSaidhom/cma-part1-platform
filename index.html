@@ -122,6 +122,8 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .qbtn.flagged{outline:2px solid var(--flag)}
 .qbtn{position:relative}
 .tag.refid{cursor:pointer}
+.qlink{color:var(--brand);font-weight:700;text-decoration:none}
+.qlink:hover{text-decoration:underline}
 .amark{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle;margin-inline-end:6px;border:1.5px solid rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(0,0,0,.18)}
 .amark.g{background:#22a559}.amark.y{background:#f2b200}.amark.r{background:#d93025}
 .qbtn.m-g::before,.qbtn.m-y::before,.qbtn.m-r::before{content:"";position:absolute;bottom:2px;right:2px;width:9px;height:9px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.2)}
@@ -2068,7 +2070,7 @@ function renderStudentHistory(){
   const s = (adminStudents||[]).find(x=>x.user_id===histUid); if(!s){ box.innerHTML=""; return; }
   const rows = histFiltered(s), shown = rows.slice(0,300);
   const when = t => isNaN(t) ? "&ndash;" : new Date(t).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
-  const body = shown.map(r=>`<tr><td>${when(r.t)}</td><td>${r.unit}</td><td>${aiEsc(r.sub)}</td><td>#${r.id}</td><td>${r.choice}</td>
+  const body = shown.map(r=>`<tr><td>${when(r.t)}</td><td>${r.unit}</td><td>${aiEsc(r.sub)}</td><td><a href="#" class="qlink" title="Open this question" onclick="goToQuestion(${r.id});return false">#${r.id}</a></td><td>${r.choice}</td>
       <td style="color:${r.ok?"var(--ok)":"var(--bad)"};font-weight:700">${r.ok?"&#10003; Correct":"&#10007; Wrong"}</td><td style="white-space:nowrap">${markDot(r.mk)}${markLabel(r.mk)}</td><td>${r.secs?fmtDur(r.secs):"&ndash;"}</td></tr>`).join("")
     || `<tr><td colspan="8" style="text-align:center;color:var(--muted)">No answers in this period</td></tr>`;
   const opt = (v,l)=>`<option value="${v}" ${histRange===v?"selected":""}>${l}</option>`;
@@ -2179,6 +2181,29 @@ function copyRef(el, id){
   }catch(e){}
   const ta=document.createElement("textarea"); ta.value=String(id); document.body.appendChild(ta); ta.select();
   try{ document.execCommand("copy"); }catch(e){} ta.remove(); done();
+}
+
+
+/* ===== Open a question from a reference (used by the admin Solving History) ===== */
+async function goToQuestion(id){
+  id = Number(id);
+  const loc = histIdMap()[id];
+  if(!loc){ alert("This question is no longer in the question bank."); return; }
+  let src = null;
+  ((manifest[loc.u.n] && manifest[loc.u.n][loc.sub] && manifest[loc.u.n][loc.sub].files) || []).forEach(f=>{ if((f.ids||[]).includes(id)) src = f.source || "Sameh Allithy Target"; });
+  closeDashboard(); closeAdmin();
+  // make sure the filters do not hide this question
+  if(globalSourceFilter !== "all" && src && !srcMatch(src)){ globalSourceFilter = src; localStorage.setItem("cma_global_source", src); }
+  if(onlyUnanswered && isDone(id)){ onlyUnanswered = false; localStorage.setItem("cma_only_unanswered","0"); }
+  populateGlobalSourceSelect();
+  openUnits.add(loc.u.n); if(loc.u.group) openGroups.add(loc.u.group);
+  buildTree();
+  await selectSub(loc.u, loc.sub, null);
+  if(src && srcFilter !== src){
+    srcFilter = src; activeSet = subAll.filter(q => (q.source||"Sameh Allithy Target") === src);
+  }
+  if(activeSet.some(q=>q.id===id)){ current = id; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else alert("Could not open question #"+id+" (its file may not be loaded).");
 }
 
 (async function init(){
