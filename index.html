@@ -266,6 +266,8 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .dash-card{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center}
 .filters .chip{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
 .filters .chip:hover{color:var(--brand)}
+.filters .reset-chip{margin-inline-start:10px;color:var(--bad);text-decoration:none;border:1px solid var(--bad);border-radius:12px;padding:0 9px}
+.filters .reset-chip:hover{background:var(--bad);color:#fff}
 .unsolved-src{border:1px solid var(--line);border-radius:10px;margin:8px 0;background:var(--bg)}
 .unsolved-src>summary{cursor:pointer;padding:10px 12px;display:flex;gap:10px;align-items:center;font-size:.85rem;list-style:none}
 .unsolved-src .uname{flex:1;font-weight:700}
@@ -1340,7 +1342,7 @@ function render(){
       <div class="filters">
         ${reviewMode ? `<span style="color:var(--flag);font-weight:700">${REVIEW_LABEL[reviewKind]||"Review"}</span>` : ''}
         <span>All ${total}</span><span class="chip" title="Jump to the next unsolved question" onclick="jumpNext('not')">Not Attempted ${notAtt}</span>
-        <span class="chip" title="Jump to the next correct answer" onclick="jumpNext('correct')">Correct ${corr}</span><span class="chip" title="Jump to the next wrong answer" onclick="jumpNext('wrong')">Wrong ${wrong}</span><span class="chip" title="Jump to the next flagged question" onclick="jumpNext('flagged')">Flagged ${flg}</span>
+        <span class="chip" title="Jump to the next correct answer" onclick="jumpNext('correct')">Correct ${corr}</span><span class="chip" title="Jump to the next wrong answer" onclick="jumpNext('wrong')">Wrong ${wrong}</span><span class="chip" title="Jump to the next flagged question" onclick="jumpNext('flagged')">Flagged ${flg}</span>${(!reviewMode && activeSubKey) ? `<span class="chip reset-chip" title="Make every question of this sub-unit unanswered again (flags and comments are kept)" onclick="resetSubHistory()">&#8634; Clear solve history</span>` : ""}
       </div>
       <div style="font-size:.8rem;color:var(--muted)">${markDot(attemptMark(answered[q.id]))}Question ${idx+1} of ${total}${attemptMark(answered[q.id]) ? " &middot; "+markLabel(attemptMark(answered[q.id])) : ""}</div>
     </div>
@@ -2204,6 +2206,28 @@ async function goToQuestion(id){
   }
   if(activeSet.some(q=>q.id===id)){ current = id; render(); window.scrollTo({top:0,behavior:"smooth"}); }
   else alert("Could not open question #"+id+" (its file may not be loaded).");
+}
+
+
+/* ===== Clear solve history of one sub-unit (flags and comments are kept) ===== */
+async function resetSubHistory(){
+  if(!activeSubKey || reviewMode) return;
+  const parts = activeSubKey.split("::"), u = UNITS.find(x=>String(x.n)===parts[0]), sub = parts.slice(1).join("::");
+  if(!u) return;
+  const ids = subIdsFiltered(u, sub);                                   // follows the Source filter
+  const todo = ids.filter(id=>{ const a = answered[id]; return a && (a.choice!=null || a.first===true || a.first===false); });
+  if(!todo.length){ alert("Nothing to clear: this sub-unit has no saved answers."); return; }
+  const scope = globalSourceFilter!=="all" ? "\nSource: "+globalSourceFilter.split("||").join(" + ") : "";
+  if(!confirm('Clear the solve history of "'+sub+'"?'+scope+"\n\n"+todo.length+" question(s) will become unanswered again: answers, results, first-try marks and solving times are removed (they also disappear from your performance statistics).\nYour flags and comments are kept.\n\nThis cannot be undone.")) return;
+  todo.forEach(id=>{
+    const a = answered[id], note = (a && a.note && String(a.note).trim()) ? a.note : "";
+    if(note) answered[id] = {choice:null, correct:false, note};          // keep the comment, drop the result
+    else delete answered[id];
+    delete triedWrong[id];                                                 // flagged[id] is untouched
+  });
+  qTimer = {id:null, acc:0, since:null};
+  persist(); buildTree();
+  await selectSub(u, sub, null);
 }
 
 (async function init(){
