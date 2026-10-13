@@ -121,6 +121,11 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .qbtn.wrong{background:#fbeae8; color:var(--bad); border-color:var(--bad)}
 .qbtn.flagged{outline:2px solid var(--flag)}
 .qbtn{position:relative}
+.amark{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle;margin-inline-end:6px;border:1.5px solid rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+.amark.g{background:#22a559}.amark.y{background:#f2b200}.amark.r{background:#d93025}
+.qbtn.m-g::before,.qbtn.m-y::before,.qbtn.m-r::before{content:"";position:absolute;bottom:2px;right:2px;width:9px;height:9px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.2)}
+.qbtn.m-g::before{background:#22a559}.qbtn.m-y::before{background:#f2b200}.qbtn.m-r::before{background:#d93025}
+.mark-legend{font-size:.72rem;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:2px 0 8px}
 .qbtn.has-note::after{content:"";position:absolute;top:3px;right:3px;width:6px;height:6px;border-radius:50%;background:var(--brand)}
 #noteTip{position:fixed;z-index:9999;max-width:300px;background:#1f2933;color:#fff;font-size:.8rem;line-height:1.5;padding:8px 11px;border-radius:9px;box-shadow:0 6px 20px rgba(0,0,0,.25);pointer-events:none;white-space:pre-wrap;word-break:break-word;display:none}
 #noteTip b{display:block;font-size:.7rem;opacity:.7;margin-bottom:3px}
@@ -1282,7 +1287,7 @@ function render(){
   let grid = "";
   activeSet.forEach((x,i)=>{
     const st = statusOf(x);
-    grid += `<button class="qbtn ${st!=="not"?st:""} ${x.id===q.id?"current":""} ${flagged[x.id]?"flagged":""} ${hasNote(x.id)?"has-note":""}" data-qid="${x.id}" onclick="jumpTo(${x.id})">${i+1}</button>`;
+    grid += `<button class="qbtn ${st!=="not"?st:""} ${x.id===q.id?"current":""} ${flagged[x.id]?"flagged":""} ${hasNote(x.id)?"has-note":""} ${attemptMark(answered[x.id])?"m-"+attemptMark(answered[x.id]):""}" data-qid="${x.id}" onclick="jumpTo(${x.id})">${i+1}</button>`;
   });
 
   const isAns = isDone(q.id);
@@ -1332,7 +1337,7 @@ function render(){
         <span>All ${total}</span><span class="chip" title="Jump to the next unsolved question" onclick="jumpNext('not')">Not Attempted ${notAtt}</span>
         <span class="chip" title="Jump to the next correct answer" onclick="jumpNext('correct')">Correct ${corr}</span><span class="chip" title="Jump to the next wrong answer" onclick="jumpNext('wrong')">Wrong ${wrong}</span><span class="chip" title="Jump to the next flagged question" onclick="jumpNext('flagged')">Flagged ${flg}</span>
       </div>
-      <div style="font-size:.8rem;color:var(--muted)">Question ${idx+1} of ${total}</div>
+      <div style="font-size:.8rem;color:var(--muted)">${markDot(attemptMark(answered[q.id]))}Question ${idx+1} of ${total}${attemptMark(answered[q.id]) ? " &middot; "+markLabel(attemptMark(answered[q.id])) : ""}</div>
     </div>
     ${srcBar}
     <div class="qgrid">${grid}</div>
@@ -1341,7 +1346,7 @@ function render(){
 
   <div class="card">
     <div class="qhead">
-      <h3>Question ${idx+1} of ${total}</h3>
+      <h3>${markDot(attemptMark(answered[q.id]))}Question ${idx+1} of ${total}</h3>
       <div class="tools">
         <button class="${flagged[q.id]?'flag-on':''}" onclick="toggleFlag(${q.id})">${flagged[q.id]?'&#9733; Flagged':'&#9734; Flag'}</button>
         ${!reviewMode ? `<button class="cert-btn" onclick="openCertificate(${q.unit})">&#127891; Unit Certificate</button>` : ''}
@@ -1437,6 +1442,13 @@ function firstStatsFrom(obj, idSet){
   });
   return {tried, ok, rate: tried ? Math.round(ok/tried*100) : 0};
 }
+function attemptMark(a){          // g = correct on the first try, y = correct on the 2nd try, r = failed (wrong)
+  if(!a || a.choice==null) return "";
+  if(!a.correct) return "r";
+  return firstOf(a)===false ? "y" : "g";
+}
+function markLabel(m){ return m==="g" ? "First try" : m==="y" ? "2nd try" : m==="r" ? "Failed" : ""; }
+function markDot(m){ return m ? `<span class="amark ${m}" title="${markLabel(m)}"></span>` : ""; }
 function firstTag(a){
   if(!a) return "";
   if(a.first===true) return " &middot; &#127942; first try";
@@ -2035,7 +2047,7 @@ function studentHistoryRows(s){
   Object.keys(s.answeredObj||{}).forEach(id=>{
     const a = s.answeredObj[id]; if(!a || a.choice==null) return;
     const loc = idx[id], t = a.at ? Date.parse(a.at) : NaN;
-    rows.push({id, t, choice:"ABCD"[a.choice]||"?", ok:!!a.correct, secs:a.time||0,
+    rows.push({id, t, choice:"ABCD"[a.choice]||"?", ok:!!a.correct, mk:attemptMark(a), secs:a.time||0,
       unit: loc ? uName(loc.u,"&middot;") : "(question no longer in the bank)", sub: loc ? loc.sub : ""});
   });
   const tv = r => isNaN(r.t) ? -1e15 : r.t;
@@ -2054,8 +2066,8 @@ function renderStudentHistory(){
   const rows = histFiltered(s), shown = rows.slice(0,300);
   const when = t => isNaN(t) ? "&ndash;" : new Date(t).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
   const body = shown.map(r=>`<tr><td>${when(r.t)}</td><td>${r.unit}</td><td>${aiEsc(r.sub)}</td><td>#${r.id}</td><td>${r.choice}</td>
-      <td style="color:${r.ok?"var(--ok)":"var(--bad)"};font-weight:700">${r.ok?"&#10003; Correct":"&#10007; Wrong"}</td><td>${r.secs?fmtDur(r.secs):"&ndash;"}</td></tr>`).join("")
-    || `<tr><td colspan="7" style="text-align:center;color:var(--muted)">No answers in this period</td></tr>`;
+      <td style="color:${r.ok?"var(--ok)":"var(--bad)"};font-weight:700">${r.ok?"&#10003; Correct":"&#10007; Wrong"}</td><td style="white-space:nowrap">${markDot(r.mk)}${markLabel(r.mk)}</td><td>${r.secs?fmtDur(r.secs):"&ndash;"}</td></tr>`).join("")
+    || `<tr><td colspan="8" style="text-align:center;color:var(--muted)">No answers in this period</td></tr>`;
   const opt = (v,l)=>`<option value="${v}" ${histRange===v?"selected":""}>${l}</option>`;
   box.innerHTML = `
     <div class="dash-section-title" style="margin-top:18px">Solving History &mdash; ${aiEsc(s.name||s.email)}</div>
@@ -2065,13 +2077,14 @@ function renderStudentHistory(){
       <span style="font-size:.78rem;color:var(--muted)">${rows.length} answers${rows.length>300?" (showing the latest 300; export for all)":""}</span>
       <button onclick="exportStudentHistoryCsv()" style="padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:.78rem;cursor:pointer">Export CSV</button>
     </div>
-    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>When</th><th>Unit</th><th>Sub-unit</th><th>Question</th><th>Answer</th><th>Result</th><th>Time</th></tr></thead><tbody>${body}</tbody></table></div>
+    <div class="mark-legend"><span><span class="amark g"></span>Correct on the first try</span><span><span class="amark y"></span>Correct on the 2nd try</span><span><span class="amark r"></span>Failed (wrong)</span></div>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>When</th><th>Unit</th><th>Sub-unit</th><th>Question</th><th>Answer</th><th>Result</th><th>Attempt</th><th>Time</th></tr></thead><tbody>${body}</tbody></table></div>
     <div class="time-note">Answers saved before date tracking have no timestamp and appear only under &ldquo;All time&rdquo;. Notes are not shown here.</div>`;
 }
 function exportStudentHistoryCsv(){
   const s = (adminStudents||[]).find(x=>x.user_id===histUid); if(!s) return;
-  const rows = [["Date","Unit","Sub-unit","Question ID","Student answer","Result","Seconds"]].concat(histFiltered(s).map(r=>[
-    isNaN(r.t) ? "" : new Date(r.t).toISOString().replace("T"," ").slice(0,19), r.unit.replace(/&middot;/g,"-"), r.sub, r.id, r.choice, r.ok?"Correct":"Wrong", r.secs||""]));
+  const rows = [["Date","Unit","Sub-unit","Question ID","Student answer","Result","Attempt","Seconds"]].concat(histFiltered(s).map(r=>[
+    isNaN(r.t) ? "" : new Date(r.t).toISOString().replace("T"," ").slice(0,19), r.unit.replace(/&middot;/g,"-"), r.sub, r.id, r.choice, r.ok?"Correct":"Wrong", markLabel(r.mk), r.secs||""]));
   const csv = "\ufeff"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
   const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
   a.download = "history-"+(s.email||"student").replace(/[^a-z0-9@._-]/gi,"_")+".csv"; document.body.appendChild(a); a.click(); a.remove();
