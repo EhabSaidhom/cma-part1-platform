@@ -266,6 +266,10 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .dash-card{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center}
 .filters .chip{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
 .filters .chip:hover{color:var(--brand)}
+.filters .rate{border-radius:12px;padding:0 9px;font-weight:700;background:var(--bg);border:1px solid var(--line);color:var(--muted)}
+.filters .rate.good{color:#16794a;border-color:#16794a;background:rgba(34,165,89,.1)}
+.filters .rate.mid{color:#9a6b00;border-color:#d9a400;background:rgba(242,178,0,.12)}
+.filters .rate.low{color:var(--bad);border-color:var(--bad);background:rgba(217,48,37,.08)}
 .filters .reset-chip{margin-inline-start:10px;color:var(--bad);text-decoration:none;border:1px solid var(--bad);border-radius:12px;padding:0 9px}
 .filters .reset-chip:hover{background:var(--bad);color:#fff}
 .unsolved-src{border:1px solid var(--line);border-radius:10px;margin:8px 0;background:var(--bg)}
@@ -652,7 +656,6 @@ async function startSession(user){
   await loadManifest();
   await loadMyProfile();
   buildTree(); render();
-  openDashboard();
 }
 
 // ---------- Dashboard ----------
@@ -1287,6 +1290,11 @@ function render(){
   const total = activeSet.length, notAtt = activeSet.filter(x=>!isDone(x.id)).length;
   const corr = activeSet.filter(x=>isDone(x.id) && answered[x.id].correct).length;
   const wrong = activeSet.filter(x=>isDone(x.id) && !answered[x.id].correct).length;
+  const rateCls = v => v===null ? "" : v>=75 ? "good" : v>=60 ? "mid" : "low";
+  const succ = (corr+wrong) ? Math.round(corr/(corr+wrong)*100) : null;
+  const ftS = firstStatsFrom(answered, new Set(activeSet.map(x=>x.id)));
+  const ftR = ftS.tried ? ftS.rate : null;
+  const rateChips = `<span class="rate ${rateCls(succ)}" title="Overall success rate: correct answers / answered questions (${corr} of ${corr+wrong})">Success ${succ===null ? "&ndash;" : succ+"%"}</span><span class="rate ${rateCls(ftR)}" title="First-try success rate: correct on the first attempt / first attempts (${ftS.ok} of ${ftS.tried})">First-try ${ftR===null ? "&ndash;" : ftR+"%"}</span>`;
   const flg = activeSet.filter(x=>flagged[x.id]).length;
 
   let grid = "";
@@ -1342,7 +1350,7 @@ function render(){
       <div class="filters">
         ${reviewMode ? `<span style="color:var(--flag);font-weight:700">${REVIEW_LABEL[reviewKind]||"Review"}</span>` : ''}
         <span>All ${total}</span><span class="chip" title="Jump to the next unsolved question" onclick="jumpNext('not')">Not Attempted ${notAtt}</span>
-        <span class="chip" title="Jump to the next correct answer" onclick="jumpNext('correct')">Correct ${corr}</span><span class="chip" title="Jump to the next wrong answer" onclick="jumpNext('wrong')">Wrong ${wrong}</span><span class="chip" title="Jump to the next flagged question" onclick="jumpNext('flagged')">Flagged ${flg}</span>${(!reviewMode && activeSubKey) ? `<span class="chip reset-chip" title="Make every question of this sub-unit unanswered again (flags and comments are kept)" onclick="resetSubHistory()">&#8634; Clear solve history</span>` : ""}
+        <span class="chip" title="Jump to the next correct answer" onclick="jumpNext('correct')">Correct ${corr}</span><span class="chip" title="Jump to the next wrong answer" onclick="jumpNext('wrong')">Wrong ${wrong}</span><span class="chip" title="Jump to the next flagged question" onclick="jumpNext('flagged')">Flagged ${flg}</span>${rateChips}${(!reviewMode && activeSubKey) ? `<span class="chip reset-chip" title="Make every question of this sub-unit unanswered again (flags and comments are kept)" onclick="resetSubHistory()">&#8634; Clear solve history</span>` : ""}
       </div>
       <div style="font-size:.8rem;color:var(--muted)">${markDot(attemptMark(answered[q.id]))}Question ${idx+1} of ${total}${attemptMark(answered[q.id]) ? " &middot; "+markLabel(attemptMark(answered[q.id])) : ""}</div>
     </div>
