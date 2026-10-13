@@ -121,6 +121,7 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .qbtn.wrong{background:#fbeae8; color:var(--bad); border-color:var(--bad)}
 .qbtn.flagged{outline:2px solid var(--flag)}
 .qbtn{position:relative}
+.tag.refid{cursor:pointer}
 .amark{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle;margin-inline-end:6px;border:1.5px solid rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(0,0,0,.18)}
 .amark.g{background:#22a559}.amark.y{background:#f2b200}.amark.r{background:#d93025}
 .qbtn.m-g::before,.qbtn.m-y::before,.qbtn.m-r::before{content:"";position:absolute;bottom:2px;right:2px;width:9px;height:9px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.2)}
@@ -1326,7 +1327,7 @@ function render(){
   const linksHtml = (q.links||[]).map(l=>`<a href="${l.url}" target="_blank" rel="noopener">&#9654; ${l.label}</a>`).join("");
   const srcName = q.source || "Sameh Allithy Target";
   const pageBadges = `<span class="tag src ${srcName==="Sameh Allithy Target"?"src-target":"src-mcq"}">${srcName}</span>` +
-    (srcName==="Sameh Allithy Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : (q.qpage!=null ? `<span class="tag">Book p.${q.qpage}</span>` : "") + (q.ref ? `<span class="tag">ID: ${aiEsc(q.ref)}</span>` : "")) +
+    (srcName==="Sameh Allithy Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : (q.qpage!=null ? `<span class="tag">Book p.${q.qpage}</span>` : "") + (q.ref ? `<span class="tag">ID: ${aiEsc(q.ref)}</span>` : "") + `<span class="tag refid" onclick="copyRef(this,${q.id})" title="Question reference (database ID). Click to copy">Ref #${q.id}</span>`) +
     ((q.links&&q.links[0]) ? `<a class="tag link" href="${q.links[0].url}" target="_blank" rel="noopener">&#9654; Video Explanation</a>` : "");
 
   main.innerHTML = `
@@ -2166,6 +2167,16 @@ function exportUnsolvedCsv(src){
   const csv = "\ufeff"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
   const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
   a.download = "unsolved-"+src.replace(/[^a-z0-9]+/gi,"_")+".csv"; document.body.appendChild(a); a.click(); a.remove();
+}
+
+
+function copyRef(el, id){
+  const done=()=>{ const t=el.textContent; el.textContent="Copied \u2713"; setTimeout(()=>{ el.textContent="Ref #"+id; },1200); };
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(String(id)).then(done,done); return; }
+  }catch(e){}
+  const ta=document.createElement("textarea"); ta.value=String(id); document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); }catch(e){} ta.remove(); done();
 }
 
 (async function init(){
