@@ -1717,32 +1717,33 @@ function weeklyTimeHtml(students){
   const totSecs = w.dayTot.reduce((x,y)=>x+y,0), totQ = w.dayQ.reduce((x,y)=>x+y,0);
   const timedAny = totSecs>0;
   const dn = (d)=>d.toLocaleDateString("en-US",{weekday:"short"})+" "+d.getDate();
-  const mx = Math.max(1, ...w.dayTot);
-  const bars = w.days.map((d,i)=>`<div title="${d.toLocaleDateString()}: ${Math.round(w.dayTot[i]/60)} min, ${w.dayQ[i]} questions, ${w.dayActive[i]} active"><span>${w.dayTot[i] ? fmtMin(w.dayTot[i]) : ""}</span><i style="height:${Math.round(w.dayTot[i]/mx*52)+2}px"></i><span>${dn(d)}</span></div>`).join("");
-  const rows = w.rows.filter(r=>r.solved>0).sort((a,b)=>b.total-a.total);
+  const mx = Math.max(1, ...w.dayQ);
+  const tip = (q, sec) => q + (q===1 ? " question" : " questions") + " \u00b7 " + (sec>0 ? fmtDur(sec) + " solving time" : "no timing recorded");
+  const bars = w.days.map((d,i)=>`<div title="${d.toLocaleDateString()}: ${tip(w.dayQ[i], w.dayTot[i])} \u00b7 ${w.dayActive[i]} active"><span>${w.dayQ[i] || ""}</span><i style="height:${Math.round(w.dayQ[i]/mx*52)+2}px"></i><span>${dn(d)}</span></div>`).join("");
+  const rows = w.rows.filter(r=>r.solved>0).sort((a,b)=>b.solved-a.solved);
   const idle = w.rows.length - rows.length;
-  const body = rows.map(r=>`<tr><td>${r.st.name ? r.st.name : r.st.email}${adminTag(r.st)}</td>${r.secs.map((x,i)=>`<td title="${r.qn[i]} questions">${r.qn[i] ? fmtMin(x) : "&ndash;"}</td>`).join("")}<td><b>${fmtMin(r.total)}</b></td></tr>`).join("")
+  const body = rows.map(r=>`<tr><td>${r.st.name ? r.st.name : r.st.email}${adminTag(r.st)}</td>${r.secs.map((x,i)=>`<td title="${r.qn[i] ? tip(r.qn[i], x) : ""}">${r.qn[i] ? r.qn[i] : "&ndash;"}</td>`).join("")}<td title="${tip(r.solved, r.total)}"><b>${r.solved}</b></td></tr>`).join("")
     || `<tr><td colspan="9" style="text-align:center;color:var(--muted)">No activity in the last 7 days</td></tr>`;
-  const totRow = `<tr style="background:var(--bg);font-weight:700"><td>Total (all users)</td>${w.dayTot.map(x=>`<td>${fmtMin(x)}</td>`).join("")}<td>${fmtMin(totSecs)}</td></tr>`;
+  const totRow = `<tr style="background:var(--bg);font-weight:700"><td>Total (all users)</td>${w.dayQ.map((q,i)=>`<td title="${tip(q, w.dayTot[i])}">${q}</td>`).join("")}<td title="${tip(totQ, totSecs)}">${totQ}</td></tr>`;
   return `
-    <div class="dash-section-title">Study Time per Day &mdash; Last 7 Days (minutes)</div>
+    <div class="dash-section-title">Questions Solved per Day &mdash; Last 7 Days <span style="font-weight:400;text-transform:none;letter-spacing:0">(hover a number to see the solving time)</span></div>
     <div class="dash-cards">
-      <div class="dash-card"><div class="num">${fmtMin(totSecs)}</div><div class="lbl">Total minutes (7 days)</div></div>
       <div class="dash-card"><div class="num">${totQ}</div><div class="lbl">Questions solved (7 days)</div></div>
+      <div class="dash-card"><div class="num">${fmtDur(totSecs)}</div><div class="lbl">Total solving time</div></div>
       <div class="dash-card"><div class="num">${totSecs && totQ ? fmtDur(totSecs/Math.max(1,w.rows.reduce((a,r)=>a+r.qn.reduce((x,y)=>x+y,0),0))) : "&ndash;"}</div><div class="lbl">Avg time / question</div></div>
       <div class="dash-card"><div class="num">${w.rows.filter(r=>r.solved>0).length}</div><div class="lbl">Active users</div></div>
     </div>
     <div class="act-bars" style="height:80px">${bars}</div>
     <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>User</th>${w.days.map(d=>`<th>${dn(d)}</th>`).join("")}<th>Total</th></tr></thead><tbody>${body}${totRow}</tbody></table></div>
-    <div class="time-note" style="margin-top:-12px">${timedAny ? "" : "No timed answers found yet: timing is recorded only for answers solved after this update. "}Minutes are counted per day (admin's local date) from the time each answer was solved; ${idle} student(s) had no activity. <a href="#" onclick="exportWeeklyTimeCsv();return false">Export CSV</a></div>`;
+    <div class="time-note" style="margin-top:-12px">${timedAny ? "" : "No timed answers found yet: timing is recorded only for answers solved after this update. "}Numbers are questions solved per day (admin's local date); hover a number for the solving time; ${idle} student(s) had no activity. <a href="#" onclick="exportWeeklyTimeCsv();return false">Export CSV</a></div>`;
 }
 function exportWeeklyTimeCsv(){
   const w = weeklyCache; if(!w) return;
-  const head = ["Name","Email"].concat(w.days.map(d=>d.toISOString().slice(0,10)+" (min)"), ["Total (min)","Questions"]);
-  const rows = w.rows.filter(r=>r.solved>0).sort((a,b)=>b.total-a.total).map(r=>[r.st.name||"", r.st.email||""].concat(r.secs.map(x=>(x/60).toFixed(1)), [(r.total/60).toFixed(1), r.solved]));
+  const head = ["Name","Email"].concat(w.days.map(d=>d.toISOString().slice(0,10)+" (questions)"), ["Total questions","Total time (min)"]);
+  const rows = w.rows.filter(r=>r.solved>0).sort((a,b)=>b.solved-a.solved).map(r=>[r.st.name||"", r.st.email||""].concat(r.qn, [r.solved, (r.total/60).toFixed(1)]));
   const csv = "\ufeff"+[head].concat(rows).map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
   const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
-  a.download = "study-time-last-7-days.csv"; document.body.appendChild(a); a.click(); a.remove();
+  a.download = "questions-per-day-last-7-days.csv"; document.body.appendChild(a); a.click(); a.remove();
 }
 
 
