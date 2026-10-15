@@ -122,6 +122,35 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .qbtn.flagged{outline:2px solid var(--flag)}
 .qbtn{position:relative}
 .tag.refid{cursor:pointer}
+.newsbar{display:flex;align-items:center;gap:10px;background:#fff6dc;border-top:1px solid #f1d78a;border-bottom:1px solid #f1d78a;color:#5a4300;padding:6px 12px;font-size:.88rem}
+.newsbar.hidden{display:none}
+.newsbar .nlabel{flex:none;font-weight:800;white-space:nowrap}
+.ticker{flex:1;overflow:hidden;white-space:nowrap;cursor:pointer;min-width:0}
+.ticker-inner{display:inline-block;padding-inline-start:100%;animation:newsscroll var(--dur,40s) linear infinite}
+.ticker:hover .ticker-inner{animation-play-state:paused}
+.ticker-inner .ni{margin-inline-end:46px}
+.ticker-inner a{color:#8a5a00;font-weight:700}
+@keyframes newsscroll{to{transform:translateX(-100%)}}
+@media (prefers-reduced-motion:reduce){.ticker-inner{animation:none;padding:0}.ticker{white-space:normal}}
+.newsbar .nclose{flex:none;border:0;background:transparent;color:#5a4300;font-size:1.05rem;cursor:pointer;padding:2px 6px}
+.news-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#d93025;margin-inline-start:6px;vertical-align:middle}
+.news-dot.hidden{display:none}
+#newsModal{position:fixed;inset:0;z-index:10003;background:rgba(10,15,12,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+#newsModal .nbox{background:var(--panel);border-radius:14px;max-width:640px;width:100%;max-height:88vh;overflow:auto;padding:20px 22px;position:relative}
+#newsModal h2{margin:0 0 12px;font-size:1.1rem;padding-right:44px}
+#newsModal .nx{position:absolute;right:12px;top:12px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:1.2rem;cursor:pointer}
+.nitem{border-top:1px solid var(--line);padding:10px 0;font-size:.9rem;line-height:1.6}
+.nitem .nd{font-size:.72rem;color:var(--muted)}
+.nitem .nt{white-space:pre-wrap;word-break:break-word}
+.nitem .chip2{display:inline-block;font-size:.68rem;font-weight:700;border-radius:10px;padding:1px 8px;margin-inline-start:6px;color:#fff;background:#6b7686}
+.nitem .chip2.on{background:#16794a}.nitem .chip2.off{background:#9a6b00}
+.nform textarea,.nform input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:inherit;font-size:.88rem;margin-bottom:8px}
+.nform textarea{min-height:90px;resize:vertical}
+.nform .row{display:flex;gap:8px;flex-wrap:wrap}
+.nform .row>*{flex:1;min-width:150px}
+.nform button,.nitem button{padding:7px 13px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-size:.8rem;cursor:pointer}
+.nform button.pub{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.nitem button.del{color:var(--bad);border-color:var(--bad)}
 #videoOverlay{position:fixed;inset:0;z-index:10002;background:rgba(10,14,18,.94);display:flex;flex-direction:column}
 #videoOverlay .vbar{display:flex;gap:10px;align-items:center;padding:8px 12px;background:#1f2933;color:#fff;font-size:.85rem;flex-wrap:wrap}
 #videoOverlay .vtitle{flex:1;min-width:140px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -386,10 +415,13 @@ table.admin-table tbody tr:hover{background:var(--bg)}
     <button class="dash-link" onclick="exportProgress()" title="Download your solving history as a file">&#11015; Export History</button>
     <button class="dash-link" onclick="document.getElementById('histFile').click()" title="Upload a previously exported solving history">&#11014; Import History</button>
     <input type="file" id="histFile" accept=".json,application/json" hidden onchange="importProgress(this)">
+    <button class="dash-link" id="newsBtn" onclick="openNewsList()" title="Platform news">&#128226; News<span id="newsDot" class="news-dot hidden"></span></button>
+    <button class="dash-link hidden" id="newsAdminBtn" onclick="openNewsAdmin()" title="Write or remove platform news">&#9998; Manage News</button>
     <button class="dash-link hidden" id="adminBtn" onclick="openAdminDashboard()">&#128737; Admin Dashboard</button>
     <button onclick="switchUser()">Sign Out</button>
   </div>
 </header>
+<div id="newsBar" class="newsbar hidden"></div>
 <div style="text-align:center;padding:6px;font-size:.78rem;color:var(--muted)" id="progressLine">Loading...</div>
 <div id="nameBanner" class="hidden" style="background:#fff3cd;color:#7a5b00;text-align:center;padding:8px;font-size:.82rem;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap">
   <span>Add your name so it appears correctly on your certificates:</span>
@@ -668,6 +700,8 @@ async function startSession(user){
   await loadManifest();
   await loadMyProfile();
   buildTree(); render();
+  loadNews();
+  if(!window._newsTimer) window._newsTimer = setInterval(()=>{ if(userId) loadNews(); }, 5*60*1000);
 }
 
 // ---------- Dashboard ----------
@@ -1043,6 +1077,8 @@ async function switchUser(){
   document.getElementById("passInput").value = "";
   attachCache = {}; attachKeyLoaded = null;
   document.getElementById("adminBtn").classList.add("hidden");
+  document.getElementById("newsAdminBtn").classList.add("hidden");
+  document.getElementById("newsBar").classList.add("hidden"); newsItems = [];
   document.getElementById("nameBanner").classList.add("hidden");
   document.getElementById("loginVeil").classList.remove("hidden");
 }
@@ -1055,6 +1091,7 @@ async function loadMyProfile(){
   const nameOk = myProfile && myProfile.display_name && myProfile.display_name.trim();
   document.getElementById("nameBanner").classList.toggle("hidden", !!nameOk);
   document.getElementById("adminBtn").classList.toggle("hidden", !(myProfile && myProfile.role === "admin"));
+  document.getElementById("newsAdminBtn").classList.toggle("hidden", !(myProfile && myProfile.role === "admin"));
 }
 async function saveMyName(){
   const v = document.getElementById("nameBannerInput").value.trim();
@@ -2274,6 +2311,96 @@ function playVideo(el, ev){
 }
 function closeVideo(){ const o=document.getElementById("videoOverlay"); if(o){ const f=o.querySelector("iframe"); if(f) f.src="about:blank"; o.remove(); } }
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeVideo(); });
+
+
+/* ===== Page news (ticker written by admins) ===== */
+let newsItems = [], newsError = "";
+function newsActive(){
+  const now = Date.now();
+  return newsItems.filter(n=>n.active && (!n.expires_at || Date.parse(n.expires_at) > now)).sort((a,b)=>b.id-a.id);
+}
+function newsSeenKey(){ return "cma_news_seen_" + (userId||""); }
+function newsSeen(){ return Number(localStorage.getItem(newsSeenKey())||0); }
+function newsMaxId(){ const a = newsActive(); return a.length ? a[0].id : 0; }
+function fmtNewsDate(t){ return new Date(t).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}); }
+async function loadNews(){
+  try{
+    const { data, error } = await sb.from("news").select("*").order("created_at",{ascending:false}).limit(60);
+    if(error) throw error;
+    newsItems = data || []; newsError = "";
+  }catch(e){ newsItems = []; newsError = String(e.message||e); }
+  renderNewsBar();
+}
+function renderNewsBar(){
+  const bar = document.getElementById("newsBar"), dot = document.getElementById("newsDot");
+  if(!bar) return;
+  const items = newsActive(), unread = newsMaxId() > newsSeen();
+  if(dot) dot.classList.toggle("hidden", !unread);
+  if(!items.length || !unread){ bar.classList.add("hidden"); return; }
+  const html = items.map(n=>`<span class="ni" dir="auto">${aiEsc(n.text)}${n.link ? ` <a href="${aiEsc(n.link)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">&#8599;</a>` : ""}</span>`).join("<span class=\"ni\">&#10022;</span>");
+  const chars = items.reduce((a,n)=>a+n.text.length+12,0), dur = Math.min(150, Math.max(24, Math.round(chars*0.17)));
+  bar.innerHTML = `<span class="nlabel">&#128226; News</span><div class="ticker" onclick="openNewsList()" title="Click to read all news"><div class="ticker-inner" style="--dur:${dur}s">${html}</div></div><button class="nclose" onclick="dismissNews(event)" title="Hide until the next news">&#10005;</button>`;
+  bar.classList.remove("hidden");
+}
+function dismissNews(ev){ if(ev) ev.stopPropagation(); localStorage.setItem(newsSeenKey(), String(newsMaxId())); renderNewsBar(); }
+function closeNewsModal(){ const m=document.getElementById("newsModal"); if(m) m.remove(); }
+function newsModal(title, bodyHtml){
+  closeNewsModal();
+  const m = document.createElement("div"); m.id = "newsModal";
+  m.innerHTML = `<div class="nbox"><button class="nx" onclick="closeNewsModal()" aria-label="Close" title="Close (Esc)">&#10005;</button><h2>${title}</h2><div id="newsBody">${bodyHtml}</div></div>`;
+  m.addEventListener("click", e=>{ if(e.target===m) closeNewsModal(); });
+  document.body.appendChild(m);
+}
+function openNewsList(){
+  localStorage.setItem(newsSeenKey(), String(newsMaxId())); renderNewsBar();
+  const items = newsActive();
+  const body = items.map(n=>`<div class="nitem"><div class="nd">${fmtNewsDate(n.created_at)}</div><div class="nt" dir="auto">${aiEsc(n.text)}</div>${n.link ? `<a href="${aiEsc(n.link)}" target="_blank" rel="noopener">Open link &#8599;</a>` : ""}</div>`).join("")
+    || `<div class="nitem">${newsError ? "News is not available right now." : "No news at the moment."}</div>`;
+  newsModal("&#128226; Platform News", body);
+}
+/* admin: write / hide / delete news */
+function openNewsAdmin(){
+  if(!(myProfile && myProfile.role==="admin")) return;
+  newsModal("&#9998; Manage News", newsAdminHtml());
+}
+function newsAdminHtml(){
+  const now = Date.now();
+  const list = newsItems.slice().sort((a,b)=>b.id-a.id).map(n=>{
+    const expired = n.expires_at && Date.parse(n.expires_at) <= now;
+    const st = expired ? '<span class="chip2">Expired</span>' : n.active ? '<span class="chip2 on">Visible</span>' : '<span class="chip2 off">Hidden</span>';
+    return `<div class="nitem"><div class="nd">${fmtNewsDate(n.created_at)}${n.expires_at ? " &middot; until "+fmtNewsDate(n.expires_at) : ""}${st}</div>
+      <div class="nt" dir="auto">${aiEsc(n.text)}</div>${n.link ? `<div class="nd">${aiEsc(n.link)}</div>` : ""}
+      <div style="margin-top:6px;display:flex;gap:8px"><button onclick="newsToggle(${n.id},${!n.active})">${n.active ? "Hide" : "Show"}</button><button class="del" onclick="newsDelete(${n.id})">Delete</button></div></div>`;
+  }).join("") || '<div class="nitem">No news yet.</div>';
+  return `<div class="nform">
+      <textarea id="newsText" maxlength="500" placeholder="Write the news (e.g. New questions added to Unit 7 &middot; Platform update ...)" dir="auto"></textarea>
+      <div class="row"><input id="newsLink" placeholder="Link (optional, https://...)"><input id="newsExp" type="date" title="Hide automatically after this date (optional)"></div>
+      <div style="display:flex;gap:10px;align-items:center"><button class="pub" onclick="newsPublish()">Publish</button><span id="newsMsg" style="font-size:.8rem;color:var(--muted)">${newsError ? aiEsc(newsError) : "Shown to all students in the bar under the header."}</span></div>
+    </div><div style="margin-top:14px">${list}</div>`;
+}
+function newsMsg(t, err){ const e=document.getElementById("newsMsg"); if(e){ e.textContent=t; e.style.color = err ? "var(--bad)" : "var(--muted)"; } }
+async function newsPublish(){
+  const text = (document.getElementById("newsText").value||"").trim(), link = (document.getElementById("newsLink").value||"").trim(), exp = document.getElementById("newsExp").value;
+  if(!text){ newsMsg("Write the news first.", true); return; }
+  if(link && !/^https?:\/\//i.test(link)){ newsMsg("The link must start with http:// or https://", true); return; }
+  const row = {text, link: link||null, expires_at: exp ? new Date(exp+"T23:59:59").toISOString() : null};
+  const { error } = await sb.from("news").insert(row);
+  if(error){ newsMsg(/relation|does not exist|schema cache/i.test(error.message) ? "News is not set up yet (run supabase-news.sql)." : error.message, true); return; }
+  await loadNews(); localStorage.removeItem(newsSeenKey()); renderNewsBar();
+  const b=document.getElementById("newsBody"); if(b) b.innerHTML = newsAdminHtml(); newsMsg("Published \u2713", false);
+}
+async function newsToggle(id, on){
+  const { error } = await sb.from("news").update({active:!!on}).eq("id", id);
+  if(error){ newsMsg(error.message, true); return; }
+  await loadNews(); const b=document.getElementById("newsBody"); if(b) b.innerHTML = newsAdminHtml();
+}
+async function newsDelete(id){
+  if(!confirm("Delete this news item?")) return;
+  const { error } = await sb.from("news").delete().eq("id", id);
+  if(error){ newsMsg(error.message, true); return; }
+  await loadNews(); const b=document.getElementById("newsBody"); if(b) b.innerHTML = newsAdminHtml();
+}
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeNewsModal(); });
 
 (async function init(){
   await loadManifest();
