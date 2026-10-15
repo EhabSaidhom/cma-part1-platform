@@ -180,7 +180,7 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .source-box h4{margin:0 0 8px; font-size:.82rem; color:var(--muted)}
 .source-box a{color:var(--brand-2); font-size:.85rem; display:block; margin-bottom:4px; text-decoration:none}
 .source-box a:hover{text-decoration:underline}
-.notes{width:100%; min-height:70px; border:1px solid var(--line); border-radius:9px; padding:10px;
+.notes{width:100%; min-height:200px; resize:vertical; font-size:.95rem; line-height:1.6; border:1px solid var(--line); border-radius:9px; padding:10px;
   font-family:inherit; font-size:.85rem; background:var(--panel); color:var(--ink); resize:vertical}
 .footer-nav{display:flex; justify-content:space-between; margin-top:14px; gap:8px}
 .footer-nav .right{display:flex; gap:8px}
@@ -256,6 +256,10 @@ header.top .sub{font-size:.78rem; opacity:.85}
 
 .modal-veil.dash-veil{align-items:flex-start; padding:26px 12px; overflow-y:auto}
 .dash-box{background:var(--panel); border-radius:14px; padding:22px; max-width:980px; width:100%; text-align:left; margin:10px auto}
+.modal-x-wrap{position:sticky;top:0;height:0;z-index:30}
+.modal-x{position:absolute;right:-6px;top:-8px;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:1.3rem;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.modal-x:hover{background:var(--bg);color:var(--bad)}
+.dash-box h1,.dash-box h2{padding-right:44px}
 .dash-box h2{margin:0 0 4px; font-size:1.25rem}
 .dash-box .sub{color:var(--muted); font-size:.85rem; margin:0 0 18px}
 .dash-cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:20px}
@@ -356,11 +360,11 @@ table.admin-table tbody tr:hover{background:var(--bg)}
 </div>
 
 <div class="modal-veil hidden dash-veil" id="dashboardVeil">
-  <div class="dash-box" id="dashboardBox"></div>
+  <div class="dash-box" id="dashboardBox"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeDashboard()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="dashboardBody"></div></div>
 </div>
 
 <div class="modal-veil hidden dash-veil" id="adminVeil">
-  <div class="dash-box admin-box" id="adminBox"></div>
+  <div class="dash-box admin-box" id="adminBox"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeAdmin()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="adminBody"></div></div>
 </div>
 
 <header class="top">
@@ -732,7 +736,7 @@ function openDashboard(){
       </div>
     </div>`;
   }).join("");
-  document.getElementById("dashboardBox").innerHTML = `
+  document.getElementById("dashboardBody").innerHTML = `
     <h2>Welcome back${userEmail ? ", " + userEmail : ""}</h2>
     <p class="sub">Your progress and the platform's question library at a glance.${globalSourceFilter!=="all" ? ` <b>(filtered to ${srcLabel()})</b>` : ""}</p>
     <div class="dash-cards">
@@ -825,7 +829,7 @@ function studentStatsForUnit(st, unitN){
   return {answered:s.answered, correct:s.correct, accuracy};
 }
 async function openAdminDashboard(){
-  const box = document.getElementById("adminBox");
+  const box = document.getElementById("adminBody");
   box.innerHTML = `<p>Loading student data&hellip;</p>`;
   document.getElementById("adminVeil").classList.remove("hidden");
   try{
@@ -839,7 +843,7 @@ async function openAdminDashboard(){
 function closeAdmin(){ document.getElementById("adminVeil").classList.add("hidden"); }
 
 function renderAdminDashboard(){
-  const box = document.getElementById("adminBox");
+  const box = document.getElementById("adminBody");
   const students = adminStudents || [];
   const n = students.length;
   const active7 = students.filter(s=>s.lastActive && (Date.now()-s.lastActive.getTime())<=7*86400000).length;
@@ -1342,7 +1346,7 @@ function render(){
     (srcName==="Sameh Allithy Target" ? `<span class="tag">Question: PDF p.${q.qpage}</span><span class="tag">Explanation: PDF p.${q.apage}</span>` : (q.qpage!=null ? `<span class="tag">Book p.${q.qpage}</span>` : "")) +
     (q.ref ? `<span class="tag">ID: ${aiEsc(q.ref)}</span>` : "") +
     `<span class="tag refid" onclick="copyRef(this,${q.id})" title="Question reference (database ID). Click to copy">Ref #${q.id}</span>` +
-    ((q.links&&q.links[0]) ? `<a class="tag link" href="${q.links[0].url}" target="_blank" rel="noopener">&#9654; Video Explanation</a>` : "");
+    (q.links||[]).map(l=>`<a class="tag link" href="${l.url}" target="_blank" rel="noopener">&#9654; ${aiEsc(l.label||"Video Explanation")}</a>`).join("");
 
   main.innerHTML = `
   <div class="card">
@@ -1377,7 +1381,6 @@ function render(){
     <div class="explain ${isAns?'show':''}">
       <div class="qimg-wrap"><img src="${q.explainImage}" alt="Explanation (cropped from source PDF)"></div>
     </div>
-    ${linksHtml ? `<div class="source-box"><h4>From the source file</h4>${linksHtml}</div>` : ""}
     <div class="source-box">
       <h4>My notes for this question</h4>
       <textarea class="notes" placeholder="Write your own notes, formulas, mistakes to remember..." onchange="saveNote(${q.id}, this.value)">${(answered[q.id] && answered[q.id].note) || ""}</textarea>
@@ -2239,6 +2242,7 @@ async function resetSubHistory(){
   await selectSub(u, sub, null);
 }
 
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ const d=document.getElementById("dashboardVeil"), a=document.getElementById("adminVeil"); if(d && !d.classList.contains("hidden")) closeDashboard(); if(a && !a.classList.contains("hidden")) closeAdmin(); } });
 (async function init(){
   await loadManifest();
   buildTree();
