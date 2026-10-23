@@ -503,6 +503,10 @@ body.has-video{padding-inline-end:var(--vw)}
   #videoOverlay .vhint{display:none}
   body.has-video{padding-inline-end:0;padding-top:calc(42vh + env(safe-area-inset-top,0px))}
 }
+
+/* news ticker: Arabic direction, text moves left -> right */
+.ticker{direction:rtl}
+@keyframes newsscroll{to{transform:translateX(100%)}}
 </style>
 </head>
 <body>
@@ -1570,7 +1574,7 @@ function render(){
       <h3>${markDot(attemptMark(answered[q.id]))}Question ${idx+1} of ${total}</h3>
       <div class="tools">
         <button class="${flagged[q.id]?'flag-on':''}" onclick="toggleFlag(${q.id})">${flagged[q.id]?'&#9733; Flagged':'&#9734; Flag'}</button>
-        ${!reviewMode ? `<button class="cert-btn" onclick="openCertificate(${q.unit})">&#127891; Unit Certificate</button>` : ''}
+        ${(!reviewMode && activeSubKey) ? `<button class="cert-btn" onclick="openSubCertificate()" title="Certificate for this sub-unit and source (${aiEsc(srcFilter)})">&#127891; Sub-unit Certificate</button>` : ''}
       </div>
     </div>
     <div class="tag-row">${pageBadges}</div>
@@ -1744,6 +1748,30 @@ function openCertificate(unitN){
     <div class="name">${(myProfile && myProfile.display_name) || userEmail}</div>
     <div class="body">has successfully completed the questions for<br><b>${u ? (u.bare ? u.title : "Unit "+unitN+": "+u.title) : "Unit "+unitN}</b></div>
     <div class="score">${correct} / ${unitQs.length} &mdash; ${pct}%</div>
+    <div class="foot"><span>Date: ${today}</span><span>Nonprofit Educational Platform</span></div>
+  `;
+  document.getElementById("certModal").classList.add("open");
+}
+function openSubCertificate(){
+  if(!activeSubKey || reviewMode) return;
+  const i = activeSubKey.indexOf("::"), u = UNITS.find(x=>String(x.n)===activeSubKey.slice(0,i)), sub = activeSubKey.slice(i+2);
+  if(!u) return;
+  const src = srcFilter, ids = subIdsForSource(u, sub, src);
+  if(!ids.length){ alert("This sub-unit has no questions from this source yet."); return; }
+  const attempted = ids.filter(isDone);
+  if(attempted.length < ids.length){
+    alert("Complete all questions of this sub-unit in \"" + src + "\" first (" + attempted.length + " of " + ids.length + ") before generating a certificate.");
+    return;
+  }
+  const correct = ids.filter(id=>answered[id].correct).length, pct = Math.round(correct/ids.length*100);
+  const today = new Date().toLocaleDateString('en-US');
+  document.getElementById("certSheet").innerHTML = `
+    <div class="kicker">CMA PART 1 &middot; FINANCIAL PLANNING, PERFORMANCE, AND ANALYTICS</div>
+    <h1>Certificate of Completion</h1>
+    <div class="body">This certifies that</div>
+    <div class="name">${aiEsc((myProfile && myProfile.display_name) || userEmail)}</div>
+    <div class="body">has successfully completed all the questions of<br><b>${aiEsc(sub)}</b><br><span style="font-size:.8rem;color:#555">${aiEsc(u.bare ? u.title : "Unit "+u.n+": "+u.title)}</span><br>Source: <b>${aiEsc(src)}</b></div>
+    <div class="score">${correct} / ${ids.length} &mdash; ${pct}%</div>
     <div class="foot"><span>Date: ${today}</span><span>Nonprofit Educational Platform</span></div>
   `;
   document.getElementById("certModal").classList.add("open");
