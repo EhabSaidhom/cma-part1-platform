@@ -507,6 +507,21 @@ body.has-video{padding-inline-end:var(--vw)}
 /* news ticker: Arabic direction, text moves left -> right */
 .ticker{direction:rtl}
 @keyframes newsscroll{to{transform:translateX(100%)}}
+
+.rte{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+.rte:focus-within{border-color:var(--brand)}
+.rte-bar{display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding:6px;background:var(--bg);border-bottom:1px solid var(--line)}
+.rte-b{min-width:32px;height:32px;padding:0 7px;border:1px solid transparent;border-radius:7px;background:none;color:var(--ink);font:inherit;font-size:.8rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.rte-b:hover{background:var(--brand-soft);border-color:var(--line)}
+.rte-sel{height:32px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink);font:inherit;font-size:.78rem;padding:0 4px}
+.rte-col{width:32px;height:32px;padding:2px;border:1px solid var(--line);border-radius:7px;background:var(--panel);cursor:pointer}
+.rte-sep{width:1px;height:20px;background:var(--line);margin:0 4px}
+.rte-body{min-height:200px;max-height:70vh;overflow:auto;padding:12px;font-size:.95rem;line-height:1.7;outline:none;word-break:break-word}
+.rte-body:empty::before{content:attr(data-ph);color:var(--muted);pointer-events:none}
+.rte-body img{max-width:100%;height:auto;border-radius:6px}
+.rte-body table{border-collapse:collapse;margin:8px 0}
+.rte-body td,.rte-body th{border:1px solid var(--muted);padding:6px 10px;min-width:48px}
+.rte-body ul,.rte-body ol{padding-inline-start:26px;margin:6px 0}
 </style>
 </head>
 <body>
@@ -1589,7 +1604,7 @@ function render(){
     </div>
     <div class="source-box">
       <h4>My notes for this question</h4>
-      <textarea class="notes" placeholder="Write your own notes, formulas, mistakes to remember..." onchange="saveNote(${q.id}, this.value)">${(answered[q.id] && answered[q.id].note) || ""}</textarea>
+      ${noteEditorHtml(q.id)}
     </div>
     <div class="footer-nav">
       <button class="secondary" onclick="step(-1)" ${idx<=0?"disabled":""}>&larr; Previous</button>
@@ -1631,6 +1646,135 @@ function retry(qid){
   delete answered[qid]; delete triedWrong[qid];
   if(old && (f!==undefined || (old.note && String(old.note).trim()))) answered[qid] = {choice:null, correct:false, note:old.note||"", first:f};   // the first attempt is never lost
   persist(); render();
+}
+
+/* ===== Rich-text notes (stored as sanitized HTML prefixed with <!--rt-->; old plain-text notes still work) ===== */
+const RT = "<!--rt-->", NOTE_MAX = 900000;
+const RT_TAGS = new Set("B STRONG I EM U S STRIKE SUB SUP BR P DIV SPAN UL OL LI TABLE THEAD TBODY TR TD TH IMG H1 H2 H3 BLOCKQUOTE FONT HR".split(" "));
+const RT_DROP = /^(SCRIPT|STYLE|IFRAME|OBJECT|EMBED|LINK|META|SVG|MATH|FORM|INPUT|BUTTON|TEXTAREA|SELECT|NOSCRIPT)$/;
+const RT_STYLE = /^(text-align|direction|font-size|color|background-color|font-weight|font-style|text-decoration|text-decoration-line)$/;
+function rtClean(node){
+  [...node.childNodes].forEach(ch=>{
+    if(ch.nodeType===3) return;
+    if(ch.nodeType!==1){ ch.remove(); return; }
+    if(!RT_TAGS.has(ch.tagName)){
+      if(RT_DROP.test(ch.tagName)){ ch.remove(); return; }
+      rtClean(ch); while(ch.firstChild) ch.parentNode.insertBefore(ch.firstChild, ch); ch.remove(); return;
+    }
+    [...ch.attributes].forEach(a=>{
+      const n = a.name.toLowerCase(), v = a.value, T = ch.tagName;
+      if(n==="style"){
+        const st = v.split(";").map(x=>x.trim()).filter(x=>{ const i=x.indexOf(":"); return i>0 && RT_STYLE.test(x.slice(0,i).trim().toLowerCase()) && !/url\(|expression|javascript/i.test(x); }).join("; ");
+        if(st) ch.setAttribute("style", st); else ch.removeAttribute("style");
+      }
+      else if(n==="dir" && /^(ltr|rtl|auto)$/i.test(v)) return;
+      else if(T==="IMG" && n==="src" && /^data:image\/(png|jpe?g|gif|webp);base64,[a-z0-9+\/=]+$/i.test(v)) return;
+      else if(T==="IMG" && n==="alt") return;
+      else if(T==="FONT" && ((n==="size" && /^[1-7]$/.test(v)) || (n==="color" && /^#?[0-9a-z]{3,20}$/i.test(v)))) return;
+      else if((T==="TD"||T==="TH") && (n==="colspan"||n==="rowspan") && /^\d{1,2}$/.test(v)) return;
+      else ch.removeAttribute(a.name);
+    });
+    if(ch.tagName==="IMG" && !ch.getAttribute("src")){ ch.remove(); return; }
+    rtClean(ch);
+  });
+}
+function rtSanitize(html){
+  const tpl = document.createElement("template"); tpl.innerHTML = html; rtClean(tpl.content);
+  const d = document.createElement("div"); d.appendChild(tpl.content); return d.innerHTML;
+}
+function noteToHtml(n){
+  if(!n) return "";
+  if(typeof n==="string" && n.startsWith(RT)) return rtSanitize(n.slice(RT.length));
+  return aiEsc(String(n)).replace(/\n/g,"<br>");
+}
+function noteToText(n){
+  const tpl = document.createElement("template");
+  tpl.innerHTML = noteToHtml(n).replace(/<(br|\/p|\/div|\/li|\/tr|\/h[1-3])[^>]*>/gi,"$&\n");
+  return tpl.content.textContent;
+}
+function noteHas(n){ if(!n) return false; return !!(noteToText(n).trim() || /<(img|table)\b/i.test(noteToHtml(n))); }
+
+let rteRange = null, rteTimer = null;
+document.addEventListener("selectionchange", ()=>{
+  const b = gid("rteBody"), sel = getSelection();
+  if(b && sel.rangeCount && b.contains(sel.anchorNode)) rteRange = sel.getRangeAt(0).cloneRange();
+});
+function noteEditorHtml(qid){
+  rteRange = null;
+  const n = (answered[qid] && answered[qid].note) || "";
+  const B = (fn, label, title)=>`<button type="button" class="rte-b" title="${title}" aria-label="${title}" onmousedown="event.preventDefault()" onclick="${fn}">${label}</button>`;
+  const C = (cmd, label, title)=>B(`rteCmd('${cmd}')`, label, title);
+  const al = k=>{ const w = k==="J" ? [12,12,12,12] : [12,7,12,7]; return `<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">` + w.map((ww,i)=>`<rect x="${k==="R"?14-ww:k==="C"?(16-ww)/2:2}" y="${2+i*4}" width="${ww}" height="2" rx="1" fill="currentColor"/>`).join("") + `</svg>`; };
+  return `<div class="rte"><div class="rte-bar" role="toolbar" aria-label="Notes formatting">
+    ${C("undo","&#8630;","Undo")}${C("redo","&#8631;","Redo")}<i class="rte-sep"></i>
+    ${C("bold","<b>B</b>","Bold")}${C("italic","<i>I</i>","Italic")}${C("underline","<u>U</u>","Underline")}${C("strikeThrough","<s>S</s>","Strikethrough")}
+    <select class="rte-sel" aria-label="Font size" title="Font size" onchange="rteSize(this)"><option value="">Size</option><option value="2">Small</option><option value="3">Normal</option><option value="4">Medium</option><option value="5">Large</option><option value="6">X-Large</option></select>
+    <input type="color" class="rte-col" value="#0f5c4c" title="Text color" aria-label="Text color" onchange="rteCmd('foreColor',this.value)"><i class="rte-sep"></i>
+    ${C("justifyLeft",al("L"),"Align left")}${C("justifyCenter",al("C"),"Align center")}${C("justifyRight",al("R"),"Align right")}${C("justifyFull",al("J"),"Justify")}<i class="rte-sep"></i>
+    ${B("rteDir('ltr')","LTR","Text direction: left to right")}${B("rteDir('rtl')","RTL","Text direction: right to left (Arabic)")}<i class="rte-sep"></i>
+    ${C("insertUnorderedList","&#8226;&#8801;","Bulleted list")}${C("insertOrderedList","1.&#8801;","Numbered list")}${B("rteTable()","&#9638;","Insert table")}${B("gid('rteImg').click()","&#128444;","Insert image")}${C("removeFormat","T<sub>x</sub>","Clear formatting")}
+  </div>
+  <div id="rteBody" class="rte-body" contenteditable="true" role="textbox" aria-multiline="true" aria-label="My notes for this question" dir="auto" data-q="${qid}" data-ph="Write your own notes, formulas, mistakes to remember..." oninput="rteInput(${qid})" onblur="rteSave(${qid})" onpaste="rtePaste(event)">${noteToHtml(n)}</div>
+  <input type="file" id="rteImg" accept="image/*" hidden onchange="rteImage(this)"></div>`;
+}
+function rteFocus(){
+  const b = gid("rteBody"); if(!b) return null;
+  b.focus();
+  if(rteRange && b.contains(rteRange.startContainer)){ const s = getSelection(); s.removeAllRanges(); s.addRange(rteRange); }
+  return b;
+}
+function rteInput(qid){ const b = gid("rteBody"); if(b) b.dataset.d = "1"; clearTimeout(rteTimer); rteTimer = setTimeout(()=>rteSave(qid), 600); }
+function rteCmd(cmd, arg){
+  const b = rteFocus(); if(!b) return;
+  document.execCommand("styleWithCSS", false, true);
+  document.execCommand(cmd, false, arg || null);
+  rteInput(+b.dataset.q);
+}
+function rteSize(sel){ const v = sel.value; sel.value = ""; if(v) rteCmd("fontSize", v); }
+function rteBlock(b){
+  let n = getSelection().anchorNode; if(n && n.nodeType===3) n = n.parentNode;
+  const k = n && n.closest ? n.closest("div,p,li,td,th,h1,h2,h3,blockquote") : null;
+  return (k && k!==b && b.contains(k)) ? k : null;
+}
+function rteDir(d){
+  const b = rteFocus(); if(!b) return;
+  let k = rteBlock(b);
+  if(!k){ document.execCommand("formatBlock", false, "div"); k = rteBlock(b); }
+  if(k){ k.setAttribute("dir", d); rteInput(+b.dataset.q); }
+}
+function rteTable(){
+  const v = prompt("Table size (rows x columns), e.g. 3x4", "3x3"); if(!v) return;
+  const m = /^\s*(\d{1,2})\s*[x,\u00d7*]\s*(\d{1,2})\s*$/i.exec(v);
+  if(!m || +m[1]<1 || +m[2]<1 || +m[1]>20 || +m[2]>10){ alert("Use a format like 3x4 (max 20 rows and 10 columns)."); return; }
+  let h = "<table><tbody>";
+  for(let r=0;r<+m[1];r++){ h += "<tr>" + "<td><br></td>".repeat(+m[2]) + "</tr>"; }
+  rteCmd("insertHTML", h + "</tbody></table><div><br></div>");
+}
+function rteImage(inp){ const f = inp.files && inp.files[0]; inp.value = ""; if(f) rteInsertFile(f); }
+function rteInsertFile(f){
+  if(!/^image\//.test(f.type)){ alert("Please choose an image file."); return; }
+  const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = ()=>{
+    const k = Math.min(1, 900/Math.max(img.width, img.height)), c = document.createElement("canvas");
+    c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0,0,c.width,c.height); x.drawImage(img,0,0,c.width,c.height);
+    URL.revokeObjectURL(url);
+    rteCmd("insertImage", c.toDataURL("image/jpeg", 0.72));
+  };
+  img.onerror = ()=>{ URL.revokeObjectURL(url); alert("Could not read this image."); };
+  img.src = url;
+}
+function rtePaste(e){
+  const f = [...((e.clipboardData && e.clipboardData.files) || [])].find(x=>/^image\//.test(x.type));
+  if(f){ e.preventDefault(); rteInsertFile(f); }
+}
+function rteSave(qid){
+  clearTimeout(rteTimer);
+  const b = gid("rteBody"); if(!b || +b.dataset.q!==qid || b.dataset.d!=="1") return;
+  const html = rtSanitize(b.innerHTML), val = noteHas(RT+html) ? RT+html : "";
+  if(val.length > NOTE_MAX){ alert("This note is too large (probably too many or too large images). Remove an image so it can be saved."); return; }
+  b.dataset.d = "";
+  if(((answered[qid] && answered[qid].note) || "") !== val) saveNote(qid, val);
 }
 function saveNote(qid, val){
   if(!answered[qid]) answered[qid] = {choice:null, correct:false, note:val};
@@ -1780,13 +1924,13 @@ function closeCert(){ document.getElementById("certModal").classList.remove("ope
 
 
 /* ===== Note tooltip on question-number hover ===== */
-function hasNote(id){ return !!(answered[id] && answered[id].note && String(answered[id].note).trim()); }
+function hasNote(id){ return noteHas(answered[id] && answered[id].note); }
 (function(){
   const tip=document.createElement("div"); tip.id="noteTip"; document.body.appendChild(tip);
   function show(btn){
     const id=+btn.dataset.qid; if(!hasNote(id)){ tip.style.display="none"; return; }
     tip.innerHTML="<b>Question "+btn.textContent+" \u2014 My note</b>";
-    const t=document.createElement("div"); t.dir="auto"; t.textContent=answered[id].note; tip.appendChild(t);
+    const t=document.createElement("div"); t.dir="auto"; t.textContent=noteToText(answered[id].note).slice(0,500); tip.appendChild(t);
     tip.style.display="block";
     const r=btn.getBoundingClientRect(), w=tip.offsetWidth, h=tip.offsetHeight;
     let x=Math.min(Math.max(8,r.left+r.width/2-w/2), window.innerWidth-w-8);
