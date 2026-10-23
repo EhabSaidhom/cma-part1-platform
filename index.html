@@ -486,6 +486,11 @@ header.top h1{font-size:1.08rem}
 .sec .sbar i{background:var(--sc)}
 .sec .dsub:hover{background:color-mix(in srgb,var(--sc) 10%,transparent)}
 .sec .hunit[open]{border-color:var(--sc)}
+
+.review-bar{max-width:1240px;margin:0 auto;padding:4px 18px 0}
+.review-bar .tree-actions{margin:0;flex-wrap:wrap;gap:8px}
+.review-bar .tree-actions button{flex:0 0 auto;padding:8px 14px;font-size:.8rem;border-radius:20px;box-shadow:var(--shadow)}
+.tree-panel{display:none!important}
 </style>
 </head>
 <body>
@@ -533,6 +538,14 @@ header.top h1{font-size:1.08rem}
 </header>
 <div id="newsBar" class="newsbar hidden"></div>
 <div style="text-align:center;padding:6px;font-size:.78rem;color:var(--muted)" id="progressLine">Loading...</div>
+<div id="reviewBar" class="review-bar">
+  <div class="tree-actions">
+    <button id="wrongBtn" onclick="reviewList('wrong')">Review Mistakes</button>
+    <button id="flaggedBtn" onclick="reviewList('flagged')">&#9873; Flagged</button>
+    <button id="commentBtn" onclick="reviewList('comment')">&#128221; Comments</button>
+    <button id="firstBtn" onclick="reviewList('first')">&#127942; First try</button>
+  </div>
+</div>
 <div id="nameBanner" class="hidden" style="background:#fff3cd;color:#7a5b00;text-align:center;padding:8px;font-size:.82rem;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap">
   <span>Add your name so it appears correctly on your certificates:</span>
   <input id="nameBannerInput" placeholder="Full name" style="padding:5px 8px;border:1px solid #e0c46a;border-radius:6px;font-family:inherit">
@@ -552,17 +565,9 @@ header.top h1{font-size:1.08rem}
 <div class="practice-bar hidden" id="practiceBar">
   <button onclick="goHome()" aria-label="Back to curriculum">&larr; Curriculum</button>
   <div id="crumb" aria-live="polite"></div>
-  <button id="treeToggle" onclick="toggleTree()" aria-controls="treePanel">&#9776; Units</button>
 </div>
 <div class="layout hidden" id="layout">
   <aside class="tree-panel" id="treePanel">
-    <div class="tree-actions">
-      <button id="wrongBtn" onclick="reviewList('wrong')">Review Mistakes</button>
-      <button id="flaggedBtn" onclick="reviewList('flagged')">&#9873; Flagged</button>
-      <button id="commentBtn" onclick="reviewList('comment')">&#128221; Comments</button>
-      <button id="firstBtn" onclick="reviewList('first')">&#127942; First try</button>
-      <button id="allBtn" onclick="goHome()">&#8962; Curriculum</button>
-    </div>
     <h2>Units (20)</h2>
     <div class="src-global-row">
       <label for="globalSrcSelect">Source:</label>
@@ -1672,6 +1677,7 @@ async function reviewList(kind){
   enterPractice();
   reviewMode = true; reviewKind = kind;
   activeSubKey = null;
+  updateCrumb();
   Object.values(REVIEW_BTN).forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove("on"); });
   const bt = document.getElementById(REVIEW_BTN[kind]); if(bt) bt.classList.add("on");
   document.querySelectorAll(".sub-item.active").forEach(el=>el.classList.remove("active"));
@@ -2555,21 +2561,10 @@ function showView(v){
   if(v==="home"){ qTimer = {id:null, acc:0, since:null}; renderHome(); } else updateCrumb();
   window.scrollTo(0,0);
 }
-function applyTree(){
-  const pref = localStorage.getItem("cma_tree_hidden");
-  const hide = innerWidth<=820 ? true : (pref===null ? false : pref==="1");
-  gid("layout").classList.toggle("tree-hidden", hide);
-  gid("treeToggle").setAttribute("aria-expanded", String(!hide));
-}
+function applyTree(){ gid("layout").classList.add("tree-hidden"); }
 function enterPractice(){
   if(view!=="practice"){ history.pushState({v:"practice"}, "", "#practice"); showView("practice"); }
   applyTree();
-}
-function toggleTree(){
-  const l = gid("layout"); l.classList.toggle("tree-hidden");
-  const h = l.classList.contains("tree-hidden");
-  if(innerWidth>820) localStorage.setItem("cma_tree_hidden", h ? "1" : "0");
-  gid("treeToggle").setAttribute("aria-expanded", String(!h));
 }
 function goHome(){
   reviewMode = false; activeSubKey = null; activeSet = []; current = null;
