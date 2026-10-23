@@ -377,6 +377,115 @@ table.admin-table tbody tr:hover{background:var(--bg)}
 .src-global-row{display:flex; align-items:center; gap:6px; font-size:.74rem; color:var(--muted); margin:2px 0 10px}
 .src-global-row select{flex:1; padding:5px 6px; border:1px solid var(--line); border-radius:7px;
   background:var(--panel); color:var(--ink); font-family:inherit; font-size:.76rem}
+
+/* ===== v2 redesign (additive overrides) ===== */
+:root{--bg:#f3f6f4;--line:#e0e7e3;--brand-soft:#e6f2ee;--ok-bg:#e8f6ee;--bad-bg:#fdecea;--shadow:0 1px 2px rgba(16,40,32,.06),0 4px 14px rgba(16,40,32,.05)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--brand-soft:#17322c;--ok-bg:#15301f;--bad-bg:#371c19;--shadow:none}}
+:root[data-theme="dark"]{--brand-soft:#17322c;--ok-bg:#15301f;--bad-bg:#371c19;--shadow:none}
+body{-webkit-font-smoothing:antialiased}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+header.top{padding:12px 24px;box-shadow:0 2px 10px rgba(10,50,40,.18);position:relative;z-index:20}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .logo{display:grid;place-items:center;width:42px;height:42px;border-radius:11px;background:rgba(255,255,255,.16);font-weight:900;font-size:.8rem;letter-spacing:.04em}
+header.top h1{font-size:1.08rem}
+.user-bar{gap:8px;flex-wrap:wrap}
+#userEmailLbl{opacity:.85;font-size:.74rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-bar .dash-link,.user-bar>button,.more>summary{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:9px;padding:7px 12px;text-decoration:none;font-size:.78rem;cursor:pointer;list-style:none;font-family:inherit}
+.user-bar .dash-link:hover,.user-bar>button:hover,.more>summary:hover{background:rgba(255,255,255,.24)}
+.more{position:relative}.more>summary::-webkit-details-marker{display:none}
+.more-menu{position:absolute;right:0;top:calc(100% + 6px);min-width:210px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.2);padding:6px;display:flex;flex-direction:column;z-index:40}
+.more-menu .dash-link{background:none;border:0;color:var(--ink);text-align:left;padding:9px 11px;border-radius:8px;font-size:.82rem;width:100%}
+.more-menu .dash-link:hover{background:var(--bg)}
+#progressLine{padding:8px;font-size:.76rem}
+/* home */
+#homeView{max-width:1240px;margin:0 auto;padding:22px 18px 48px}
+.home-hero h2{margin:0;font-size:1.65rem;letter-spacing:-.01em}
+.home-hero p{margin:4px 0 16px;color:var(--muted);font-size:.92rem}
+.home-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.home-tools input[type=search]{flex:1 1 280px;min-width:0;padding:11px 14px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--ink);font:inherit;font-size:.92rem;box-shadow:var(--shadow)}
+.home-tools select{padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--ink);font:inherit;font-size:.85rem;max-width:100%}
+.home-tools label{display:flex;gap:7px;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer}
+.home-tools label input{accent-color:var(--brand);width:17px;height:17px}
+.home-stats{font-size:.8rem;color:var(--muted);margin:4px 0 18px}
+.home-group{margin:26px 0 12px;font-size:.78rem;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:10px}
+.home-group::after{content:"";flex:1;height:1px;background:var(--line)}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;align-items:start}
+.dcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.dcard.off{opacity:.55}
+.dhead{display:flex;gap:12px;align-items:flex-start}
+.dnum{flex:0 0 40px;height:40px;border-radius:11px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:1rem}
+.dhead h3{margin:0;font-size:.98rem;line-height:1.3}
+.dmeta{margin:3px 0 0;font-size:.74rem;color:var(--muted)}
+.dbar,.sbar{height:6px;border-radius:6px;background:var(--bg);overflow:hidden}
+.dbar{margin:12px 0 8px}
+.dbar i,.sbar i{display:block;height:100%;background:var(--brand-2);border-radius:6px}
+.dsubs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.dsub{width:100%;display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;align-items:center;text-align:left;background:none;border:1px solid transparent;border-radius:10px;padding:9px 10px;cursor:pointer;color:var(--ink);font:inherit}
+.dsub:hover{background:var(--brand-soft);border-color:var(--line)}
+.dsub:disabled{opacity:.45;cursor:default;background:none}
+.dsub .sn{font-weight:800;font-size:.78rem;color:var(--brand);min-width:30px}
+.dsub .st{font-size:.84rem;line-height:1.3}
+.dsub .sc{font-size:.72rem;color:var(--muted);white-space:nowrap}
+.dsub .sc.done{color:var(--ok);font-weight:700}
+.dsub .sbar{grid-column:2 / 4;height:4px}
+.home-empty{padding:50px 20px;text-align:center;color:var(--muted)}
+/* practice */
+.practice-bar{max-width:1400px;margin:0 auto;padding:12px 14px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.practice-bar button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:8px 14px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;box-shadow:var(--shadow)}
+.practice-bar button:hover{border-color:var(--brand);color:var(--brand)}
+#crumb{flex:1;min-width:0;font-size:.84rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#crumb b{color:var(--ink)}
+.layout.tree-hidden .tree-panel{display:none}
+.tree-panel{width:340px;flex:0 0 340px;border-radius:14px;box-shadow:var(--shadow)}
+.tree-search{width:100%;padding:9px 11px;margin:0 0 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:inherit;font-size:.82rem}
+.sub-item.active{background:var(--brand)}
+.unit .unit-title{color:var(--brand)}
+.unit.group > summary .unit-title{color:var(--ink)}
+.card{border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.qimg-wrap{border-radius:12px;padding:18px}
+.options{gap:12px}
+.opt{padding:16px 10px;border-radius:12px;font-size:1.05rem;min-height:56px;transition:border-color .12s,background .12s,transform .12s}
+.opt:hover:not(.tried):not(.correct):not(.wrong){background:var(--brand-soft);transform:translateY(-1px)}
+.opt.correct{background:var(--ok-bg);border-width:2px}
+.opt.wrong{background:var(--bad-bg);border-width:2px}
+.opt.correct::after{content:"\2713"}.opt.wrong::after{content:"\2717"}
+.result-banner.correct{background:var(--ok-bg)}.result-banner.wrong{background:var(--bad-bg)}
+.kbd-hint{margin-inline-start:8px;font-size:.72rem;opacity:.8}
+.qbtn.current{background:var(--brand-soft)}
+.qbtn.correct{background:var(--ok-bg)}.qbtn.wrong{background:var(--bad-bg)}
+.footer-nav button{border-radius:10px;padding:10px 20px}
+@media(max-width:820px){.tree-panel{width:100%;flex:none}.dgrid{grid-template-columns:1fr}header.top{padding:12px 14px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:18px;align-items:start}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.sec-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.sec-head h3{margin:0;font-size:1.08rem;line-height:1.3;color:var(--brand)}
+.sec-pct{flex:none;background:var(--brand);color:#fff;font-weight:800;font-size:.82rem;border-radius:20px;padding:4px 11px}
+.sec-desc{margin:8px 0 6px;font-size:.84rem;line-height:1.55;color:var(--muted)}
+.sec-meta{font-size:.74rem;color:var(--muted);margin-bottom:12px}
+.hunits{display:flex;flex-direction:column;gap:8px}
+.hunit{border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.hunit>summary{list-style:none;cursor:pointer;display:flex;gap:12px;align-items:center;padding:10px 12px}
+.hunit>summary::-webkit-details-marker{display:none}
+.hunit>summary::after{content:"\25BE";margin-inline-start:auto;color:var(--muted);transition:transform .15s}
+.hunit[open]>summary::after{transform:rotate(180deg)}
+.hunit.off{opacity:.55}.hunit.off>summary{cursor:default}
+.hu-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.hu-t{font-weight:700;font-size:.88rem;line-height:1.3}
+.hunit .dnum{flex:0 0 34px;height:34px;font-size:.9rem;border-radius:9px}
+.hunit .dsubs{padding:0 8px 8px}
+.hunit .sbar{height:4px;background:var(--line)}
+@media(max-width:560px){.sgrid{grid-template-columns:1fr}}
+
+.sec{--sct:var(--sc);border-top:6px solid var(--sc)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sec{--sct:color-mix(in srgb,var(--sc) 50%,#fff)}}
+:root[data-theme="dark"] .sec{--sct:color-mix(in srgb,var(--sc) 50%,#fff)}
+.sec .sec-head h3,.sec .dsub .sn{color:var(--sct)}
+.sec .sec-pct,.sec .dnum{background:var(--sc)}
+.sec .sbar i{background:var(--sc)}
+.sec .dsub:hover{background:color-mix(in srgb,var(--sc) 10%,transparent)}
+.sec .hunit[open]{border-color:var(--sc)}
 </style>
 </head>
 <body>
@@ -405,19 +514,20 @@ table.admin-table tbody tr:hover{background:var(--bg)}
 </div>
 
 <header class="top">
-  <div>
+  <div class="brand"><span class="logo" aria-hidden="true">CMA</span><div>
     <h1>CMA Part 1 Practice Platform</h1>
-    <div class="sub">Nonprofit educational platform &middot; Financial Planning, Performance, and Analytics</div>
-  </div>
+    <div class="sub">Nonprofit educational platform &middot; Financial Planning, Performance, and Analytics</div></div></div>
   <div class="user-bar">
     <span id="userEmailLbl"></span>
     <button class="dash-link" onclick="openDashboard()">&#128202; My Performance</button>
-    <button class="dash-link" onclick="exportProgress()" title="Download your solving history as a file">&#11015; Export History</button>
-    <button class="dash-link" onclick="document.getElementById('histFile').click()" title="Upload a previously exported solving history">&#11014; Import History</button>
-    <input type="file" id="histFile" accept=".json,application/json" hidden onchange="importProgress(this)">
     <button class="dash-link" id="newsBtn" onclick="openNewsList()" title="Platform news">&#128226; News<span id="newsDot" class="news-dot hidden"></span></button>
-    <button class="dash-link hidden" id="newsAdminBtn" onclick="openNewsAdmin()" title="Write or remove platform news">&#9998; Manage News</button>
-    <button class="dash-link hidden" id="adminBtn" onclick="openAdminDashboard()">&#128737; Admin Dashboard</button>
+    <details class="more" id="moreMenu"><summary aria-label="More tools">&#8943; More</summary><div class="more-menu">
+      <button class="dash-link" onclick="exportProgress()" title="Download your solving history as a file">&#11015; Export History</button>
+      <button class="dash-link" onclick="document.getElementById('histFile').click()" title="Upload a previously exported solving history">&#11014; Import History</button>
+      <input type="file" id="histFile" accept=".json,application/json" hidden onchange="importProgress(this)">
+      <button class="dash-link hidden" id="newsAdminBtn" onclick="openNewsAdmin()" title="Write or remove platform news">&#9998; Manage News</button>
+      <button class="dash-link hidden" id="adminBtn" onclick="openAdminDashboard()">&#128737; Admin Dashboard</button>
+    </div></details>
     <button onclick="switchUser()">Sign Out</button>
   </div>
 </header>
@@ -429,14 +539,29 @@ table.admin-table tbody tr:hover{background:var(--bg)}
   <button onclick="saveMyName()" style="padding:5px 12px;border:none;border-radius:6px;background:#7a5b00;color:#fff;cursor:pointer;font-family:inherit">Save</button>
 </div>
 
-<div class="layout">
-  <aside class="tree-panel">
+<section id="homeView" aria-label="Curriculum">
+  <div class="home-hero"><h2>CMA Part 1 &mdash; Curriculum</h2><p>Choose a unit to start practicing its questions.</p></div>
+  <div class="home-tools">
+    <input type="search" id="homeSearch" placeholder="Search units or topics (e.g. variance, 8.2, budgeting)" oninput="renderHome()" aria-label="Search units and topics">
+    <select id="homeSrcSelect" onchange="setGlobalSource(this.value)" aria-label="Question source"></select>
+    <label><input type="checkbox" id="homeOnlyUn" onchange="setOnlyUnanswered(this.checked)"> Only not answered</label>
+  </div>
+  <div class="home-stats" id="homeStats"></div>
+  <div id="homeGrid"></div>
+</section>
+<div class="practice-bar hidden" id="practiceBar">
+  <button onclick="goHome()" aria-label="Back to curriculum">&larr; Curriculum</button>
+  <div id="crumb" aria-live="polite"></div>
+  <button id="treeToggle" onclick="toggleTree()" aria-controls="treePanel">&#9776; Units</button>
+</div>
+<div class="layout hidden" id="layout">
+  <aside class="tree-panel" id="treePanel">
     <div class="tree-actions">
       <button id="wrongBtn" onclick="reviewList('wrong')">Review Mistakes</button>
       <button id="flaggedBtn" onclick="reviewList('flagged')">&#9873; Flagged</button>
       <button id="commentBtn" onclick="reviewList('comment')">&#128221; Comments</button>
       <button id="firstBtn" onclick="reviewList('first')">&#127942; First try</button>
-      <button id="allBtn" onclick="clearReview()">All Units</button>
+      <button id="allBtn" onclick="goHome()">&#8962; Curriculum</button>
     </div>
     <h2>Units (20)</h2>
     <div class="src-global-row">
@@ -444,6 +569,7 @@ table.admin-table tbody tr:hover{background:var(--bg)}
       <select id="globalSrcSelect" onchange="setGlobalSource(this.value)"></select>
     </div>
     <label class="only-un"><input type="checkbox" id="onlyUnanswered" onchange="setOnlyUnanswered(this.checked)"> Only Not answered Question</label>
+    <input type="search" class="tree-search" id="treeSearch" placeholder="Search units..." oninput="filterTree()" aria-label="Search units">
     <div id="tree"></div>
   </aside>
 
@@ -698,6 +824,8 @@ async function startSession(user){
   await loadManifest();
   await loadMyProfile();
   buildTree(); render();
+  if(location.hash==="#practice") history.replaceState(null,"",location.pathname+location.search);
+  showView("home");
   loadNews();
   if(!window._newsTimer) window._newsTimer = setInterval(()=>{ if(userId) loadNews(); }, 5*60*1000);
 }
@@ -1184,6 +1312,8 @@ function buildTree(){
   Object.values(groups).forEach(g=>{
     g.gs.innerHTML = `<span class="unit-title">${g.name}</span><span class="badge">${manifest===null ? '<span class="spinner"></span>loading...' : g.count + " questions"}</span>`;
   });
+  filterTree();
+  if(view==="home") renderHome();
 }
 
 let manifest = null;   // {unit: {sub: {file, ids}}}
@@ -1239,6 +1369,8 @@ function populateGlobalSourceSelect(){
   sel.innerHTML = `<option value="all">All sources (${srcs.length})</option>` +
     srcs.map(s=>`<option value="${s}">${s}</option>`).join("");
   sel.value = globalSourceFilter;
+  const hs = document.getElementById("homeSrcSelect"); if(hs){ hs.innerHTML = sel.innerHTML; hs.value = globalSourceFilter; }
+  const hc = document.getElementById("homeOnlyUn"); if(hc) hc.checked = onlyUnanswered;
   const cb = document.getElementById("onlyUnanswered"); if(cb) cb.checked = onlyUnanswered;
 }
 function setGlobalSource(v){
@@ -1290,6 +1422,7 @@ async function ensureSubLoaded(u, s){
 }
 
 async function selectSub(u, sub, btnEl){
+  enterPractice();
   document.querySelectorAll(".sub-item.active").forEach(el=>el.classList.remove("active"));
   if(btnEl) btnEl.classList.add("active");
   activeSubKey = u.n + "::" + sub;
@@ -1328,6 +1461,7 @@ function statusOf(q){
 }
 
 function render(){
+  updateCrumb();
   const main = document.getElementById("main");
   if(!activeSet.length){
     main.innerHTML = `<div class="card empty">
@@ -1367,7 +1501,7 @@ function render(){
       if(i===q.correct) cls += " correct";
       else if(i===answered[q.id].choice) cls += " wrong";
     } else if(triedWrong[q.id]===i) cls += " tried";
-    optsHtml += `<div class="${cls}" onclick="pick(${q.id},${i})">${letter}</div>`;
+    optsHtml += `<div class="${cls}" role="button" tabindex="0" aria-label="Answer ${letter}" onclick="pick(${q.id},${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();pick(${q.id},${i})}">${letter}</div>`;
   });
 
   let bannerHtml = "";
@@ -1375,9 +1509,9 @@ function render(){
     const userLetter = letters[answered[q.id].choice];
     const correctLetter = letters[q.correct];
     if(answered[q.id].correct){
-      bannerHtml = `<div class="result-banner show correct">&#10003; Correct!${firstTag(answered[q.id])}${timeTag(answered[q.id])}</div>`;
+      bannerHtml = `<div role="status" class="result-banner show correct">&#10003; Correct!${firstTag(answered[q.id])}${timeTag(answered[q.id])}</div>`;
     }else{
-      bannerHtml = `<div class="result-banner show wrong">&#10007; Incorrect. Your answer: ${userLetter} &middot; Correct answer: ${correctLetter}${timeTag(answered[q.id])}</div>`;
+      bannerHtml = `<div role="status" class="result-banner show wrong">&#10007; Incorrect. Your answer: ${userLetter} &middot; Correct answer: ${correctLetter}${timeTag(answered[q.id])}</div>`;
     }
   }
 
@@ -1424,7 +1558,7 @@ function render(){
     </div>
     <div class="tag-row">${pageBadges}</div>
     <div class="qimg-wrap"><img src="${q.image}" alt="Question text (cropped from source PDF)"></div>
-    <div class="pick-label">Select your answer</div>
+    <div class="pick-label">Select your answer <span class="kbd-hint">A&ndash;D or 1&ndash;4 &middot; &larr; &rarr; to navigate</span></div>
     <div class="options">${optsHtml}</div>
     ${bannerHtml}
     ${aiPanelHtml(q)}
@@ -1535,6 +1669,7 @@ function reviewTest(kind, id){
 }
 function reviewWrong(){ return reviewList("wrong"); }
 async function reviewList(kind){
+  enterPractice();
   reviewMode = true; reviewKind = kind;
   activeSubKey = null;
   Object.values(REVIEW_BTN).forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove("on"); });
@@ -2407,6 +2542,138 @@ async function newsDelete(id){
   await loadNews(); const b=document.getElementById("newsBody"); if(b) b.innerHTML = newsAdminHtml();
 }
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeNewsModal(); });
+
+
+/* ===== Curriculum home, view switching, tree search, keyboard ===== */
+let view = "home";
+const gid = id => document.getElementById(id);
+function showView(v){
+  view = v;
+  gid("homeView").classList.toggle("hidden", v!=="home");
+  gid("layout").classList.toggle("hidden", v!=="practice");
+  gid("practiceBar").classList.toggle("hidden", v!=="practice");
+  if(v==="home"){ qTimer = {id:null, acc:0, since:null}; renderHome(); } else updateCrumb();
+  window.scrollTo(0,0);
+}
+function applyTree(){
+  const pref = localStorage.getItem("cma_tree_hidden");
+  const hide = innerWidth<=820 ? true : (pref===null ? false : pref==="1");
+  gid("layout").classList.toggle("tree-hidden", hide);
+  gid("treeToggle").setAttribute("aria-expanded", String(!hide));
+}
+function enterPractice(){
+  if(view!=="practice"){ history.pushState({v:"practice"}, "", "#practice"); showView("practice"); }
+  applyTree();
+}
+function toggleTree(){
+  const l = gid("layout"); l.classList.toggle("tree-hidden");
+  const h = l.classList.contains("tree-hidden");
+  if(innerWidth>820) localStorage.setItem("cma_tree_hidden", h ? "1" : "0");
+  gid("treeToggle").setAttribute("aria-expanded", String(!h));
+}
+function goHome(){
+  reviewMode = false; activeSubKey = null; activeSet = []; current = null;
+  Object.values(REVIEW_BTN).forEach(id=>{ const el=gid(id); if(el) el.classList.remove("on"); });
+  if(location.hash==="#practice") history.back(); else showView("home");
+}
+window.addEventListener("popstate", ()=>showView(location.hash==="#practice" ? "practice" : "home"));
+function updateCrumb(){
+  const c = gid("crumb"); if(!c) return;
+  if(reviewMode){ c.innerHTML = "<b>"+aiEsc(REVIEW_LABEL[reviewKind]||"Review")+"</b>"; return; }
+  if(!activeSubKey){ c.textContent = ""; return; }
+  const i = activeSubKey.indexOf("::"), u = UNITS.find(x=>String(x.n)===activeSubKey.slice(0,i));
+  c.innerHTML = (u ? aiEsc(u.title)+" &rsaquo; " : "") + "<b>"+aiEsc(activeSubKey.slice(i+2))+"</b>";
+}
+function openSub(n, sub){ const u = UNITS.find(x=>x.n===n); if(u) selectSub(u, sub, null); }
+const SECTIONS = [
+ {name:"External Financial Reporting Decisions", c:"#0f5c4c", pct:15, units:[1,2,3,4,5,6], desc:"Focuses on financial statement preparation and interpretation under GAAP or IFRS, including balance sheet, income statement, cash flow statement, revenue recognition, and consolidated reporting"},
+ {name:"Cost Management", c:"#1f5fbf", pct:15, units:[7,8,9,10,11], desc:"Addresses cost behavior, cost allocation, standard costing, variance analysis, and cost control strategies"},
+ {name:"Planning, Budgeting, and Forecasting", c:"#7b3fa0", pct:20, units:[12,13,14], desc:"Covers strategic planning, budgeting processes, forecasting techniques, and aligning resources with organizational goals"},
+ {name:"Performance Management", c:"#b45309", pct:20, units:[15,16], desc:"Includes performance measurement systems, balanced scorecard, KPIs, variance analysis, and evaluating operational efficiency"},
+ {name:"Internal Controls", c:"#b4233a", pct:15, units:[17,18], desc:"Covers control frameworks, risk management, internal audit functions, and compliance with regulatory requirements"},
+ {name:"Technology and Analytics", c:"#0e7490", pct:15, units:[19,20], desc:"Focuses on data management, analytics tools, business intelligence, and ethical considerations in technology use"},
+];
+const homeOpen = new Set();
+function homeUnitHtml(u, q){
+  const gname = u.group || "";
+  const all = u.subs.concat(extraSubs(u));
+  const unitHit = !q || u.title.toLowerCase().includes(q) || ("unit "+u.n).includes(q) || String(u.n)===q;
+  const rows = [];
+  all.forEach(s=>{
+    const ids = subIdsFiltered(u,s), total = ids.length, done = ids.filter(isDone).length, left = total-done;
+    if(manifest && (globalSourceFilter!=="all" || onlyUnanswered) && (onlyUnanswered ? left===0 : total===0)) return;
+    if(!(unitHit || s.toLowerCase().includes(q))) return;
+    rows.push({s,total,done,left});
+  });
+  if(!rows.length) return null;
+  const tot = rows.reduce((a,r)=>a+r.total,0), done = rows.reduce((a,r)=>a+r.done,0);
+  const pct = tot ? Math.round(done/tot*100) : 0;
+  const meta = !tot ? "Not available yet" : `${tot} questions` + (done ? ` &middot; ${tot-done} left` : "");
+  const open = (q || homeOpen.has(u.n)) && tot;
+  const html = `<details class="hunit${tot?"":" off"}" data-n="${u.n}" ${open?"open":""}><summary><span class="dnum">${u.bare?"&sect;":u.n}</span><span class="hu-main"><span class="hu-t">${aiEsc(u.title)}</span><span class="dmeta">${meta}</span>`
+    + (tot ? `<span class="sbar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Progress ${pct}%"><i style="width:${pct}%"></i></span>` : "") + `</span></summary>`
+    + `<ul class="dsubs">` + rows.map(r=>{
+      const m = /^(\S+)\s+(.*)$/.exec(r.s), num = m ? m[1] : "", name = m ? m[2] : r.s;
+      const sp = r.total ? Math.round(r.done/r.total*100) : 0;
+      const cnt = !r.total ? "&ndash;" : r.left===0 ? `&#10003; ${r.total}` : `${r.done}/${r.total}`;
+      return `<li><button class="dsub" ${r.total?"":"disabled"} onclick="openSub(${u.n}, this.dataset.s)" data-s="${aiEsc(r.s)}"><span class="sn">${aiEsc(num)}</span><span class="st">${aiEsc(name)}</span><span class="sc${r.total&&r.left===0?" done":""}">${cnt}</span>`
+        + (r.total ? `<span class="sbar"><i style="width:${sp}%"></i></span>` : "") + `</button></li>`;
+    }).join("") + `</ul></details>`;
+  return {html, tot, done, nSubs: rows.length};
+}
+function renderHome(){
+  const grid = gid("homeGrid"); if(!grid) return;
+  const q = (gid("homeSearch").value||"").trim().toLowerCase();
+  let out = "", nUnits = 0, nSubs = 0, nQ = 0, extra = "";
+  const used = new Set();
+  const card = (title, pct, desc, units, color)=>{
+    const parts = units.map(u=>homeUnitHtml(u,q)).filter(Boolean);
+    if(!parts.length) return "";
+    const tot = parts.reduce((a,r)=>a+r.tot,0), done = parts.reduce((a,r)=>a+r.done,0), pp = tot ? Math.round(done/tot*100) : 0;
+    nUnits += parts.length; nSubs += parts.reduce((a,r)=>a+r.nSubs,0); nQ += tot;
+    return `<article class="sec" style="--sc:${color||"#475569"}"><div class="sec-head"><h3>${aiEsc(title)}</h3>${pct?`<span class="sec-pct" title="Exam weight">${pct}%</span>`:""}</div>`
+      + (desc ? `<p class="sec-desc">${aiEsc(desc)}</p>` : "")
+      + `<div class="sec-meta">${parts.length} units &middot; ${tot} questions${done?` &middot; ${pp}% done`:""}</div>`
+      + `<div class="hunits">${parts.map(r=>r.html).join("")}</div></article>`;
+  };
+  SECTIONS.forEach(sc=>{
+    const us = sc.units.map(n=>UNITS.find(x=>x.n===n)).filter(Boolean); us.forEach(u=>used.add(u.n));
+    if(!q || sc.name.toLowerCase().includes(q) || sc.desc.toLowerCase().includes(q) || us.some(u=>true)) out += card(sc.name, sc.pct, sc.desc, us, sc.c);
+  });
+  const groups = {};
+  UNITS.filter(u=>!used.has(u.n)).forEach(u=>{ (groups[u.group||"Other"] = groups[u.group||"Other"] || []).push(u); });
+  Object.keys(groups).forEach(g=>{ const c = card(g, 0, "", groups[g]); if(c) extra += `<div class="home-group">${aiEsc(g)}</div><div class="sgrid">${c}</div>`; });
+  grid.innerHTML = manifest===null ? '<div class="home-empty"><span class="spinner"></span>Loading...</div>'
+    : ((out||extra) ? `<div class="sgrid">${out}</div>${extra}` : '<div class="home-empty">No units match your search or filters.</div>');
+  gid("homeStats").textContent = manifest ? `${nUnits} units \u00b7 ${nSubs} topics \u00b7 ${nQ} questions` + (globalSourceFilter!=="all" ? " \u00b7 source: "+srcLabel() : "") : "";
+  grid.querySelectorAll("details.hunit").forEach(d=>d.addEventListener("toggle",()=>{ const n = +d.dataset.n; if(d.open) homeOpen.add(n); else homeOpen.delete(n); }));
+}
+function filterTree(){
+  const inp = gid("treeSearch"), root = gid("tree"); if(!inp || !root) return;
+  const q = inp.value.trim().toLowerCase();
+  root.querySelectorAll("details.unit:not(.group)").forEach(d=>{
+    const unitHit = !q || d.querySelector("summary").textContent.toLowerCase().includes(q);
+    let any = false;
+    d.querySelectorAll(".sub-item").forEach(b=>{ const hit = unitHit || b.textContent.toLowerCase().includes(q); b.classList.toggle("hidden", !hit); any = any || hit; });
+    d.classList.toggle("hidden", !any);
+    if(q && any) d.open = true;
+  });
+  root.querySelectorAll("details.unit.group").forEach(g=>{
+    const any = [...g.querySelectorAll("details.unit")].some(d=>!d.classList.contains("hidden"));
+    g.classList.toggle("hidden", !any);
+    if(q && any) g.open = true;
+  });
+}
+document.addEventListener("click", e=>{ const m = gid("moreMenu"); if(m && m.open && !m.contains(e.target)) m.open = false; });
+document.addEventListener("keydown", e=>{
+  if(view!=="practice" || e.ctrlKey || e.metaKey || e.altKey) return;
+  const t = e.target; if(t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+  if(document.querySelector(".modal-veil:not(.hidden), #retryVeil, #videoOverlay, #pdfOverlay, #newsModal, #certModal.open")) return;
+  const k = e.key.toLowerCase(), map = {a:0,b:1,c:2,d:3,"1":0,"2":1,"3":2,"4":3};
+  if(k in map && current!=null){ e.preventDefault(); pick(current, map[k]); }
+  else if(e.key==="ArrowRight"){ step(1); }
+  else if(e.key==="ArrowLeft"){ step(-1); }
+});
 
 (async function init(){
   await loadManifest();
