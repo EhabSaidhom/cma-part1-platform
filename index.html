@@ -550,6 +550,26 @@ body.has-video{padding-inline-end:var(--vw)}
 .qbtn{position:relative}
 @media(max-width:1100px),(min-width:1101px){body.has-video .qlayout{grid-template-columns:1fr}}
 @media(max-width:1100px){.qlayout{grid-template-columns:1fr}.chat{position:static;max-height:520px}}
+
+.subvideos{max-width:1400px;margin:0 auto;padding:10px 14px 0}
+.svbar{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:0 14px}
+.svbar>summary{cursor:pointer;list-style:none;padding:11px 0;font-weight:700;font-size:.9rem;color:var(--brand)}
+.svbar>summary::-webkit-details-marker{display:none}
+.svbar>summary span{color:var(--muted);font-weight:600}
+.svbar>summary::after{content:"\25BE";float:inline-end;color:var(--muted)}
+.svbar[open]>summary::after{transform:rotate(180deg)}
+.svlist{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.svlist li{display:flex;align-items:center;gap:2px;background:var(--brand-soft);border:1px solid var(--line);border-radius:22px;padding:2px 4px 2px 4px}
+.svlink{padding:6px 11px;font-size:.84rem;font-weight:600;color:var(--brand);text-decoration:none;border-radius:20px}
+.svlink:hover{text-decoration:underline}
+.sv-b{border:0;background:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:4px 5px}
+.sv-b:hover{color:var(--ink)}
+.svnone{margin:0 0 10px;color:var(--muted);font-size:.84rem}
+.svform{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.svform input{flex:1 1 220px;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:inherit;font-size:.86rem}
+.svform button,.svadd{padding:8px 14px;border-radius:9px;font-size:.84rem}
+.svadd{margin:0 0 12px}
+.svb{font-style:normal;font-size:.68rem;font-weight:700;color:var(--brand);background:var(--brand-soft);border:1px solid var(--line);border-radius:10px;padding:1px 6px;margin-inline-start:6px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -625,6 +645,7 @@ body.has-video{padding-inline-end:var(--vw)}
   <button onclick="goHome()" aria-label="Back to curriculum">&larr; Curriculum</button>
   <div id="crumb" aria-live="polite"></div>
 </div>
+<div id="subVideos" class="subvideos hidden"></div>
 <div class="layout hidden" id="layout">
   <aside class="tree-panel" id="treePanel">
     <h2>Units (20)</h2>
@@ -890,6 +911,7 @@ async function startSession(user){
   buildTree(); render();
   if(location.hash==="#practice") history.replaceState(null,"",location.pathname+location.search);
   showView("home");
+  loadSubVideos();
   loadNews();
   if(!window._newsTimer) window._newsTimer = setInterval(()=>{ if(userId) loadNews(); }, 5*60*1000);
 }
@@ -1758,6 +1780,51 @@ async function chatDel(qid, id){
     chatCache[qid] = (chatCache[qid]||[]).filter(m=>m.id!==id); chatCounts[qid] = chatCache[qid].length;
   }catch(e){ console.warn(e); alert("Could not delete the message."); }
   if(chatQid===qid){ chatRender(qid); chatBadges(); }
+}
+
+/* ===== Review videos per sub-unit (Supabase table sub_videos; see sub-videos-setup.sql) ===== */
+let subVideos = {}, svOpen = {}, svForm = null;
+async function loadSubVideos(){
+  try{
+    const { data, error } = await sb.from("sub_videos").select("id,unit,sub,title,url,position").order("position",{ascending:true}).order("id",{ascending:true}).limit(3000);
+    if(error) throw error;
+    subVideos = {}; (data||[]).forEach(v=>{ const k = v.unit+"::"+v.sub; (subVideos[k] = subVideos[k] || []).push(v); });
+  }catch(e){ console.warn("Review videos unavailable", e); }
+  if(view==="home") renderHome(); else renderSubVideos();
+}
+function renderSubVideos(){
+  const box = gid("subVideos"); if(!box) return;
+  const key = activeSubKey, adm = attIsAdmin(), list = (key && subVideos[key]) || [];
+  if(view!=="practice" || reviewMode || !key || (!list.length && !adm)){ box.classList.add("hidden"); box.innerHTML = ""; return; }
+  const i = key.indexOf("::"), un = +key.slice(0,i), u = UNITS.find(x=>x.n===un), sub = key.slice(i+2);
+  const fresh = u ? !subIdsFiltered(u, sub).some(isDone) : true;
+  const open = (key in svOpen) ? svOpen[key] : fresh;
+  const items = list.map(v=>`<li><a class="svlink" href="${aiEsc(v.url)}" data-label="${aiEsc(v.title)}" target="_blank" rel="noopener" onclick="return playVideo(this,event)">&#9654; ${aiEsc(v.title)}</a>`
+    + (adm ? `<button type="button" class="sv-b" aria-label="Edit video" title="Edit" onclick="svEdit(${v.id})">&#9998;</button><button type="button" class="sv-b" aria-label="Delete video" title="Delete" onclick="svDelete(${v.id})">&#10005;</button>` : "") + `</li>`).join("");
+  const cur = svForm && svForm.id ? list.find(v=>v.id===svForm.id) : null;
+  const form = !adm ? "" : svForm
+    ? `<div class="svform"><input id="svT" type="text" maxlength="200" placeholder="Video title" value="${aiEsc(cur?cur.title:"")}" aria-label="Video title"><input id="svU" type="url" placeholder="Link (YouTube or Google Drive)" value="${aiEsc(cur?cur.url:"")}" aria-label="Video link" dir="ltr"><button type="button" onclick="svSave()">Save</button><button type="button" class="sec" onclick="svForm=null;renderSubVideos()">Cancel</button></div>`
+    : `<button type="button" class="svadd" onclick="svForm={id:0};renderSubVideos();gid('svT').focus()">+ Add video</button>`;
+  box.classList.remove("hidden");
+  box.innerHTML = `<details class="svbar" ${open?"open":""}><summary>&#9654; Review before you start${list.length?` <span>(${list.length})</span>`:""}</summary>`
+    + (list.length ? `<ul class="svlist">${items}</ul>` : `<p class="svnone">No review videos for this sub-unit yet.</p>`) + form + `</details>`;
+  box.querySelector("details").addEventListener("toggle", e=>{ svOpen[key] = e.target.open; });
+}
+function svEdit(id){ svForm = {id}; svOpen[activeSubKey] = true; renderSubVideos(); const t = gid("svT"); if(t) t.focus(); }
+async function svSave(){
+  const key = activeSubKey; if(!key || !svForm) return;
+  const i = key.indexOf("::"), unit = +key.slice(0,i), sub = key.slice(i+2);
+  const title = gid("svT").value.trim(), url = gid("svU").value.trim();
+  if(!title || !/^https?:\/\/\S+$/i.test(url)){ alert("Enter a title and a valid link starting with http:// or https://"); return; }
+  const r = svForm.id ? await sb.from("sub_videos").update({title, url}).eq("id", svForm.id) : await sb.from("sub_videos").insert({unit, sub, title, url});
+  if(r.error){ alert("Could not save the video. Make sure sub-videos-setup.sql was run in Supabase.\n" + (r.error.message||"")); return; }
+  svForm = null; await loadSubVideos();
+}
+async function svDelete(id){
+  if(!confirm("Delete this video link?")) return;
+  const { error } = await sb.from("sub_videos").delete().eq("id", id);
+  if(error){ alert("Could not delete: " + (error.message||"")); return; }
+  await loadSubVideos();
 }
 function pick(qid, choiceIdx){
   if(isDone(qid)) return;
@@ -2764,17 +2831,24 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ const d=document
 function driveFileId(url){ const m = /drive\.google\.com\/file\/d\/([\w-]+)/.exec(url||""); return m ? m[1] : null; }
 function videoStart(url){ const m = /[?&]t=(\d+)/.exec(url||""); return m ? Number(m[1]) : 0; }
 function clockText(sec){ const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), x=sec%60; return (h? h+":"+String(m).padStart(2,"0") : m)+":"+String(x).padStart(2,"0"); }
+function videoEmbed(url){
+  const d = driveFileId(url), t = videoStart(url);
+  if(d) return {src:`https://drive.google.com/file/d/${d}/preview${t?`?t=${t}`:""}`, t};
+  const y = /(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/.exec(url||"");
+  if(y){ const m = /[?&](?:t|start)=(\d+)/.exec(url); const st = m ? Number(m[1]) : 0; return {src:`https://www.youtube-nocookie.com/embed/${y[1]}${st?`?start=${st}`:""}`, t:0}; }
+  return null;
+}
 function playVideo(el, ev){
   if(ev && (ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.button===1)) return true;      // let the browser open a new tab on request
-  const url = el.href, id = driveFileId(url);
-  if(!id) return true;                                                                    // not a Drive file: normal link
+  const url = el.href, emb = videoEmbed(url);
+  if(!emb) return true;                                                                   // not Drive/YouTube: normal link
   closeVideo();
-  const t = videoStart(url);
+  const t = emb.t;
   const ov = document.createElement("div"); ov.id = "videoOverlay";
   ov.innerHTML = `<div class="vbar"><span class="vtitle">&#9654; ${aiEsc(el.dataset.label||"Video")}</span>
       <a href="${aiEsc(url)}" target="_blank" rel="noopener">Open in a new tab</a>
       <button type="button" onclick="closeVideo()" aria-label="Close video" title="Close (Esc)">&#10005;</button></div>
-    <div class="vwrap"><iframe src="https://drive.google.com/file/d/${id}/preview${t?`?t=${t}`:""}" allow="autoplay; fullscreen; encrypted-media" allowfullscreen referrerpolicy="no-referrer"></iframe></div>
+    <div class="vwrap"><iframe src="${aiEsc(emb.src)}" allow="autoplay; fullscreen; encrypted-media" allowfullscreen referrerpolicy="no-referrer"></iframe></div>
     ${t ? `<div class="vhint">This explanation starts at ${clockText(t)}. If the player begins from the start, use the link above or drag to ${clockText(t)}.</div>` : ""}`;
   document.body.appendChild(ov);
   document.body.classList.add("has-video");
@@ -2896,7 +2970,8 @@ function goHome(){
   if(location.hash==="#practice") history.back(); else showView("home");
 }
 window.addEventListener("popstate", ()=>showView(location.hash==="#practice" ? "practice" : "home"));
-function updateCrumb(){
+function updateCrumb(){ updateCrumb0(); renderSubVideos(); }
+function updateCrumb0(){
   const c = gid("crumb"); if(!c) return;
   if(reviewMode){ c.innerHTML = "<b>"+aiEsc(REVIEW_LABEL[reviewKind]||"Review")+"</b>"; return; }
   if(!activeSubKey){ c.textContent = ""; return; }
@@ -2935,7 +3010,7 @@ function homeUnitHtml(u, q){
       const m = /^(\S+)\s+(.*)$/.exec(r.s), num = m ? m[1] : "", name = m ? m[2] : r.s;
       const sp = r.total ? Math.round(r.done/r.total*100) : 0;
       const cnt = !r.total ? "&ndash;" : r.left===0 ? `&#10003; ${r.total}` : `${r.done}/${r.total}`;
-      return `<li><button class="dsub" ${r.total?"":"disabled"} onclick="openSub(${u.n}, this.dataset.s)" data-s="${aiEsc(r.s)}"><span class="sn">${aiEsc(num)}</span><span class="st">${aiEsc(name)}</span><span class="sc${r.total&&r.left===0?" done":""}">${cnt}</span>`
+      return `<li><button class="dsub" ${r.total?"":"disabled"} onclick="openSub(${u.n}, this.dataset.s)" data-s="${aiEsc(r.s)}"><span class="sn">${aiEsc(num)}</span><span class="st">${aiEsc(name)}${(subVideos[u.n+"::"+r.s]||[]).length ? ` <em class="svb" title="Review videos">&#9654; ${(subVideos[u.n+"::"+r.s]||[]).length}</em>` : ""}</span><span class="sc${r.total&&r.left===0?" done":""}">${cnt}</span>`
         + (r.total ? `<span class="sbar"><i style="width:${sp}%"></i></span>` : "") + `</button></li>`;
     }).join("") + `</ul></details>`;
   return {html, tot, done, nSubs: rows.length};
