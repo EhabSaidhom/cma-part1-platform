@@ -1669,7 +1669,16 @@ function chatAgo(ts){
 function chatRender(qid){
   const list = gid("chatList"); if(!list) return;
   const panel = gid("chatPanel");
-  if(chatErr){ panel.classList.add("off"); list.innerHTML = '<div class="chat-empty">The discussion is not available yet.</div>'; return; }
+  if(chatErr){
+    const code = String(chatErr.code||""), msg = String(chatErr.message||chatErr);
+    const missing = /PGRST205|42P01/.test(code) || /schema cache|does not exist/i.test(msg);
+    const hint = missing ? "The discussion table has not been created yet. Run chat-setup.sql in Supabase (SQL Editor)."
+      : /42501|permission|policy/i.test(code+" "+msg) ? "Permission denied by the database. Re-run chat-setup.sql (policies and grants)."
+      : "The discussion could not be loaded. Please check your connection and try again.";
+    panel.classList.add("off");
+    list.innerHTML = '<div class="chat-empty">The discussion is not available yet.' + (attIsAdmin() ? '<br><small>'+aiEsc(hint)+'<br><code>'+aiEsc((code?code+": ":"")+msg.slice(0,160))+'</code></small>' : '') + '</div>';
+    return;
+  }
   panel.classList.remove("off");
   const msgs = chatCache[qid];
   if(!msgs){ list.innerHTML = '<div class="chat-empty"><span class="spinner"></span></div>'; return; }
