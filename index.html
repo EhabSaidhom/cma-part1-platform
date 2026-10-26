@@ -3205,9 +3205,9 @@ function videoStart(url){ const m = /[?&]t=(\d+)/.exec(url||""); return m ? Numb
 function clockText(sec){ const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), x=sec%60; return (h? h+":"+String(m).padStart(2,"0") : m)+":"+String(x).padStart(2,"0"); }
 function videoEmbed(url){
   const d = driveFileId(url), t = videoStart(url);
-  if(d) return {src:`https://drive.google.com/file/d/${d}/preview${t?`?t=${t}`:""}`, t};
+  if(d) return {src:`https://drive.google.com/file/d/${d}/preview${t?`?t=${t}`:""}`, t, ref:"no-referrer"};
   const y = /(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/.exec(url||"");
-  if(y){ const m = /[?&](?:t|start)=(\d+)/.exec(url); const st = m ? Number(m[1]) : 0; return {src:`https://www.youtube-nocookie.com/embed/${y[1]}${st?`?start=${st}`:""}`, t:0}; }
+  if(y){ const m = /[?&](?:t|start)=(\d+)/.exec(url); const st = m ? Number(m[1]) : 0; return {src:`https://www.youtube-nocookie.com/embed/${y[1]}?rel=0&playsinline=1${st?`&start=${st}`:""}`, t:0, ref:"strict-origin-when-cross-origin"}; }
   return null;
 }
 function playVideo(el, ev){
@@ -3220,7 +3220,7 @@ function playVideo(el, ev){
   ov.innerHTML = `<div class="vbar"><span class="vtitle">&#9654; ${aiEsc(el.dataset.label||"Video")}</span>
       <a href="${aiEsc(url)}" target="_blank" rel="noopener">Open in a new tab</a>
       <button type="button" onclick="closeVideo()" aria-label="Close video" title="Close (Esc)">&#10005;</button></div>
-    <div class="vwrap"><iframe src="${aiEsc(emb.src)}" allow="autoplay; fullscreen; encrypted-media" allowfullscreen referrerpolicy="no-referrer"></iframe></div>
+    <div class="vwrap"><iframe src="${aiEsc(emb.src)}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="${emb.ref}" title="${aiEsc(el.dataset.label||"Video")}"></iframe></div>
     ${t ? `<div class="vhint">This explanation starts at ${clockText(t)}. If the player begins from the start, use the link above or drag to ${clockText(t)}.</div>` : ""}`;
   document.body.appendChild(ov);
   document.body.classList.add("has-video");
