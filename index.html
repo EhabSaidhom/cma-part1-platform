@@ -553,6 +553,7 @@ body.has-video{padding-inline-end:var(--vw)}
 
 .subvideos{max-width:1400px;margin:0 auto;padding:10px 14px 0}
 .svbar{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:0 14px}
+.svhead{padding:11px 0 8px;font-weight:700;font-size:.9rem;color:var(--brand)}
 .svbar>summary{cursor:pointer;list-style:none;padding:11px 0;font-weight:700;font-size:.9rem;color:var(--brand)}
 .svbar>summary::-webkit-details-marker{display:none}
 .svbar>summary span{color:var(--muted);font-weight:600}
@@ -1918,9 +1919,8 @@ function renderSubVideos(){
     ? `<div class="svform"><input id="svT" type="text" maxlength="200" placeholder="Video title" value="${aiEsc(cur?cur.title:"")}" aria-label="Video title"><input id="svU" type="url" placeholder="Link (YouTube or Google Drive)" value="${aiEsc(cur?cur.url:"")}" aria-label="Video link" dir="ltr"><button type="button" onclick="svSave()">Save</button><button type="button" class="sec" onclick="svForm=null;renderSubVideos()">Cancel</button></div>`
     : `<button type="button" class="svadd" onclick="svForm={id:0};renderSubVideos();gid('svT').focus()">+ Add video</button>`;
   box.classList.remove("hidden");
-  box.innerHTML = `<details class="svbar" ${open?"open":""}><summary>&#9654; Review before you start${list.length?` <span>(${list.length})</span>`:""}</summary>`
-    + (list.length ? `<ul class="svlist">${items}</ul>` : `<p class="svnone">No review videos for this sub-unit yet.</p>`) + form + `</details>`;
-  box.querySelector("details").addEventListener("toggle", e=>{ svOpen[key] = e.target.open; });
+  box.innerHTML = `<div class="svbar"><div class="svhead">&#9654; Review before you start${list.length?` <span>(${list.length})</span>`:""}</div>`
+    + (list.length ? `<ul class="svlist">${items}</ul>` : `<p class="svnone">No review videos for this sub-unit yet.</p>`) + form + `</div>`;
 }
 function svEdit(id){ svForm = {id}; svOpen[activeSubKey] = true; renderSubVideos(); const t = gid("svT"); if(t) t.focus(); }
 async function svSave(){
@@ -2827,6 +2827,7 @@ function attStatus(t, err){
   const el=document.getElementById("attachStatus"); if(el){ el.textContent=attMsg.t; el.className="attach-status"+(attMsg.err?" err":""); }
 }
 function attachPanelHtml(){
+  return "";   // Attachments section removed from the UI (data and code kept)
   if(!activeSubKey) return "";
   return `
     <details class="attach" id="attachBox" ${attachOpen?"open":""} ontoggle="attachOpen=this.open">
