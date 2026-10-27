@@ -1691,7 +1691,7 @@ function render(){
     grid += `<button class="qbtn ${st!=="not"?st:""} ${x.id===q.id?"current":""} ${flagged[x.id]?"flagged":""} ${hasNote(x.id)?"has-note":""} ${attemptMark(answered[x.id])?"m-"+attemptMark(answered[x.id]):""}" data-qid="${x.id}" onclick="jumpTo(${x.id})">${i+1}</button>`;
   });
 
-  const isAns = isDone(q.id);
+  const isAns = isDone(q.id) && !(answered[q.id] && answered[q.id].redo);
   const letters = ["A","B","C","D"];
   let optsHtml = "";
   letters.forEach((letter,i)=>{
@@ -1707,7 +1707,9 @@ function render(){
   if(isAns){
     const userLetter = letters[answered[q.id].choice];
     const correctLetter = letters[q.correct];
-    if(answered[q.id].correct){
+    if(answered[q.id].failed && answered[q.id].practice){
+      bannerHtml = `<div role="status" class="result-banner show wrong">&#10003; Correct this time, but this question stays recorded as <b>Failed (wrong)</b>.${timeTag(answered[q.id])}</div>`;
+    }else if(answered[q.id].correct){
       bannerHtml = `<div role="status" class="result-banner show correct">&#10003; Correct!${firstTag(answered[q.id])}${timeTag(answered[q.id])}</div>`;
     }else{
       bannerHtml = `<div role="status" class="result-banner show wrong">&#10007; Incorrect. Your answer: ${userLetter} &middot; Correct answer: ${correctLetter}${timeTag(answered[q.id])}</div>`;
@@ -2302,7 +2304,8 @@ async function accBulk(grant){
   if(!(await accSave(rows))) await openAccess(); else renderAccessRows();
 }
 function pick(qid, choiceIdx){
-  if(isDone(qid)) return;
+  const redoing = !!(answered[qid] && answered[qid].redo);
+  if(isDone(qid) && !redoing) return;
   const q = activeSet.find(x=>x.id===qid);
   // First wrong attempt: warn and allow one more try (not recorded)
   const firstKnown = answered[qid] && (answered[qid].first===true || answered[qid].first===false);
@@ -2318,13 +2321,18 @@ function pick(qid, choiceIdx){
   const note = (answered[qid] && answered[qid].note) || "";
   const prevFirst = answered[qid] ? answered[qid].first : undefined;
   const secs = (qTimer.id===qid) ? Math.min(timerElapsed(), TIME_CAP) : 0;
-  answered[qid] = {choice:choiceIdx, correct: choiceIdx===q.correct, note, at: new Date().toISOString(),
-                   first: (prevFirst===true || prevFirst===false) ? prevFirst : (choiceIdx===q.correct)};
+  const right = choiceIdx===q.correct;
+  answered[qid] = {choice:choiceIdx, correct: redoing ? false : right, note, at: new Date().toISOString(),
+                   first: (prevFirst===true || prevFirst===false) ? prevFirst : right};
+  // A question that ended up wrong stays "Failed (wrong)" for good: retrying it is practice only and never turns it into "2nd try".
+  if(redoing){ answered[qid].failed = true; answered[qid].practice = right; answered[qid].first = false; }
+  else if(!right && prevFirst!==true) answered[qid].failed = true;
   if(secs>0) answered[qid].time = secs;
   persist(); render();
 }
 function retry(qid){
   const old = answered[qid], f = firstOf(old);
+  if(old && old.failed && old.choice!=null){ old.redo = true; delete old.practice; delete triedWrong[qid]; persist(); render(); return; }
   delete answered[qid]; delete triedWrong[qid];
   if(old && (f!==undefined || (old.note && String(old.note).trim()))) answered[qid] = {choice:null, correct:false, note:old.note||"", first:f};   // the first attempt is never lost
   persist(); render();
@@ -2665,7 +2673,7 @@ function importProgress(inp){
       const cur=answered[id];
       if(cur&&cur.choice!=null){ keep++; return; }          // already solved here: keep existing answer
       if(ch===null){ if(typeof e.note==="string"&&e.note.trim()&&!(cur&&cur.note)){ merged[id]={choice:null,correct:false,note:e.note}; noteOnly++; } return; }
-      merged[id]={choice:ch,correct:!!e.correct,note:(cur&&cur.note)||(typeof e.note==="string"?e.note:""),first:(e.first===true||e.first===false)?e.first:undefined, at:e.at||undefined, time:(Number.isFinite(+e.time)&&+e.time>0)?Math.round(+e.time):undefined};
+      merged[id]={choice:ch,correct:!!e.correct,note:(cur&&cur.note)||(typeof e.note==="string"?e.note:""),first:(e.first===true||e.first===false)?e.first:undefined, failed:e.failed===true?true:undefined, at:e.at||undefined, time:(Number.isFinite(+e.time)&&+e.time>0)?Math.round(+e.time):undefined};
       add++;
     });
     if(!add&&!noteOnly){ alert("Nothing new to import.\n\nAlready solved here (kept): "+keep+"\nInvalid entries: "+bad); return; }
