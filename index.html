@@ -1026,7 +1026,8 @@ async function startSession(user){
 }
 
 // ---------- Dashboard ----------
-const SRC_COLORS = {"Sameh Allithy Target":"#2b4a9e", "MCQ Book":"#a35a00", "Gleim 2025 Vol. 1":"#1a7f4e", "Gleim 2025 Vol. 2":"#7b3fa0", "ICMA Retired Questions 2016":"#c23838", "ICMA Exam Support Package 2025":"#0f766e", "Amro Taison":"#be185d"};
+const SRC_ALIAS = {"Gleim 2025 Vol. 1":"Gleim 2025", "Gleim 2025 Vol. 2":"Gleim 2025"};   // merged sources
+const SRC_COLORS = {"Gleim 2025":"#1a7f4e", "Sameh Allithy Target":"#2b4a9e", "MCQ Book":"#a35a00", "Gleim 2025 Vol. 1":"#1a7f4e", "Gleim 2025 Vol. 2":"#7b3fa0", "ICMA Retired Questions 2016":"#c23838", "ICMA Exam Support Package 2025":"#0f766e", "Amro Taison":"#be185d"};
 function srcColor(name){ return SRC_COLORS[name] || "#6b7480"; }
 function dashStats(){
   let total=0, correct=0, wrong=0, flaggedCt=0;
@@ -1595,7 +1596,7 @@ function loadFileOnce(f){
   if(!fileLoads[f.file]){
     fileLoads[f.file] = fetch(f.file)
       .then(r=>{ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-      .then(data=>{ data.forEach(q=>{ if(!q.source) q.source = f.source || "Sameh Allithy Target"; }); return data; })
+      .then(data=>{ data.forEach(q=>{ q.source = SRC_ALIAS[q.source] || q.source || f.source || "Sameh Allithy Target"; }); return data; })
       .catch(err=>{ delete fileLoads[f.file]; throw err; });
   }
   return fileLoads[f.file];
