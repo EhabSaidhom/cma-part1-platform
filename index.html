@@ -659,6 +659,17 @@ body.has-video{padding-inline-end:var(--vw)}
 .mx-w em{font-style:normal;font-weight:700;font-size:.78rem}.mx-w em.na{color:var(--muted)}.mx-w em.good{color:var(--ok)}
 .mx-wb{padding:0 12px 12px}
 @media(max-width:900px){.mx-grid,.mx-body{grid-template-columns:1fr}.mx-pal{position:static}.mx-pg{grid-template-columns:repeat(8,1fr)}}
+
+.acc-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 12px}
+.acc-tools input[type=search]{flex:1 1 200px;min-width:0;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.acc-tools select{padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font:inherit;max-width:100%}
+.acc-tools .mx-start{padding:9px 14px;font-size:.84rem}
+.acc-table{width:100%;border-collapse:collapse;font-size:.84rem}
+.acc-table th,.acc-table td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:start;vertical-align:middle}
+.acc-h{font-size:.7rem;color:var(--muted);font-weight:600;min-width:84px;text-align:center!important}
+.acc-c{text-align:center!important}
+.acc-table input[type=checkbox]{width:18px;height:18px;accent-color:var(--brand)}
+.acc-new{background:#fff8e6}
 </style>
 </head>
 <body>
@@ -682,6 +693,9 @@ body.has-video{padding-inline-end:var(--vw)}
   <div class="dash-box" id="dashboardBox"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeDashboard()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="dashboardBody"></div></div>
 </div>
 
+<div class="modal-veil hidden dash-veil" id="accessVeil">
+  <div class="dash-box admin-box"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeAccess()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="accessBody"></div></div>
+</div>
 <div class="modal-veil hidden dash-veil" id="adminVeil">
   <div class="dash-box admin-box" id="adminBox"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeAdmin()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="adminBody"></div></div>
 </div>
@@ -701,6 +715,7 @@ body.has-video{padding-inline-end:var(--vw)}
       <input type="file" id="histFile" accept=".json,application/json" hidden onchange="importProgress(this)">
       <button class="dash-link hidden" id="newsAdminBtn" onclick="openNewsAdmin()" title="Write or remove platform news">&#9998; Manage News</button>
       <button class="dash-link hidden" id="adminBtn" onclick="openAdminDashboard()">&#128737; Admin Dashboard</button>
+      <button class="dash-link hidden" id="accessBtn" onclick="openAccess()">&#128273; Source Access</button>
     </div></details>
     <button onclick="switchUser()">Sign Out</button>
   </div>
@@ -985,12 +1000,12 @@ async function loadUserData(){
 }
 let saveTimer = null;
 function persist(){
-  try{ localStorage.setItem(lsKey(), JSON.stringify({answered, flagged, mock:mockHistory, mockRun})); }catch(e){}
+  try{ localStorage.setItem(lsKey(), JSON.stringify({answered:Object.assign({}, answeredHidden, answered), flagged:Object.assign({}, flaggedHidden, flagged), mock:mockHistory, mockRun})); }catch(e){}
   if(!userId) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
     const { error } = await sb.from("user_progress").upsert(
-      { user_id: userId, state: {answered, flagged, mock:mockHistory, mockRun}, updated_at: new Date().toISOString() });
+      { user_id: userId, state: {answered:Object.assign({}, answeredHidden, answered), flagged:Object.assign({}, flaggedHidden, flagged), mock:mockHistory, mockRun}, updated_at: new Date().toISOString() });
     if(error) console.warn("Save failed", error);
   }, 600);
 }
@@ -1001,6 +1016,7 @@ async function startSession(user){
   await loadUserData();
   await loadManifest();
   await loadMyProfile();
+  await loadAccess(); applyAccess();
   buildTree(); render();
   if(location.hash==="#practice") history.replaceState(null,"",location.pathname+location.search);
   showView("home");
@@ -1018,6 +1034,7 @@ function dashStats(){
   const perUnit = [];      // {n, title, total, correct, wrong}  (respects globalSourceFilter)
   UNITS.forEach(u=>{
     const ids = unitIdsFiltered(u);
+    if(accessRestricted && !ids.length) return;
     let uCorrect=0, uWrong=0;
     ids.forEach(id=>{
       const a = answered[id];
@@ -1378,10 +1395,10 @@ async function doAuth(mode){
 }
 async function switchUser(){
   await sb.auth.signOut();
-  userId = ""; userEmail = ""; answered = {}; flagged = {}; myProfile = null; mockHistory = []; mockRun = null; mock.phase = "setup";
+  userId = ""; userEmail = ""; answered = {}; flagged = {}; myProfile = null; mockHistory = []; mockRun = null; mock.phase = "setup"; answeredHidden = {}; flaggedHidden = {}; accessSet = null; accessRestricted = false;
   document.getElementById("passInput").value = "";
   attachCache = {}; attachKeyLoaded = null;
-  document.getElementById("adminBtn").classList.add("hidden");
+  document.getElementById("adminBtn").classList.add("hidden"); document.getElementById("accessBtn").classList.add("hidden");
   document.getElementById("newsAdminBtn").classList.add("hidden");
   document.getElementById("newsBar").classList.add("hidden"); newsItems = [];
   document.getElementById("nameBanner").classList.add("hidden");
@@ -1396,6 +1413,7 @@ async function loadMyProfile(){
   const nameOk = myProfile && myProfile.display_name && myProfile.display_name.trim();
   document.getElementById("nameBanner").classList.toggle("hidden", !!nameOk);
   document.getElementById("adminBtn").classList.toggle("hidden", !(myProfile && myProfile.role === "admin"));
+  document.getElementById("accessBtn").classList.toggle("hidden", !(myProfile && myProfile.role === "admin"));
   document.getElementById("newsAdminBtn").classList.toggle("hidden", !(myProfile && myProfile.role === "admin"));
 }
 async function saveMyName(){
@@ -2035,12 +2053,15 @@ function mockRenderSetup(){
   const keep = new Set([...el.querySelectorAll("details[open]")].map(d=>d.dataset.k));
   base.forEach(x=>{ cnt[x.u] = (cnt[x.u]||0)+1; });
   const unitRow = u=>`<label class="mx-chk"><input type="checkbox" ${c.units.has(u.n)?"checked":""} onchange="mockToggleUnit(${u.n},this.checked)"><span>${u.bare?"":`<b>${u.n}</b> `}${aiEsc(u.title)}</span><em>${cnt[u.n]||0}</em></label>`;
+  const have = {}; mockIndex().forEach(x=>{ have[x.u] = 1; });
   const group = (k, name, pct, color, us, fn)=>{
+    if(accessRestricted) us = us.filter(u=>have[u.n]);
+    if(!us.length) return "";
     const on = us.filter(u=>c.units.has(u.n)).length, tot = us.reduce((a,u)=>a+(cnt[u.n]||0), 0);
     return `<details class="mx-sec" data-k="${k}" ${keep.has(k)?"open":""} style="--sc:${color}"><summary><input type="checkbox" aria-label="Select all: ${aiEsc(name)}" ${on===us.length?"checked":""} data-part="${on>0&&on<us.length?1:0}" onclick="event.stopPropagation()" onchange="${fn}(this.checked)"><span class="mx-sn">${aiEsc(name)}</span>${pct?`<span class="mx-pct">${pct}%</span>`:""}<em>${tot}</em></summary><div class="mx-units">${us.map(unitRow).join("")}</div></details>`;
   };
   const secs = SECTIONS.map((sc,i)=>group("s"+i, sc.name, sc.pct, sc.c, sc.units.map(n=>UNITS.find(x=>x.n===n)).filter(Boolean), `mockToggleSec.bind(null,${i})`).replace(`onchange="mockToggleSec.bind(null,${i})(this.checked)"`, `onchange="mockToggleSec(${i},this.checked)"`)).join("");
-  const others = UNITS.filter(u=>mockSecIdx(u.n)<0);
+  const others = UNITS.filter(u=>mockSecIdx(u.n)<0 && (!accessRestricted || have[u.n]));
   const srcs = allSources();
   const radio = (name, val, cur, label, fn)=>`<label class="mx-rad"><input type="radio" name="${name}" ${cur===val?"checked":""} onchange="${fn}('${val}')"><span>${label}</span></label>`;
   const hist = mockHistory.length ? `<section class="mx-card"><h3>Previous Mock Exams</h3><div class="mx-hist"><table><thead><tr><th>Date</th><th>Score</th><th>Time</th><th></th></tr></thead><tbody>${mockHistory.map((e,i)=>`<tr><td>${aiEsc(new Date(e.t).toLocaleString("en-US",{dateStyle:"medium",timeStyle:"short"}))}</td><td><b>${e.c}/${e.n}</b> (${Math.round(e.c/e.n*100)}%)</td><td>${fmtDur(e.secs)}</td><td><button type="button" class="mx-link" onclick="mockCertAt(${i})">&#127891; Certificate</button></td></tr>`).join("")}</tbody></table></div></section>` : "";
@@ -2197,6 +2218,83 @@ function mockCert(e){
     <div class="body" style="font-size:.9rem">Correct ${e.c} &middot; Wrong ${e.w} &middot; Not answered ${e.u}<br>Time taken: <b>${fmtDur(e.secs)}</b></div>
     <div class="foot"><span>Date: ${new Date(e.t).toLocaleDateString("en-US")}</span><span>Nonprofit Educational Platform</span></div>`;
   gid("certModal").classList.add("open");
+}
+
+/* ===== Source access: which question sources a student may use ===== */
+let accessSet = null, accessRestricted = false, answeredHidden = {}, flaggedHidden = {}, manifestFull = null;
+async function loadAccess(){
+  accessSet = null; accessRestricted = false;
+  if(attIsAdmin()) return;
+  try{
+    const { data, error } = await sb.from("source_access").select("sources").eq("user_id", userId).maybeSingle();
+    if(error) throw error;
+    accessRestricted = true; accessSet = new Set((data && data.sources) || []);   // no row = no sources
+  }catch(e){ console.warn("source_access unavailable: all sources allowed", e); }
+}
+function applyAccess(){
+  answeredHidden = {}; flaggedHidden = {}; mockIdxCache = null;
+  if(!manifest) return;
+  if(!manifestFull) manifestFull = JSON.parse(JSON.stringify(manifest));
+  manifest = JSON.parse(JSON.stringify(manifestFull));
+  if(!accessRestricted) return;
+  const ok = new Set();
+  Object.values(manifest).forEach(units=>Object.values(units).forEach(sub=>{
+    sub.files = (sub.files||[]).filter(f=>accessSet.has(f.source || "Sameh Allithy Target"));
+    sub.ids = sub.files.reduce((a,f)=>a.concat(f.ids||[]), []); sub.ids.forEach(id=>ok.add(id));
+  }));
+  Object.keys(answered).forEach(id=>{ if(!ok.has(Number(id))){ answeredHidden[id] = answered[id]; delete answered[id]; } });
+  Object.keys(flagged).forEach(id=>{ if(!ok.has(Number(id))){ flaggedHidden[id] = flagged[id]; delete flagged[id]; } });
+}
+/* admin: manage access */
+let accRows = [], accSel = new Set(), accQ = "", accSources = [];
+async function openAccess(){
+  const b = gid("accessBody"); gid("accessVeil").classList.remove("hidden"); b.innerHTML = "<p>Loading&hellip;</p>";
+  try{
+    accSources = [...new Set(Object.values(manifestFull||manifest||{}).reduce((a,u)=>a.concat(Object.values(u).reduce((b2,sb2)=>b2.concat((sb2.files||[]).map(f=>f.source||"Sameh Allithy Target")),[])),[]))].sort();
+    const [p, a] = await Promise.all([sb.from("profiles").select("user_id,email,display_name,role"), sb.from("source_access").select("user_id,sources")]);
+    if(p.error) throw p.error; if(a.error) throw a.error;
+    const m = new Map((a.data||[]).map(r=>[r.user_id, r.sources||[]]));
+    accRows = (p.data||[]).filter(x=>x.role!=="admin").map(x=>({id:x.user_id, email:x.email||"", name:x.display_name||"", src:new Set(m.get(x.user_id)||[]), has:m.has(x.user_id)}))
+      .sort((x,y)=>(x.has-y.has) || (x.name||x.email).toLowerCase().localeCompare((y.name||y.email).toLowerCase()));
+    accSel = new Set(); accQ = ""; renderAccess();
+  }catch(e){ b.innerHTML = `<p>Could not load: ${aiEsc(e.message||String(e))}<br>Make sure source-access-setup.sql was run in Supabase.</p>`; }
+}
+function closeAccess(){ gid("accessVeil").classList.add("hidden"); }
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeAccess(); });
+function renderAccess(){
+  gid("accessBody").innerHTML = `<h2 style="margin:0 0 4px">Source access</h2>
+    <p class="mx-note" id="accInfo"></p>
+    <div class="acc-tools"><input type="search" id="accSearch" placeholder="Search students..." oninput="accQ=this.value;renderAccessRows()" aria-label="Search students">
+      <select id="accBulkSrc" aria-label="Source for bulk action"><option value="*">All sources</option>${accSources.map(x=>`<option value="${aiEsc(x)}">${aiEsc(x)}</option>`).join("")}</select>
+      <button type="button" class="mx-start" onclick="accBulk(true)">Grant to selected</button><button type="button" class="mx-back" onclick="accBulk(false)">Revoke from selected</button></div>
+    <div class="mx-hist"><table class="acc-table"><thead><tr><th><input type="checkbox" id="accAll" aria-label="Select all shown" onchange="accSelAll(this.checked)"></th><th>Student</th>${accSources.map(x=>`<th class="acc-h">${aiEsc(x)}</th>`).join("")}</tr></thead><tbody id="accBody"></tbody></table></div>`;
+  renderAccessRows();
+}
+function accShown(){ const q = accQ.trim().toLowerCase(); return accRows.filter(r=>!q || r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q)); }
+function renderAccessRows(){
+  const rows = accShown(), none = accRows.filter(r=>!r.has).length;
+  gid("accInfo").textContent = accRows.length+" students" + (none ? " \u00b7 "+none+" without any access yet (shown first)" : "") + " \u00b7 selected: "+accSel.size;
+  gid("accBody").innerHTML = rows.map(r=>`<tr class="${r.has?"":"acc-new"}"><td><input type="checkbox" ${accSel.has(r.id)?"checked":""} aria-label="Select ${aiEsc(r.email)}" onchange="accPick('${r.id}',this.checked)"></td><td>${r.name?aiEsc(r.name)+"<br>":""}<span class="mx-note">${aiEsc(r.email)}${r.has?"":" \u00b7 no access yet"}</span></td>`
+    + accSources.map((x,i)=>`<td class="acc-c"><input type="checkbox" ${r.src.has(x)?"checked":""} data-s="${aiEsc(x)}" aria-label="${aiEsc(x)} for ${aiEsc(r.email)}" onchange="accToggle('${r.id}',this.dataset.s,this.checked)"></td>`).join("") + `</tr>`).join("") || `<tr><td colspan="${accSources.length+2}" class="mx-note">No students match.</td></tr>`;
+}
+function accPick(id, on){ on ? accSel.add(id) : accSel.delete(id); renderAccessRows(); }
+function accSelAll(on){ accShown().forEach(r=>{ on ? accSel.add(r.id) : accSel.delete(r.id); }); renderAccessRows(); gid("accAll").checked = on; }
+async function accSave(rows){
+  const now = new Date().toISOString();
+  const { error } = await sb.from("source_access").upsert(rows.map(r=>({user_id:r.id, sources:[...r.src], updated_by:userId, updated_at:now})), {onConflict:"user_id"});
+  if(error){ alert("Could not save: "+(error.message||error)); return false; }
+  rows.forEach(r=>{ r.has = true; }); return true;
+}
+async function accToggle(id, src, on){
+  const r = accRows.find(x=>x.id===id); if(!r) return;
+  on ? r.src.add(src) : r.src.delete(src);
+  if(!(await accSave([r]))) await openAccess(); else renderAccessRows();
+}
+async function accBulk(grant){
+  const rows = accRows.filter(r=>accSel.has(r.id)); if(!rows.length){ alert("Select one or more students first."); return; }
+  const v = gid("accBulkSrc").value, list = v==="*" ? accSources : [v];
+  rows.forEach(r=>list.forEach(x=>{ grant ? r.src.add(x) : r.src.delete(x); }));
+  if(!(await accSave(rows))) await openAccess(); else renderAccessRows();
 }
 function pick(qid, choiceIdx){
   if(isDone(qid)) return;
@@ -3374,6 +3472,7 @@ function homeUnitHtml(u, q){
   const rows = [];
   all.forEach(s=>{
     const ids = subIdsFiltered(u,s), total = ids.length, done = ids.filter(isDone).length, left = total-done;
+    if(accessRestricted && !total) return;
     if(manifest && (globalSourceFilter!=="all" || onlyUnanswered) && (onlyUnanswered ? left===0 : total===0)) return;
     if(!(unitHit || s.toLowerCase().includes(q))) return;
     rows.push({s,total,done,left});
@@ -3417,7 +3516,7 @@ function renderHome(){
   UNITS.filter(u=>!used.has(u.n)).forEach(u=>{ (groups[u.group||"Other"] = groups[u.group||"Other"] || []).push(u); });
   Object.keys(groups).forEach(g=>{ const c = card(g, 0, "", groups[g]); if(c) extra += `<div class="home-group">${aiEsc(g)}</div><div class="sgrid">${c}</div>`; });
   grid.innerHTML = manifest===null ? '<div class="home-empty"><span class="spinner"></span>Loading...</div>'
-    : ((out||extra) ? `<div class="sgrid">${out}</div>${extra}` : '<div class="home-empty">No units match your search or filters.</div>');
+    : ((accessRestricted && !accessSet.size) ? '<div class="home-empty"><b>No question sources are enabled for your account yet.</b><br>Please contact the administrator to get access.</div>' : (out||extra) ? `<div class="sgrid">${out}</div>${extra}` : '<div class="home-empty">No units match your search or filters.</div>');
   gid("homeStats").textContent = manifest ? `${nUnits} units \u00b7 ${nSubs} topics \u00b7 ${nQ} questions` + (globalSourceFilter!=="all" ? " \u00b7 source: "+srcLabel() : "") : "";
   grid.querySelectorAll("details.hunit").forEach(d=>d.addEventListener("toggle",()=>{ const n = +d.dataset.n; if(d.open) homeOpen.add(n); else homeOpen.delete(n); }));
 }
