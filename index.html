@@ -209,7 +209,11 @@ header.top .sub{font-size:.78rem; opacity:.85}
 .result-banner.wrong{background:#fdecea; color:var(--bad); border:1px solid var(--bad)}
 
 .explain-title{margin:18px 0 8px; font-size:.85rem; color:var(--muted); font-weight:700; display:none}
-.explain-title.show{display:block}
+.explain-title.show{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.explain-btn{border:1px solid var(--brand);background:var(--panel);color:var(--brand);border-radius:10px;padding:9px 16px;font:inherit;font-size:.86rem;font-weight:700;cursor:pointer}
+.explain-btn:hover{background:var(--brand-soft)}
+.explain-btn[aria-expanded="true"]{background:var(--brand);color:#fff}
+.ex-sub{font-weight:500;color:var(--muted);font-size:.78rem}
 .explain{display:none}
 .explain.show{display:block}
 
@@ -1692,6 +1696,7 @@ function render(){
   });
 
   const isAns = isDone(q.id) && !(answered[q.id] && answered[q.id].redo);
+  const exOpen = isAns && !!explainOpen[q.id];
   const letters = ["A","B","C","D"];
   let optsHtml = "";
   letters.forEach((letter,i)=>{
@@ -1763,8 +1768,8 @@ function render(){
     <div class="options">${optsHtml}</div>
     ${bannerHtml}
     ${aiPanelHtml(q)}
-    <div class="explain-title ${isAns?'show':''}">Explanation &mdash; why each answer is right or wrong</div>
-    <div class="explain ${isAns?'show':''}">
+    <div class="explain-title ${isAns?'show':''}"><button type="button" id="explainBtn" class="explain-btn" aria-expanded="${exOpen}" aria-controls="explainBox" onclick="toggleExplain(${q.id})">${exOpen?"&#9662; Hide explanation":"&#9656; Show explanation"}</button><span class="ex-sub">Why each answer is right or wrong &middot; press E</span></div>
+    <div class="explain ${exOpen?'show':''}" id="explainBox">
       <div class="qimg-wrap"><img src="${q.explainImage}" alt="Explanation (cropped from source PDF)"></div>
     </div>
     <div class="source-box">
@@ -2303,7 +2308,16 @@ async function accBulk(grant){
   rows.forEach(r=>list.forEach(x=>{ grant ? r.src.add(x) : r.src.delete(x); }));
   if(!(await accSave(rows))) await openAccess(); else renderAccessRows();
 }
+const explainOpen = {};
+function toggleExplain(qid){
+  explainOpen[qid] = !explainOpen[qid];
+  const box = gid("explainBox"), btn = gid("explainBtn"); if(!box || !btn) return;
+  box.classList.toggle("show", explainOpen[qid]);
+  btn.setAttribute("aria-expanded", String(explainOpen[qid]));
+  btn.innerHTML = explainOpen[qid] ? "&#9662; Hide explanation" : "&#9656; Show explanation";
+}
 function pick(qid, choiceIdx){
+  explainOpen[qid] = false;      // the explanation always starts hidden after an answer
   const redoing = !!(answered[qid] && answered[qid].redo);
   if(isDone(qid) && !redoing) return;
   const q = activeSet.find(x=>x.id===qid);
@@ -3559,6 +3573,7 @@ document.addEventListener("keydown", e=>{
   if(k in map && current!=null){ e.preventDefault(); pick(current, map[k]); }
   else if(e.key==="ArrowRight"){ step(1); }
   else if(e.key==="ArrowLeft"){ step(-1); }
+  else if(k==="e" && current!=null && isDone(current)){ e.preventDefault(); toggleExplain(current); }
 });
 
 (async function init(){
