@@ -675,6 +675,60 @@ body.has-video{padding-inline-end:var(--vw)}
 .acc-c{text-align:center!important}
 .acc-table input[type=checkbox]{width:18px;height:18px;accent-color:var(--brand)}
 .acc-new{background:#fff8e6}
+
+/* users / inbox / about / tour */
+.inb-head,.ab-top{padding-inline-end:46px}
+.site-footer{max-width:1240px;margin:0 auto;padding:18px;text-align:center;color:var(--muted);font-size:.8rem}
+.site-footer button{border:0;background:none;color:var(--brand);font:inherit;font-weight:700;cursor:pointer;padding:4px 8px}
+.site-footer button:hover{text-decoration:underline}
+.hero-ctas{display:flex;gap:10px;flex-wrap:wrap}
+.mx-cta.tour-cta{background:var(--panel);color:var(--brand);border:1px solid var(--brand);direction:rtl;align-items:flex-end}
+.mx-cta.tour-cta:hover{background:var(--brand-soft)}
+.inb-n{display:inline-block;min-width:18px;height:18px;padding:0 5px;margin-inline-start:6px;border-radius:9px;background:#e0392b;color:#fff;font:700 .68rem/18px inherit;font-style:normal;text-align:center;vertical-align:middle}
+.acc-b{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:5px 9px;font:inherit;font-size:.74rem;font-weight:600;cursor:pointer;margin-inline-end:4px}
+.acc-b:hover{border-color:var(--brand);color:var(--brand)}.acc-b.danger:hover{border-color:var(--bad);color:var(--bad)}
+.acc-act{white-space:nowrap}.acc-off{background:#f6e9e7;opacity:.85}.acc-st{color:var(--bad);text-transform:uppercase;font-size:.7rem}
+.inb-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.inb{display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;min-height:420px}
+.inb-l{border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:62vh;background:var(--bg)}
+.inb-t{position:relative;display:flex;flex-direction:column;gap:2px;width:100%;text-align:start;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);padding:10px 12px;font:inherit;cursor:pointer}
+.inb-t:hover,.inb-t.on{background:var(--brand-soft)}.inb-t.unread .inb-s{font-weight:800}
+.inb-s{font-size:.88rem;padding-inline-end:26px}.inb-m{font-size:.72rem;color:var(--muted)}
+.inb-t .inb-n{position:absolute;top:10px;inset-inline-end:10px}
+.inb-r{border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-width:0;background:var(--panel);max-height:62vh}
+.inb-ch{display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+.inb-bk{display:none}
+.inb-msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:200px}
+.inb-b{max-width:82%;align-self:flex-start}.inb-b.mine{align-self:flex-end}
+.inb-bt{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:.88rem;line-height:1.55;word-break:break-word}
+.inb-b.mine .inb-bt{background:var(--brand-soft)}
+.inb-bm{font-size:.68rem;color:var(--muted);margin-top:2px}.inb-b.mine .inb-bm{text-align:end}
+.inb-empty{margin:auto;color:var(--muted);padding:30px;text-align:center;font-size:.9rem}
+.inb-form{display:flex;flex-direction:column;gap:10px;padding:12px;overflow:auto}
+.inb-in{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;width:100%}
+.inb-actions{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.inb-rec{border:1px solid var(--line);border-radius:10px;padding:8px}.inb-reclist{max-height:170px;overflow:auto}
+@media(max-width:820px){.inb{grid-template-columns:1fr}.inb.has-sel .inb-l{display:none}.inb:not(.has-sel) .inb-r{display:none}.inb-bk{display:inline-block}}
+.ab-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.ab-lang{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ab-lang button{border:0;background:var(--panel);color:var(--ink);padding:7px 14px;font:inherit;font-size:.84rem;cursor:pointer}.ab-lang button.on{background:var(--brand);color:#fff}
+.ab-body h3{margin:18px 0 6px;color:var(--brand)}.ab-body p{margin:0;line-height:1.9;font-size:.98rem}
+.ab-team{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.ab-m{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+.ab-m span{font-size:.8rem;color:var(--muted)}
+.ab-av{width:72px;height:72px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:1.5rem;overflow:hidden;flex:none}.ab-av img{width:100%;height:100%;object-fit:cover}
+.ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ab-f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--muted)}
+.ab-f textarea,.ab-row input{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.ab-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.ab-row .ab-av{width:44px;height:44px;font-size:1rem}.ab-row input{flex:1 1 140px;min-width:0}.ab-up{cursor:pointer}
+@media(max-width:700px){.ab-grid{grid-template-columns:1fr}}
+.tour-veil{position:fixed;inset:0;z-index:10000}
+.tour-hole{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(8,22,18,.68);border:2px solid #fff;pointer-events:none;transition:all .2s}
+.tour-card{position:fixed;background:var(--panel);color:var(--ink);border-radius:16px;padding:16px 18px;box-shadow:0 12px 40px rgba(0,0,0,.35);font-size:.92rem;line-height:1.8}
+.tour-card h4{margin:2px 0 6px;font-size:1.05rem;color:var(--brand)}.tour-card p{margin:0 0 12px}
+.tour-n{font-size:.72rem;color:var(--muted)}
+.tour-bt{display:flex;gap:8px;align-items:center}
+.tour-bt button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;font-size:.86rem;cursor:pointer}
+.tour-bt .tour-nx{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}.tour-bt .tour-skip{border:0;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -698,6 +752,15 @@ body.has-video{padding-inline-end:var(--vw)}
   <div class="dash-box" id="dashboardBox"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeDashboard()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="dashboardBody"></div></div>
 </div>
 
+<div class="modal-veil hidden dash-veil" id="inboxVeil">
+  <div class="dash-box admin-box"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeInbox()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="inboxBody"></div></div>
+</div>
+<div class="modal-veil hidden dash-veil" id="aboutVeil">
+  <div class="dash-box admin-box"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeAbout()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="aboutBody"></div></div>
+</div>
+<div class="modal-veil hidden" id="blockedVeil" style="z-index:9999">
+  <div class="modal-box" style="max-width:440px;text-align:center"><h2 style="margin-top:0">Account unavailable</h2><p id="blockedMsg"></p><p dir="rtl" id="blockedMsgAr"></p><button type="button" class="mx-start" onclick="blockedOk()">OK</button></div>
+</div>
 <div class="modal-veil hidden dash-veil" id="accessVeil">
   <div class="dash-box admin-box"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeAccess()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="accessBody"></div></div>
 </div>
@@ -713,14 +776,18 @@ body.has-video{padding-inline-end:var(--vw)}
     <span id="userEmailLbl"></span>
     <button class="dash-link mx-nav" onclick="openMock()">&#128221; Mock Exam</button>
     <button class="dash-link" onclick="openDashboard()">&#128202; My Performance</button>
+    <button class="dash-link" id="inboxBtn" onclick="openInbox()" title="Messages">&#128172; Inbox<span id="inboxN" class="inb-n hidden"></span></button>
     <button class="dash-link" id="newsBtn" onclick="openNewsList()" title="Platform news">&#128226; News<span id="newsDot" class="news-dot hidden"></span></button>
     <details class="more" id="moreMenu"><summary aria-label="More tools">&#8943; More</summary><div class="more-menu">
+      <button class="dash-link" onclick="openAbout()">&#8505; About Us</button>
+      <button class="dash-link" onclick="openContact()">&#9993; Contact me</button>
+      <button class="dash-link" onclick="startTour('home')">&#127891; How it works (tour)</button>
       <button class="dash-link" onclick="exportProgress()" title="Download your solving history as a file">&#11015; Export History</button>
       <button class="dash-link" onclick="document.getElementById('histFile').click()" title="Upload a previously exported solving history">&#11014; Import History</button>
       <input type="file" id="histFile" accept=".json,application/json" hidden onchange="importProgress(this)">
       <button class="dash-link hidden" id="newsAdminBtn" onclick="openNewsAdmin()" title="Write or remove platform news">&#9998; Manage News</button>
       <button class="dash-link hidden" id="adminBtn" onclick="openAdminDashboard()">&#128737; Admin Dashboard</button>
-      <button class="dash-link hidden" id="accessBtn" onclick="openAccess()">&#128273; Source Access</button>
+      <button class="dash-link hidden" id="accessBtn" onclick="openAccess()">&#128101; Users &amp; Access</button>
     </div></details>
     <button onclick="switchUser()">Sign Out</button>
   </div>
@@ -742,7 +809,7 @@ body.has-video{padding-inline-end:var(--vw)}
 </div>
 
 <section id="homeView" aria-label="Curriculum">
-  <div class="home-hero"><div><h2>CMA Part 1 &mdash; Curriculum</h2><p>Choose a unit to start practicing its questions.</p></div><button type="button" class="mx-cta" onclick="openMock()">&#128221; Mock Exam <small>Build a custom test</small></button></div>
+  <div class="home-hero"><div><h2>CMA Part 1 &mdash; Curriculum</h2><p>Choose a unit to start practicing its questions.</p></div><div class="hero-ctas"><button type="button" class="mx-cta tour-cta" onclick="startTour('home')">&#127891; &#1603;&#1610;&#1601; &#1578;&#1593;&#1605;&#1604; &#1575;&#1604;&#1605;&#1606;&#1589;&#1577;&#1567; <small>&#1580;&#1608;&#1604;&#1577; &#1578;&#1601;&#1575;&#1593;&#1604;&#1610;&#1577; &#1576;&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</small></button><button type="button" class="mx-cta" onclick="openMock()">&#128221; Mock Exam <small>Build a custom test</small></button></div></div>
   <div class="home-tools">
     <input type="search" id="homeSearch" placeholder="Search units or topics (e.g. variance, 8.2, budgeting)" oninput="renderHome()" aria-label="Search units and topics">
     <select id="homeSrcSelect" onchange="setGlobalSource(this.value)" aria-label="Question source"></select>
@@ -755,6 +822,7 @@ body.has-video{padding-inline-end:var(--vw)}
 <div class="practice-bar hidden" id="practiceBar">
   <button onclick="goHome()" aria-label="Back to curriculum">&larr; Curriculum</button>
   <div id="crumb" aria-live="polite"></div>
+  <button type="button" onclick="startTour('practice')" title="&#1580;&#1608;&#1604;&#1577; &#1578;&#1593;&#1585;&#1610;&#1601;&#1610;&#1577; &#1576;&#1575;&#1604;&#1589;&#1601;&#1581;&#1577;">&#127891; &#1580;&#1608;&#1604;&#1577;</button>
 </div>
 <div id="subVideos" class="subvideos hidden"></div>
 <div class="layout hidden" id="layout">
@@ -778,6 +846,7 @@ body.has-video{padding-inline-end:var(--vw)}
   <div class="cert-sheet" id="certSheet"></div>
 </div>
 
+<footer id="siteFooter" class="site-footer"><button type="button" onclick="openAbout()">About Us</button><span>&middot;</span><button type="button" onclick="openContact()">Contact me</button><span>&middot;</span><button type="button" onclick="startTour('home')">&#127891; &#1603;&#1610;&#1601; &#1578;&#1593;&#1605;&#1604; &#1575;&#1604;&#1605;&#1606;&#1589;&#1577;&#1567;</button></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================================================
@@ -1018,6 +1087,7 @@ async function startSession(user){
   userId = user.id; userEmail = (user.email || "").toLowerCase();
   document.getElementById("loginVeil").classList.add("hidden");
   document.getElementById("userEmailLbl").textContent = userEmail;
+  if(!(await checkActive())) return;
   await loadUserData();
   await loadManifest();
   await loadMyProfile();
@@ -1026,6 +1096,7 @@ async function startSession(user){
   if(location.hash==="#practice") history.replaceState(null,"",location.pathname+location.search);
   showView("home");
   loadSubVideos();
+  inboxBadge(); if(!window._inbTimer) window._inbTimer = setInterval(()=>{ if(userId && !document.hidden) inboxBadge(); }, 60000);
   loadNews();
   if(!window._newsTimer) window._newsTimer = setInterval(()=>{ if(userId) loadNews(); }, 5*60*1000);
 }
@@ -1168,11 +1239,14 @@ function classifyStudent(hasAnyRow, answeredCt, accuracy, lastActive){
   return "good";
 }
 async function loadAllStudentsData(){
-  const [{data:profiles, error:e1}, {data:progress, error:e2}] = await Promise.all([
+  const [{data:profiles0, error:e1}, {data:progress, error:e2}, stq] = await Promise.all([
     sb.from("profiles").select("user_id,email,display_name,role"),
-    sb.from("user_progress_admin").select("user_id,updated_at,answered,flagged")
+    sb.from("user_progress_admin").select("user_id,updated_at,answered,flagged"),
+    sb.from("user_status").select("user_id,status")
   ]);
   if(e1) throw e1; if(e2) throw e2;
+  const gone = new Set(((stq && stq.data)||[]).filter(x=>x.status==="deleted").map(x=>x.user_id));
+  const profiles = (profiles0||[]).filter(p=>!gone.has(p.user_id));
   const progByUser = {}; (progress||[]).forEach(p=>progByUser[p.user_id]=p);
   const bankTotal = bankTotalQuestions();
   return (profiles||[]).map(p=>{
@@ -1405,7 +1479,7 @@ async function switchUser(){
   document.getElementById("passInput").value = "";
   attachCache = {}; attachKeyLoaded = null;
   document.getElementById("adminBtn").classList.add("hidden"); document.getElementById("accessBtn").classList.add("hidden");
-  document.getElementById("newsAdminBtn").classList.add("hidden");
+  document.getElementById("newsAdminBtn").classList.add("hidden"); setInboxBadge(0); inb.threads = []; inb.sel = null; inb.names = {};
   document.getElementById("newsBar").classList.add("hidden"); newsItems = [];
   document.getElementById("nameBanner").classList.add("hidden");
   document.getElementById("loginVeil").classList.remove("hidden");
@@ -2076,7 +2150,7 @@ function mockRenderSetup(){
   const run = (mockRun && !mockRun.done && mockRun.items && mockRun.items.length) ? mockRun : null;
   const resume = run ? `<section class="mx-card mx-resume"><div><h3>Exam in progress</h3><p>${run.ans.filter(x=>x!=null).length} of ${run.items.length} answered &middot; time so far ${fmtDur(Math.round((run.acc||0)/1000))} &middot; saved ${chatAgo(new Date(run.saved).toISOString())}</p></div><div class="mx-acts"><button type="button" class="mx-start" onclick="mockResume()">Resume</button><button type="button" onclick="mockDiscard()">Discard</button></div></section>` : "";
   el.innerHTML = `<div class="mx-wrap">
-    <div class="mx-head"><button type="button" class="mx-back" onclick="mockExit()">&larr; Curriculum</button><div><h2>Mock Exam</h2><p>Build a custom test from the questions on the platform. Answers are revealed only after you submit.</p></div></div>${resume}
+    <div class="mx-head"><button type="button" class="mx-back" onclick="mockExit()">&larr; Curriculum</button><div style="flex:1"><h2>Mock Exam</h2><p>Build a custom test from the questions on the platform. Answers are revealed only after you submit.</p></div><button type="button" class="mx-back" onclick="startTour('mock')">&#127891; &#1580;&#1608;&#1604;&#1577;</button></div>${resume}
     <div class="mx-grid"><div class="mx-col">
       <section class="mx-card"><div class="mx-ch"><h3>1. Sources</h3><span><button type="button" class="mx-link" onclick="mockAllSrc(true)">All</button> &middot; <button type="button" class="mx-link" onclick="mockAllSrc(false)">None</button></span></div>
         <div class="mx-chips">${srcs.map(sn=>`<label class="mx-chip"><input type="checkbox" ${c.src.has(sn)?"checked":""} onchange="mockToggleSrc(this.dataset.s,this.checked)" data-s="${aiEsc(sn)}"><span>${aiEsc(sn)}</span></label>`).join("")}</div></section>
@@ -2257,40 +2331,47 @@ function applyAccess(){
   Object.keys(answered).forEach(id=>{ if(!ok.has(Number(id))){ answeredHidden[id] = answered[id]; delete answered[id]; } });
   Object.keys(flagged).forEach(id=>{ if(!ok.has(Number(id))){ flaggedHidden[id] = flagged[id]; delete flagged[id]; } });
 }
-/* admin: manage access */
-let accRows = [], accSel = new Set(), accQ = "", accSources = [];
+/* admin: users (status) & source access */
+let accRows = [], accSel = new Set(), accQ = "", accSources = [], accShowDel = false;
 async function openAccess(){
   const b = gid("accessBody"); gid("accessVeil").classList.remove("hidden"); b.innerHTML = "<p>Loading&hellip;</p>";
   try{
     accSources = [...new Set(Object.values(manifestFull||manifest||{}).reduce((a,u)=>a.concat(Object.values(u).reduce((b2,sb2)=>b2.concat((sb2.files||[]).map(f=>f.source||"Sameh Allithy Target")),[])),[]))].sort();
-    const [p, a] = await Promise.all([sb.from("profiles").select("user_id,email,display_name,role"), sb.from("source_access").select("user_id,sources")]);
+    const [p, a, st] = await Promise.all([sb.from("profiles").select("user_id,email,display_name,role"), sb.from("source_access").select("user_id,sources"), sb.from("user_status").select("user_id,status,reason")]);
     if(p.error) throw p.error; if(a.error) throw a.error;
-    const m = new Map((a.data||[]).map(r=>[r.user_id, r.sources||[]]));
-    accRows = (p.data||[]).filter(x=>x.role!=="admin").map(x=>({id:x.user_id, email:x.email||"", name:x.display_name||"", src:new Set(m.get(x.user_id)||[]), has:m.has(x.user_id)}))
+    const m = new Map((a.data||[]).map(r=>[r.user_id, r.sources||[]])), sm = new Map(((st&&st.data)||[]).map(r=>[r.user_id, r]));
+    accRows = (p.data||[]).filter(x=>x.role!=="admin").map(x=>({id:x.user_id, email:x.email||"", name:x.display_name||"", src:new Set(m.get(x.user_id)||[]), has:m.has(x.user_id), st:(sm.get(x.user_id)||{}).status||"active"}))
       .sort((x,y)=>(x.has-y.has) || (x.name||x.email).toLowerCase().localeCompare((y.name||y.email).toLowerCase()));
     accSel = new Set(); accQ = ""; renderAccess();
-  }catch(e){ b.innerHTML = `<p>Could not load: ${aiEsc(e.message||String(e))}<br>Make sure source-access-setup.sql was run in Supabase.</p>`; }
+  }catch(e){ b.innerHTML = `<p>Could not load: ${aiEsc(e.message||String(e))}<br>Make sure source-access-setup.sql and platform-extras-setup.sql were run in Supabase.</p>`; }
 }
 function closeAccess(){ gid("accessVeil").classList.add("hidden"); }
-document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeAccess(); });
 function renderAccess(){
-  gid("accessBody").innerHTML = `<h2 style="margin:0 0 4px">Source access</h2>
+  gid("accessBody").innerHTML = `<h2 style="margin:0 0 4px">Users &amp; access</h2>
     <p class="mx-note" id="accInfo"></p>
     <div class="acc-tools"><input type="search" id="accSearch" placeholder="Search students..." oninput="accQ=this.value;renderAccessRows()" aria-label="Search students">
+      <label class="mx-note"><input type="checkbox" onchange="accShowDel=this.checked;renderAccessRows()"> Show deleted</label>
       <select id="accBulkSrc" aria-label="Source for bulk action"><option value="*">All sources</option>${accSources.map(x=>`<option value="${aiEsc(x)}">${aiEsc(x)}</option>`).join("")}</select>
-      <button type="button" class="mx-start" onclick="accBulk(true)">Grant to selected</button><button type="button" class="mx-back" onclick="accBulk(false)">Revoke from selected</button></div>
-    <div class="mx-hist"><table class="acc-table"><thead><tr><th><input type="checkbox" id="accAll" aria-label="Select all shown" onchange="accSelAll(this.checked)"></th><th>Student</th>${accSources.map(x=>`<th class="acc-h">${aiEsc(x)}</th>`).join("")}</tr></thead><tbody id="accBody"></tbody></table></div>`;
+      <button type="button" class="mx-start" onclick="accBulk(true)">Grant to selected</button><button type="button" class="mx-back" onclick="accBulk(false)">Revoke from selected</button>
+      <button type="button" class="mx-back" onclick="accMessage()">&#9993; Message selected</button></div>
+    <div class="mx-hist"><table class="acc-table"><thead><tr><th><input type="checkbox" id="accAll" aria-label="Select all shown" onchange="accSelAll(this.checked)"></th><th>Student</th>${accSources.map(x=>`<th class="acc-h">${aiEsc(x)}</th>`).join("")}<th>Account</th></tr></thead><tbody id="accBody"></tbody></table></div>`;
   renderAccessRows();
 }
-function accShown(){ const q = accQ.trim().toLowerCase(); return accRows.filter(r=>!q || r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q)); }
+function accShown(){ const q = accQ.trim().toLowerCase(); return accRows.filter(r=>(accShowDel || r.st!=="deleted") && (!q || r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q))); }
+function accActions(r){
+  const B = (st, label, cls)=>`<button type="button" class="acc-b ${cls||""}" onclick="usrStatus('${r.id}','${st}')">${label}</button>`;
+  return r.st==="deleted" ? B("active","Restore") : (r.st==="disabled" ? B("active","Enable") : B("disabled","Disable")) + B("deleted","Delete","danger");
+}
 function renderAccessRows(){
-  const rows = accShown(), none = accRows.filter(r=>!r.has).length;
-  gid("accInfo").textContent = accRows.length+" students" + (none ? " \u00b7 "+none+" without any access yet (shown first)" : "") + " \u00b7 selected: "+accSel.size;
-  gid("accBody").innerHTML = rows.map(r=>`<tr class="${r.has?"":"acc-new"}"><td><input type="checkbox" ${accSel.has(r.id)?"checked":""} aria-label="Select ${aiEsc(r.email)}" onchange="accPick('${r.id}',this.checked)"></td><td>${r.name?aiEsc(r.name)+"<br>":""}<span class="mx-note">${aiEsc(r.email)}${r.has?"":" \u00b7 no access yet"}</span></td>`
-    + accSources.map((x,i)=>`<td class="acc-c"><input type="checkbox" ${r.src.has(x)?"checked":""} data-s="${aiEsc(x)}" aria-label="${aiEsc(x)} for ${aiEsc(r.email)}" onchange="accToggle('${r.id}',this.dataset.s,this.checked)"></td>`).join("") + `</tr>`).join("") || `<tr><td colspan="${accSources.length+2}" class="mx-note">No students match.</td></tr>`;
+  const rows = accShown(), none = accRows.filter(r=>!r.has && r.st!=="deleted").length, dis = accRows.filter(r=>r.st==="disabled").length;
+  gid("accInfo").textContent = accRows.filter(r=>r.st!=="deleted").length+" students" + (none ? " \u00b7 "+none+" without any source yet (shown first)" : "") + (dis ? " \u00b7 "+dis+" disabled" : "") + " \u00b7 selected: "+accSel.size;
+  gid("accBody").innerHTML = rows.map(r=>`<tr class="${r.st!=="active"?"acc-off":(r.has?"":"acc-new")}"><td><input type="checkbox" ${accSel.has(r.id)?"checked":""} aria-label="Select ${aiEsc(r.email)}" onchange="accPick('${r.id}',this.checked)"></td><td>${r.name?aiEsc(r.name)+"<br>":""}<span class="mx-note">${aiEsc(r.email)}${r.st!=="active"?` \u00b7 <b class="acc-st">${r.st}</b>`:(r.has?"":" \u00b7 no access yet")}</span></td>`
+    + accSources.map(x=>`<td class="acc-c"><input type="checkbox" ${r.src.has(x)?"checked":""} data-s="${aiEsc(x)}" aria-label="${aiEsc(x)} for ${aiEsc(r.email)}" onchange="accToggle('${r.id}',this.dataset.s,this.checked)"></td>`).join("")
+    + `<td class="acc-act">${accActions(r)}<button type="button" class="acc-b" title="Send a message" onclick="inboxCompose(['${r.id}']);openInbox(true)">&#9993;</button></td></tr>`).join("") || `<tr><td colspan="${accSources.length+3}" class="mx-note">No students match.</td></tr>`;
 }
 function accPick(id, on){ on ? accSel.add(id) : accSel.delete(id); renderAccessRows(); }
 function accSelAll(on){ accShown().forEach(r=>{ on ? accSel.add(r.id) : accSel.delete(r.id); }); renderAccessRows(); gid("accAll").checked = on; }
+function accMessage(){ if(!accSel.size){ alert("Select one or more students first."); return; } inboxCompose([...accSel]); openInbox(true); }
 async function accSave(rows){
   const now = new Date().toISOString();
   const { error } = await sb.from("source_access").upsert(rows.map(r=>({user_id:r.id, sources:[...r.src], updated_by:userId, updated_at:now})), {onConflict:"user_id"});
@@ -2308,6 +2389,276 @@ async function accBulk(grant){
   rows.forEach(r=>list.forEach(x=>{ grant ? r.src.add(x) : r.src.delete(x); }));
   if(!(await accSave(rows))) await openAccess(); else renderAccessRows();
 }
+async function usrStatus(id, st){
+  const r = accRows.find(x=>x.id===id); if(!r) return;
+  let reason = "";
+  if(st==="disabled"){ const x = prompt("Disable "+(r.name||r.email)+"?\nThe student will be blocked from signing in.\n\nReason shown to the student (optional):", ""); if(x===null) return; reason = x.trim(); }
+  if(st==="deleted" && !confirm("Delete "+(r.name||r.email)+"?\n\nThey will be blocked from signing in and hidden from all lists. Their data is kept, and you can restore them later.")) return;
+  const { error } = await sb.from("user_status").upsert({user_id:id, status:st, reason:reason||null, updated_at:new Date().toISOString(), updated_by:userId}, {onConflict:"user_id"});
+  if(error){ alert("Could not update the user: "+(error.message||error)+"\nMake sure platform-extras-setup.sql was run."); return; }
+  r.st = st; renderAccessRows();
+}
+/* sign-in gate for disabled / deleted accounts */
+async function checkActive(){
+  try{
+    const { data, error } = await sb.from("user_status").select("status,reason").eq("user_id", userId).maybeSingle();
+    if(error) throw error;
+    if(data && data.status && data.status!=="active"){
+      const del = data.status==="deleted", why = data.reason ? " Reason: "+data.reason : "";
+      gid("blockedMsg").textContent = del ? "This account is no longer available." : "Your account has been disabled. Please contact the platform administration."+why;
+      gid("blockedMsgAr").textContent = del ? "هذا الحساب لم يعد متاحًا." : "تم تعطيل حسابك. يرجى التواصل مع إدارة المنصة."+(data.reason ? " السبب: "+data.reason : "");
+      gid("blockedVeil").classList.remove("hidden");
+      try{ await sb.auth.signOut(); }catch(e){}
+      userId = ""; userEmail = ""; return false;
+    }
+  }catch(e){ console.warn("user_status unavailable: access allowed", e); }
+  return true;
+}
+function blockedOk(){ gid("blockedVeil").classList.add("hidden"); gid("loginVeil").classList.remove("hidden"); }
+
+/* ===== Inbox: private messages between students and the platform admin (also "Contact me") ===== */
+const INB_TOPICS = ["Question", "Technical problem", "Suggestion", "Other"];
+let inb = {threads:[], unread:{}, sel:null, msgs:[], names:{}, st:{}, mode:"list", timer:null, rec:new Set(), all:false, recQ:"", draft:{}};
+function inbSum(){ return Object.values(inb.unread).reduce((a,b)=>a+b, 0); }
+function setInboxBadge(n){ const b = gid("inboxN"); if(!b) return; b.textContent = n>99 ? "99+" : n; b.classList.toggle("hidden", !n); }
+async function inboxBadge(){
+  if(!userId) return;
+  try{
+    const { count, error } = await sb.from("inbox_messages").select("id", {count:"exact", head:true}).is("read_at", null).eq("from_admin", !attIsAdmin());
+    if(error) throw error; setInboxBadge(count||0);
+  }catch(e){ /* inbox not set up yet */ }
+}
+function inbName(uid){ const n = inb.names[uid]; return n ? (n.name || n.email || "Student") : "Student"; }
+async function openInbox(keep){
+  gid("inboxVeil").classList.remove("hidden");
+  if(!keep){ inb.mode = "list"; inb.sel = null; }
+  await inboxLoad();
+  clearInterval(inb.timer);
+  inb.timer = setInterval(()=>{ if(!gid("inboxVeil").classList.contains("hidden") && !document.hidden && inb.mode==="list") inboxLoad(true); }, 15000);
+}
+function closeInbox(){ gid("inboxVeil").classList.add("hidden"); clearInterval(inb.timer); inboxBadge(); }
+function openContact(){ const m = gid("moreMenu"); if(m) m.open = false; inboxCompose(); openInbox(true); }
+async function inboxLoad(silent){
+  const adm = attIsAdmin();
+  try{
+    const [t, u] = await Promise.all([
+      sb.from("inbox_threads").select("id,user_id,subject,kind,topic,created_at,last_at").order("last_at", {ascending:false}).limit(300),
+      sb.from("inbox_messages").select("thread_id").is("read_at", null).eq("from_admin", !adm).limit(3000)]);
+    if(t.error) throw t.error;
+    inb.threads = t.data || []; inb.unread = {}; ((u && u.data)||[]).forEach(r=>{ inb.unread[r.thread_id] = (inb.unread[r.thread_id]||0)+1; });
+    if(adm && !Object.keys(inb.names).length){
+      const [p, st] = await Promise.all([sb.from("profiles").select("user_id,email,display_name,role"), sb.from("user_status").select("user_id,status")]);
+      (p.data||[]).forEach(x=>{ inb.names[x.user_id] = {name:x.display_name, email:x.email, role:x.role}; });
+      inb.st = {}; ((st && st.data)||[]).forEach(x=>{ inb.st[x.user_id] = x.status; });
+    }
+    setInboxBadge(inbSum());
+    if(inb.sel && inb.mode==="list") await inboxThread(inb.sel, true);
+    if(!(silent && inb.mode==="compose")) inboxRender();
+  }catch(e){
+    console.warn("Inbox unavailable", e);
+    gid("inboxBody").innerHTML = `<h2 style="margin:0 0 6px">Inbox</h2><p class="mx-note">The inbox is not available yet.${adm?" Make sure platform-extras-setup.sql was run in Supabase.":""}</p>`;
+  }
+}
+async function inboxThread(id, quiet){
+  const { data, error } = await sb.from("inbox_messages").select("id,sender_id,from_admin,body,created_at,read_at").eq("thread_id", id).order("created_at", {ascending:true}).limit(500);
+  if(error) return;
+  inb.sel = id; inb.mode = "list"; inb.msgs = data || [];
+  if(inb.unread[id]){ await sb.rpc("mark_read", {p_thread:id}); inb.unread[id] = 0; setInboxBadge(inbSum()); }
+  if(!quiet) inboxRender();
+}
+function inboxRender(){
+  const adm = attIsAdmin(), body = gid("inboxBody"); if(!body) return;
+  const list = inb.threads.map(t=>{
+    const n = inb.unread[t.id]||0, who = adm ? aiEsc(inbName(t.user_id)) : "Platform admin";
+    return `<button type="button" class="inb-t${t.id===inb.sel?" on":""}${n?" unread":""}" onclick="inboxThread(${t.id})"><span class="inb-s">${aiEsc(t.subject)}</span><span class="inb-m">${who}${t.kind==="contact"?" &middot; Contact":""} &middot; ${chatAgo(t.last_at)}</span>${n?`<i class="inb-n">${n}</i>`:""}</button>`;
+  }).join("") || `<p class="mx-note" style="padding:12px">No messages yet.</p>`;
+  let right;
+  if(inb.mode==="compose") right = inboxComposeHtml(adm);
+  else if(inb.sel){
+    const th = inb.threads.find(x=>x.id===inb.sel);
+    right = `<div class="inb-ch"><button type="button" class="mx-back inb-bk" onclick="inb.sel=null;inboxRender()">&larr;</button><div><b>${aiEsc(th?th.subject:"")}</b><div class="mx-note">${adm ? aiEsc(inbName(th&&th.user_id))+(th&&th.topic?" &middot; "+aiEsc(th.topic):"") : "Platform admin"}</div></div></div>
+      <div class="inb-msgs" id="inbMsgs">${inb.msgs.map(m=>{ const mine = m.from_admin===adm; return `<div class="inb-b${mine?" mine":""}"><div class="inb-bt" dir="auto">${aiEsc(m.body).replace(/\n/g,"<br>")}</div><div class="inb-bm">${mine?"You":(m.from_admin?"Platform admin":aiEsc(inbName(th&&th.user_id)))} &middot; ${chatAgo(m.created_at)}</div></div>`; }).join("")}</div>
+      <div class="chat-form"><textarea id="inbText" rows="2" maxlength="4000" dir="auto" placeholder="Write a reply..." oninput="inb.draft[inb.sel]=this.value" onkeydown="if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();inboxReply()}">${aiEsc(inb.draft[inb.sel]||"")}</textarea><button type="button" id="inbSendBtn" onclick="inboxReply()">Send</button></div>`;
+  } else right = `<div class="inb-empty">Select a conversation${adm?"":", or write to the platform admin with “New message”"}.</div>`;
+  body.innerHTML = `<div class="inb-head"><h2 style="margin:0">Inbox</h2><button type="button" class="mx-start" onclick="inboxCompose()">&#9993; ${adm?"New message":"Contact the admin"}</button></div>
+    <div class="inb${inb.sel||inb.mode==="compose"?" has-sel":""}"><div class="inb-l">${list}</div><div class="inb-r">${right}</div></div>`;
+  const ms = gid("inbMsgs"); if(ms) ms.scrollTop = ms.scrollHeight;
+  if(inb.mode==="compose" && adm) inboxRecRender();
+}
+async function inboxReply(){
+  const t = gid("inbText"), btn = gid("inbSendBtn"); if(!t || !inb.sel) return;
+  const v = t.value.trim(); if(!v) return; btn.disabled = true;
+  const { error } = await sb.from("inbox_messages").insert({thread_id:inb.sel, body:v});
+  btn.disabled = false;
+  if(error){ alert("Could not send the message. Please try again."); return; }
+  inb.draft[inb.sel] = ""; await inboxLoad(true);
+}
+function inboxCompose(ids){
+  inb.mode = "compose"; inb.sel = null; inb.rec = new Set(ids||[]); inb.all = false; inb.recQ = "";
+  if(!gid("inboxVeil").classList.contains("hidden")) inboxRender();
+}
+function inbStudents(){
+  const q = inb.recQ.trim().toLowerCase();
+  return Object.keys(inb.names).filter(id=>inb.names[id].role!=="admin" && inb.st[id]!=="deleted").map(id=>({id, n:inb.names[id].name||"", e:inb.names[id].email||""}))
+    .filter(x=>!q || x.n.toLowerCase().includes(q) || x.e.toLowerCase().includes(q)).sort((a,b)=>(a.n||a.e).localeCompare(b.n||b.e));
+}
+function inboxComposeHtml(adm){
+  const head = `<div class="inb-ch"><button type="button" class="mx-back inb-bk" onclick="inb.mode='list';inboxRender()">&larr;</button><b>${adm?"New message":"Contact the platform admin"}</b></div>`;
+  const fields = `<input id="inbSubj" type="text" maxlength="200" placeholder="Subject" aria-label="Subject" class="inb-in"><textarea id="inbBody" rows="6" maxlength="4000" dir="auto" placeholder="Your message..." aria-label="Message" class="inb-in"></textarea><div class="inb-actions"><button type="button" class="mx-start" onclick="inboxSend()">Send</button></div>`;
+  if(!adm) return head + `<div class="inb-form"><select id="inbTopic" class="inb-in" aria-label="Topic">${INB_TOPICS.map(x=>`<option>${x}</option>`).join("")}</select>${fields}</div>`;
+  const st = inbStudents();
+  return head + `<div class="inb-form"><div class="inb-rec"><div class="acc-tools"><input type="search" placeholder="Search students..." value="${aiEsc(inb.recQ)}" oninput="inb.recQ=this.value;inboxRecRender()" aria-label="Search students"><label class="mx-note"><input type="checkbox" ${inb.all?"checked":""} onchange="inb.all=this.checked;inboxRecRender()"> All students</label></div><div id="inbRecList" class="inb-reclist"></div></div>${fields}</div>`;
+}
+function inboxRecRender(){
+  const el = gid("inbRecList"); if(!el) return;
+  el.innerHTML = inb.all ? `<p class="mx-note" style="padding:8px">The message will be sent to every active student (${inbStudents().length}).</p>` : inbStudents().slice(0,300).map(x=>`<label class="mx-chk"><input type="checkbox" ${inb.rec.has(x.id)?"checked":""} onchange="inb.rec[this.checked?'add':'delete']('${x.id}')"><span>${aiEsc(x.n||x.e)}<em style="margin-inline-start:8px">${x.n?aiEsc(x.e):""}</em></span></label>`).join("") || `<p class="mx-note" style="padding:8px">No students match.</p>`;
+}
+async function inboxSend(){
+  const adm = attIsAdmin(), subj = gid("inbSubj").value.trim(), body = gid("inbBody").value.trim();
+  if(!subj || !body){ alert("Please write a subject and a message."); return; }
+  try{
+    if(!adm){
+      const { data, error } = await sb.from("inbox_threads").insert({user_id:userId, subject:subj, kind:"contact", topic:gid("inbTopic").value}).select("id").single();
+      if(error) throw error;
+      const r = await sb.from("inbox_messages").insert({thread_id:data.id, body}); if(r.error) throw r.error;
+    }else{
+      const ids = inb.all ? inbStudents().map(x=>x.id) : [...inb.rec];
+      if(!ids.length){ alert("Choose at least one student."); return; }
+      if(ids.length>1 && !confirm("Send this message to "+ids.length+" students?")) return;
+      for(let i=0;i<ids.length;i+=100){
+        const { data, error } = await sb.from("inbox_threads").insert(ids.slice(i,i+100).map(id=>({user_id:id, subject:subj, kind:"message"}))).select("id");
+        if(error) throw error;
+        const r = await sb.from("inbox_messages").insert(data.map(t=>({thread_id:t.id, body}))); if(r.error) throw r.error;
+      }
+    }
+    inb.mode = "list"; inb.sel = null; await inboxLoad(true);
+  }catch(e){ console.warn(e); alert("Could not send the message. Make sure platform-extras-setup.sql was run in Supabase."); }
+}
+
+/* ===== About Us (editable by admins; stored in site_pages) ===== */
+const ABOUT_DEFAULT = {
+  ar:{about:"منصة تعليمية غير ربحية تساعد الدارسين على الاستعداد لاختبار CMA الجزء الأول (التخطيط المالي والأداء والتحليلات) من خلال بنك كبير من أسئلة الاختيار من متعدد، مقسّم حسب أقسام المنهج ووحداته، مع شرح لكل سؤال وتتبّع لتقدّمك وأدائك.", goal:"هدفنا أن نجعل التدريب على أسئلة CMA منظّمًا وفعّالًا ومتاحًا للجميع: تدرّب على كل وحدة، وراجع أخطاءك، واختبر نفسك باختبارات تجريبية مخصّصة قبل الامتحان الفعلي."},
+  en:{about:"A nonprofit educational platform that helps candidates prepare for CMA Part 1 (Financial Planning, Performance, and Analytics) with a large bank of multiple-choice questions organized by exam section and unit, explanations for every question, and tracking of your progress and performance.", goal:"Our goal is to make CMA practice organized, effective and accessible: train on every unit, review your mistakes, and test yourself with custom mock exams before the real exam."},
+  team:[]
+};
+let aboutData = null, aboutLang = "ar", aboutEdit = false, aboutDraft = null;
+async function openAbout(){
+  const m = gid("moreMenu"); if(m) m.open = false;
+  gid("aboutVeil").classList.remove("hidden"); aboutEdit = false;
+  try{ const { data } = await sb.from("site_pages").select("content").eq("key","about").maybeSingle(); aboutData = (data && data.content && data.content.ar) ? data.content : ABOUT_DEFAULT; }catch(e){ aboutData = ABOUT_DEFAULT; }
+  aboutRender();
+}
+function closeAbout(){ gid("aboutVeil").classList.add("hidden"); }
+function aboutRender(){
+  const adm = attIsAdmin(), b = gid("aboutBody");
+  if(aboutEdit){ aboutEditRender(); return; }
+  const d = aboutData, L = aboutLang, ar = L==="ar", T = ar ? {a:"نبذة عن المنصة", g:"هدفنا", t:"فريق العمل"} : {a:"About the platform", g:"Our goal", t:"Our team"};
+  const para = x=>aiEsc(x||"").replace(/\n/g,"<br>");
+  const team = (d.team||[]).map(m=>`<div class="ab-m"><div class="ab-av">${m.img?`<img src="${aiEsc(m.img)}" alt="">`:aiEsc((m.name||"?").charAt(0).toUpperCase())}</div><b>${aiEsc(m.name)}</b><span>${aiEsc((ar?m.role_ar:m.role_en)||m.role_ar||m.role_en||"")}</span></div>`).join("");
+  b.innerHTML = `<div class="ab-top"><h2 style="margin:0">${ar?"من نحن":"About Us"}</h2><div class="ab-lang" role="tablist"><button type="button" class="${ar?"on":""}" onclick="aboutLang='ar';aboutRender()">العربية</button><button type="button" class="${ar?"":"on"}" onclick="aboutLang='en';aboutRender()">English</button></div>${adm?`<button type="button" class="mx-back" onclick="aboutStartEdit()">&#9998; Edit</button>`:""}</div>
+    <div class="ab-body" dir="${ar?"rtl":"ltr"}"><h3>${T.a}</h3><p>${para(d[L].about)}</p><h3>${T.g}</h3><p>${para(d[L].goal)}</p>${team||adm?`<h3>${T.t}</h3>${team?`<div class="ab-team">${team}</div>`:`<p class="mx-note">${ar?"لم تُضف أسماء الفريق بعد. اضغط Edit لإضافتها.":"No team members added yet. Click Edit to add them."}</p>`}`:""}</div>`;
+}
+function aboutStartEdit(){ aboutDraft = JSON.parse(JSON.stringify(aboutData)); aboutDraft.team = aboutDraft.team || []; aboutEdit = true; aboutRender(); }
+function aboutEditRender(){
+  const d = aboutDraft, F = (k,l,v,r)=>`<label class="ab-f">${l}<textarea rows="4" maxlength="2000" dir="${r?"rtl":"ltr"}" oninput="aboutSet('${k}',this.value)">${aiEsc(v||"")}</textarea></label>`;
+  gid("aboutBody").innerHTML = `<h2 style="margin:0 0 10px">Edit About Us</h2><div class="ab-grid">${F("ar.about","نبذة عن المنصة (عربي)",d.ar.about,1)}${F("en.about","About the platform (English)",d.en.about)}${F("ar.goal","هدفنا (عربي)",d.ar.goal,1)}${F("en.goal","Our goal (English)",d.en.goal)}</div>
+    <h3>Team</h3><div id="abTeam">${d.team.map((m,i)=>`<div class="ab-row"><div class="ab-av">${m.img?`<img src="${aiEsc(m.img)}" alt="">`:aiEsc((m.name||"?").charAt(0).toUpperCase())}</div><input placeholder="Name" value="${aiEsc(m.name||"")}" oninput="aboutTeam(${i},'name',this.value)"><input placeholder="الدور (عربي)" dir="rtl" value="${aiEsc(m.role_ar||"")}" oninput="aboutTeam(${i},'role_ar',this.value)"><input placeholder="Role (English)" value="${aiEsc(m.role_en||"")}" oninput="aboutTeam(${i},'role_en',this.value)"><label class="mx-back ab-up">Photo<input type="file" accept="image/*" hidden onchange="aboutPhoto(${i},this)"></label><button type="button" class="acc-b danger" onclick="aboutDraft.team.splice(${i},1);aboutEditRender()">&#10005;</button></div>`).join("")}</div>
+    <div class="inb-actions"><button type="button" class="mx-back" onclick="aboutDraft.team.push({name:'',role_ar:'',role_en:'',img:''});aboutEditRender()">+ Add team member</button><span style="flex:1"></span><button type="button" class="mx-back" onclick="aboutEdit=false;aboutRender()">Cancel</button><button type="button" class="mx-start" onclick="aboutSave()">Save</button></div>`;
+}
+function aboutSet(path, v){ const [a,b] = path.split("."); aboutDraft[a][b] = v; }
+function aboutTeam(i, k, v){ aboutDraft.team[i][k] = v; }
+function aboutPhoto(i, inp){
+  const f = inp.files && inp.files[0]; inp.value = ""; if(!f || !/^image\//.test(f.type)) return;
+  const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = ()=>{ const S = 200, k = Math.max(S/img.width, S/img.height), c = document.createElement("canvas"); c.width = c.height = S; const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0,0,S,S); x.drawImage(img, (S-img.width*k)/2, (S-img.height*k)/2, img.width*k, img.height*k); URL.revokeObjectURL(url); aboutDraft.team[i].img = c.toDataURL("image/jpeg", 0.82); aboutEditRender(); };
+  img.src = url;
+}
+async function aboutSave(){
+  const d = aboutDraft; d.team = (d.team||[]).filter(m=>(m.name||"").trim());
+  const { error } = await sb.from("site_pages").upsert({key:"about", content:d, updated_at:new Date().toISOString(), updated_by:userId}, {onConflict:"key"});
+  if(error){ alert("Could not save: "+(error.message||error)+"\nMake sure platform-extras-setup.sql was run in Supabase."); return; }
+  aboutData = d; aboutEdit = false; aboutRender();
+}
+
+/* ===== Interactive Arabic tour (how the platform works) ===== */
+const TOURS = {
+  home:[
+    {t:"مرحبًا بك في منصة التدريب", x:"منصة للتدرّب على أسئلة اختبار CMA الجزء الأول. في هذه الجولة القصيرة نتعرّف على أهم أجزاء المنصة وطريقة العمل بها. يمكنك إيقافها في أي وقت."},
+    {s:".sec", t:"أقسام المنهج ووحداته", x:"ينقسم المنهج إلى ستة أقسام، لكل قسم لونه ونسبته ووصفه. اضغط على أي وحدة لتظهر مواضيعها الفرعية، ثم اضغط على الموضوع لتبدأ حل أسئلته."},
+    {s:"#homeSearch", t:"البحث", x:"ابحث باسم الوحدة أو رقمها أو موضوعها للوصول إليها بسرعة."},
+    {s:"#homeSrcSelect", t:"مصادر الأسئلة", x:"اختر مصدر الأسئلة الذي تريده أو اترك كل المصادر. ويمكنك تفعيل «Only not answered» لعرض الأسئلة التي لم تجب عنها بعد فقط."},
+    {s:".mx-cta:not(.tour-cta)", t:"الاختبار التجريبي Mock Exam", x:"ابنِ اختبارًا مخصّصًا من المصادر والأقسام التي تختارها. لا تظهر الإجابات إلا بعد التسليم، ثم تحصل على النتيجة والزمن وتقرير بأخطائك وشهادة قابلة للطباعة، ويمكنك إيقاف الاختبار واستكماله لاحقًا."},
+    {s:"#reviewBar", t:"مراجعة أخطائك", x:"من هنا تراجع الأسئلة التي أخطأت فيها (Review Mistakes)، أو علّمتها بعلامة (Flagged)، أو كتبت عليها ملاحظات (Comments)، أو أجبت عنها صحيحًا من المحاولة الأولى (First try)."},
+    {s:".user-bar .dash-link[onclick*=openDashboard]", t:"أداؤك", x:"في «My Performance» تجد إحصاءات تقدّمك: نسبة الدقة، والتقدم في كل وحدة، والزمن المستغرق."},
+    {s:"#inboxBtn", t:"الرسائل", x:"تواصل مع إدارة المنصة وتلقَّ رسائلها من هنا. يظهر عدد الرسائل غير المقروءة على الزر."},
+    {s:"#moreMenu > summary", t:"المزيد", x:"تجد في «More»: نبذة عن المنصة (About Us)، والتواصل معنا (Contact me)، وتصدير سجل حلّك أو استيراده."}
+  ],
+  practice:[
+    {s:"#practiceBar", t:"الرجوع إلى الفهرس", x:"زر «Curriculum» يعيدك إلى قائمة الأقسام والوحدات، ويظهر بجانبه مسار الموضوع الحالي."},
+    {s:"#subVideos", t:"فيديوهات المراجعة", x:"قبل أن تبدأ الحل شاهد فيديوهات شرح هذا الموضوع. يُفتح الفيديو في لوحة بجانب السؤال لتتابع الحل أثناء المشاهدة."},
+    {s:".qgrid", t:"أرقام الأسئلة", x:"اضغط على أي رقم للانتقال إلى السؤال. الدائرة الخضراء تعني إجابة صحيحة من أول محاولة، والصفراء صحيحة من المحاولة الثانية، والحمراء إجابة خاطئة."},
+    {s:".qimg-wrap", t:"السؤال", x:"اقرأ السؤال في الصورة ثم اختر إجابتك من الأزرار A–D أسفله. يمكنك استخدام لوحة المفاتيح أيضًا: الحروف A–D أو الأرقام 1–4 للإجابة، والسهمان للتنقل."},
+    {s:".options", t:"اختيار الإجابة", x:"إذا أخطأت في المحاولة الأولى تُتاح لك فرصة ثانية، وبعد الإجابة يظهر لك الصواب والخطأ."},
+    {s:"#explainBtn", t:"شرح الإجابة", x:"بعد الإجابة اضغط «Show explanation» (أو مفتاح E) لتعرف لماذا كل إجابة صحيحة أو خاطئة."},
+    {s:".rte", t:"ملاحظاتك", x:"اكتب ملاحظاتك وقوانينك لكل سؤال، مع تنسيق النص وإضافة جداول وصور وتغيير اتجاه الكتابة بين العربية والإنجليزية."},
+    {s:"#chatPanel", t:"نقاش السؤال", x:"ناقش السؤال مع زملائك. يظهر عدد الرسائل على رقم السؤال."},
+    {s:".cert-btn", t:"شهادة الموضوع", x:"بعد حل كل أسئلة هذا الموضوع في المصدر الحالي يمكنك إصدار شهادة قابلة للطباعة."}
+  ],
+  mock:[
+    {t:"الاختبار التجريبي", x:"هنا تبني اختبارًا مخصّصًا من أسئلة المنصة. تختار المصادر والأقسام وعدد الأسئلة ثم تبدأ."},
+    {s:"#mockView .mx-col:nth-child(1) .mx-card:nth-child(1)", t:"١. المصادر", x:"اختر مصدرًا واحدًا أو أكثر."},
+    {s:"#mockView .mx-col:nth-child(1) .mx-card:nth-child(2)", t:"٢. الأقسام والوحدات", x:"حدّد الأقسام أو الوحدات التي تريد الاختبار فيها. الأرقام تبيّن عدد الأسئلة المتاحة في كل منها."},
+    {s:"#mockView .mx-col:nth-child(2) .mx-card:nth-child(1)", t:"٣. حالة السؤال", x:"اختر كل الأسئلة، أو التي لم تجب عنها، أو التي أخطأت فيها سابقًا، أو المعلَّمة."},
+    {s:"#mockView .mx-col:nth-child(2) .mx-card:nth-child(2)", t:"٤. التوزيع", x:"إما حسب أوزان الأقسام أو عشوائيًا بين كل ما اخترته."},
+    {s:"#mockView .mx-col:nth-child(2) .mx-card:nth-child(3)", t:"٥. عدد الأسئلة", x:"اكتب عدد الأسئلة. يظهر العدد المتاح فعليًا وتنبيه إن تجاوزته."},
+    {s:"#mxStart", t:"ابدأ الاختبار", x:"أثناء الاختبار لا تظهر الإجابات الصحيحة. يمكنك تغيير إجاباتك ووضع علامة مراجعة، وإيقاف الاختبار بزر «Save & exit» لتكمله لاحقًا. عند الانتهاء اضغط «Finish exam» لتظهر النتيجة والتقرير والشهادة."}
+  ]
+};
+let tour = null;
+function startTour(name){
+  const m = gid("moreMenu"); if(m) m.open = false;
+  if(name==="home" && view!=="home"){ if(view==="practice") goHome(); else if(view==="mock") mockExit(); setTimeout(()=>startTour(name), 350); return; }
+  if(name==="mock" && view!=="mock"){ openMock(); setTimeout(()=>startTour(name), 400); return; }
+  if(name==="practice" && view!=="practice") return;
+  endTour(); tour = {name, i:-1};
+  const v = document.createElement("div"); v.id = "tourVeil"; v.className = "tour-veil";
+  v.innerHTML = `<div id="tourHole" class="tour-hole"></div><div id="tourCard" class="tour-card" dir="rtl" role="dialog" aria-live="polite"><div class="tour-n" id="tourN"></div><h4 id="tourT"></h4><p id="tourX"></p><div class="tour-bt"><button type="button" class="tour-skip" onclick="endTour()">تخطي</button><span style="flex:1"></span><button type="button" id="tourPrev" onclick="tourGo(-1)">السابق</button><button type="button" id="tourNext" class="tour-nx" onclick="tourGo(1)">التالي</button></div></div>`;
+  document.body.appendChild(v);
+  window.addEventListener("resize", tourPlace); document.addEventListener("keydown", tourKey);
+  tourGo(1);
+}
+function tourEl(st){ if(!st.s) return null; const e = document.querySelector(st.s); return (e && e.getBoundingClientRect().width>0) ? e : null; }
+function tourGo(d){
+  if(!tour) return; const steps = TOURS[tour.name];
+  let i = tour.i + d;
+  while(i>=0 && i<steps.length && steps[i].s && !tourEl(steps[i])) i += d;
+  if(i<0) return;
+  if(i>=steps.length){ endTour(true); return; }
+  tour.i = i; const st = steps[i], vis = steps.filter(x=>!x.s || tourEl(x)), pos = vis.indexOf(st)+1;
+  gid("tourT").textContent = st.t; gid("tourX").textContent = st.x; gid("tourN").textContent = pos+" / "+vis.length;
+  let last = true; for(let j=i+1;j<steps.length;j++){ if(!steps[j].s || tourEl(steps[j])){ last = false; break; } }
+  gid("tourNext").textContent = last ? "إنهاء" : "التالي"; gid("tourPrev").style.visibility = pos>1 ? "visible" : "hidden";
+  const e = tourEl(st); if(e) e.scrollIntoView({block:"center", behavior:"auto"});
+  tourPlace();
+}
+function tourPlace(){
+  if(!tour) return; const st = TOURS[tour.name][tour.i], e = st && tourEl(st), hole = gid("tourHole"), card = gid("tourCard"); if(!card) return;
+  const W = innerWidth, H = innerHeight, cw = Math.min(380, W-24);
+  card.style.width = cw+"px";
+  if(!e){ hole.style.cssText = "display:none"; card.style.left = (W-cw)/2+"px"; card.style.top = Math.max(20, H/2-110)+"px"; return; }
+  const r = e.getBoundingClientRect(), pad = 6, hh = Math.min(r.height, H-20);
+  hole.style.cssText = `display:block;left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${hh+pad*2}px`;
+  const ch = card.offsetHeight, below = H - (r.top+hh+pad) , top = below > ch+20 ? r.top+hh+pad+12 : (r.top-pad-ch-12 > 10 ? r.top-pad-ch-12 : Math.max(10, H-ch-12));
+  card.style.top = top+"px"; card.style.left = Math.max(12, Math.min(W-cw-12, r.left+r.width/2-cw/2))+"px";
+}
+function tourKey(e){ if(e.key==="Escape") endTour(); }
+function endTour(done){
+  const v = gid("tourVeil"); if(v) v.remove();
+  window.removeEventListener("resize", tourPlace); document.removeEventListener("keydown", tourKey);
+  if(tour && done){ try{ localStorage.setItem("cma_tour_"+tour.name, "1"); }catch(e){} }
+  tour = null;
+}
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ ["accessVeil","inboxVeil","aboutVeil"].forEach(id=>{ const v=gid(id); if(v && !v.classList.contains("hidden")){ v.classList.add("hidden"); if(id==="inboxVeil") clearInterval(inb.timer); } }); } });
 const explainOpen = {};
 function toggleExplain(qid){
   explainOpen[qid] = !explainOpen[qid];
