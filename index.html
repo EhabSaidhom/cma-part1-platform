@@ -749,6 +749,51 @@ body.has-video{padding-inline-end:var(--vw)}
 .inb-b{display:flex!important;gap:8px;align-items:flex-end;max-width:88%!important}
 .inb-b.mine{flex-direction:row-reverse}
 .inb-bc{min-width:0}
+
+/* review explanations */
+.rv-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:2px 0 12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.rv-sp{flex:1}
+.rv-st{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.74rem;font-weight:700;background:var(--bg);border:1px solid var(--line);color:var(--muted)}
+.rv-st.ok{background:#e6f2ee;color:#0f5c4c;border-color:#b9d9cf}.rv-st.warn{background:#fff4d6;color:#7a5200;border-color:#f0d089}
+.rv-read{border:0;background:var(--brand);color:#fff;border-radius:10px;padding:9px 16px;font:inherit;font-size:.86rem;font-weight:700;cursor:pointer}
+.rv-read:hover{background:var(--brand-2)}.rv-row .svadd{margin:0}
+body.rv-lock{overflow:hidden}
+.rv-veil{position:fixed;inset:0;z-index:5000;background:rgba(8,22,18,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+#readerVeil{z-index:5100}
+.rv-veil.hidden{display:none}
+.rv-panel{background:var(--panel);color:var(--ink);width:min(1000px,100%);height:100%;max-height:calc(100vh - 32px);border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.35)}
+#rvEditVeil .rv-panel{width:min(1100px,100%)}
+.rv-veil.full{padding:0;background:var(--panel)}.rv-veil.full .rv-panel{width:100%;max-height:100vh;border-radius:0;box-shadow:none}
+.rv-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
+.rv-title{flex:1;min-width:140px;font-weight:800;font-size:.95rem;color:var(--brand)}
+.rv-tools{display:flex;gap:6px;flex-wrap:wrap}
+.rv-tools button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:9px;padding:8px 13px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
+.rv-tools button:hover{border-color:var(--brand);color:var(--brand)}
+.rv-tools .rv-pub{background:var(--brand);border-color:var(--brand);color:#fff}.rv-tools .rv-pub:hover{color:#fff;background:var(--brand-2)}
+.rv-tools .rv-x{font-weight:800}
+.rv-tb{display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--bg);max-height:132px;overflow:auto}
+.rv-tt{font-size:.7rem;color:var(--muted);font-weight:700;margin:0 4px}
+.rv-col{position:relative;display:inline-grid;place-items:center;width:32px;height:32px;border:1px solid var(--line);border-radius:7px;background:var(--panel);cursor:pointer;font-weight:800;color:var(--brand)}
+.rv-col input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.rv-bg{color:#d4a900}
+.rv-scroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
+.rv-doc{--rvs:1;max-width:860px;margin:0 auto;padding:26px 22px 90px;font-size:calc(1.05rem*var(--rvs,1));line-height:1.95;word-break:break-word;overflow-wrap:anywhere}
+.rv-veil{--rvs:1}
+.rv-doc.rv-ed{min-height:60vh;outline:none}
+.rv-doc p,.rv-doc li,.rv-doc h1,.rv-doc h2,.rv-doc h3,.rv-doc h4,.rv-doc td,.rv-doc th,.rv-doc blockquote,.rv-doc div:not([dir]){unicode-bidi:plaintext}
+.rv-doc h1{font-size:1.8em;line-height:1.35;margin:1.1em 0 .5em;color:var(--brand)}.rv-doc h2{font-size:1.45em;line-height:1.4;margin:1em 0 .45em;color:var(--brand)}
+.rv-doc h3{font-size:1.2em;margin:.9em 0 .4em}.rv-doc h4{font-size:1.05em;margin:.8em 0 .3em;color:var(--muted)}
+.rv-doc p{margin:.55em 0}.rv-doc ul,.rv-doc ol{padding-inline-start:1.6em;margin:.5em 0}
+.rv-doc blockquote{margin:.8em 0;padding:.4em 1em;border-inline-start:4px solid var(--brand-2);background:var(--brand-soft);border-radius:6px}
+.rv-doc a{color:#1a5fb4;text-decoration:underline}
+.rv-doc img{max-width:100%;height:auto;border-radius:8px;display:block;margin:.6em auto}
+.rv-doc hr{border:0;border-top:2px solid var(--line);margin:1.4em 0}
+.rv-doc table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse;margin:.8em 0;-webkit-overflow-scrolling:touch}
+.rv-doc td,.rv-doc th{border:1px solid var(--muted);padding:7px 11px;min-width:64px;vertical-align:top}
+.rv-doc th{background:var(--brand-soft);font-weight:800}
+.rv-veil.full .rv-doc{max-width:900px;font-size:calc(1.18rem*var(--rvs,1));padding-top:38px}
+.rv-veil.full .rv-bar{padding:8px 14px;background:var(--bg)}
+@media(max-width:700px){.rv-veil{padding:0}.rv-panel,#rvEditVeil .rv-panel{border-radius:0;max-height:100vh;width:100%}.rv-doc{padding:18px 16px 80px}.rv-bar{gap:6px}.rv-tools button{padding:8px 10px}}
 </style>
 </head>
 <body>
@@ -775,6 +820,15 @@ body.has-video{padding-inline-end:var(--vw)}
 
 <div class="modal-veil hidden dash-veil" id="profileVeil">
   <div class="dash-box admin-box" style="max-width:640px"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeProfile()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="profileBody"></div></div>
+</div>
+<div id="readerVeil" class="rv-veil hidden" role="dialog" aria-modal="true" aria-label="Explanation">
+  <div class="rv-panel"><div class="rv-bar"><div class="rv-title" id="rvTitle"></div><div class="rv-tools"><button type="button" onclick="rvSize(-1)" aria-label="Smaller text">A&minus;</button><button type="button" onclick="rvSize(1)" aria-label="Larger text">A+</button><button type="button" id="rvFullBtn" onclick="rvToggleFull()">&#9974; Full screen</button><button type="button" class="rv-x" onclick="rvClose()">&#10005; Close</button></div></div>
+  <div class="rv-scroll"><article id="rvDoc" class="rv-doc"></article></div></div>
+</div>
+<div id="rvEditVeil" class="rv-veil hidden" role="dialog" aria-modal="true" aria-label="Edit explanation">
+  <div class="rv-panel"><div class="rv-bar"><div class="rv-title" id="rvEdTitle"></div><span id="rvEdStatus" class="rv-st"></span><div class="rv-tools"><button type="button" onclick="rvPreview()">&#128065; Preview</button><button type="button" onclick="rvSaveDraft()">Save draft</button><button type="button" class="rv-pub" onclick="rvPublish()">Publish</button><button type="button" id="rvUnpub" onclick="rvUnpublish()">Unpublish</button><button type="button" class="rv-x" onclick="rvEditClose()" aria-label="Close editor">&#10005;</button></div></div>
+  <div class="rv-tb" id="rvTb" role="toolbar" aria-label="Formatting"></div>
+  <div class="rv-scroll"><div id="rvBody" class="rv-doc rv-ed" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Explanation text" dir="auto" oninput="rvTouch()" onpaste="rvPaste(event)"></div></div></div>
 </div>
 <div class="modal-veil hidden dash-veil" id="inboxVeil">
   <div class="dash-box admin-box"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeInbox()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="inboxBody"></div></div>
@@ -1122,7 +1176,7 @@ async function startSession(user){
   buildTree(); render();
   if(location.hash==="#practice") history.replaceState(null,"",location.pathname+location.search);
   showView("home");
-  loadSubVideos();
+  loadSubVideos(); loadReviewMeta();
   inboxBadge(); if(!window._inbTimer) window._inbTimer = setInterval(()=>{ if(userId && !document.hidden) inboxBadge(); }, 60000);
   loadNews();
   if(!window._newsTimer) window._newsTimer = setInterval(()=>{ if(userId) loadNews(); }, 5*60*1000);
@@ -1512,7 +1566,7 @@ async function switchUser(){
   document.getElementById("passInput").value = "";
   attachCache = {}; attachKeyLoaded = null;
   document.getElementById("adminBtn").classList.add("hidden"); document.getElementById("accessBtn").classList.add("hidden");
-  document.getElementById("newsAdminBtn").classList.add("hidden"); setInboxBadge(0); inb.threads = []; inb.sel = null; inb.names = {};
+  document.getElementById("newsAdminBtn").classList.add("hidden"); setInboxBadge(0); inb.threads = []; inb.sel = null; inb.names = {}; rvPub = {}; rvDraft = {}; rvEditor = false;
   document.getElementById("newsBar").classList.add("hidden"); newsItems = [];
   document.getElementById("nameBanner").classList.add("hidden"); gid("phoneBanner").classList.add("hidden"); myExtra = null; paintAvatar();
   document.getElementById("loginVeil").classList.remove("hidden");
@@ -2023,7 +2077,7 @@ async function loadSubVideos(){
 function renderSubVideos(){
   const box = gid("subVideos"); if(!box) return;
   const key = activeSubKey, adm = attIsAdmin(), list = (key && subVideos[key]) || [];
-  if(view!=="practice" || reviewMode || !key || (!list.length && !adm)){ box.classList.add("hidden"); box.innerHTML = ""; return; }
+  if(view!=="practice" || reviewMode || !key){ box.classList.add("hidden"); box.innerHTML = ""; return; }
   const i = key.indexOf("::"), un = +key.slice(0,i), u = UNITS.find(x=>x.n===un), sub = key.slice(i+2);
   const fresh = u ? !subIdsFiltered(u, sub).some(isDone) : true;
   const open = (key in svOpen) ? svOpen[key] : fresh;
@@ -2035,7 +2089,7 @@ function renderSubVideos(){
     : `<button type="button" class="svadd" onclick="svForm={id:0};renderSubVideos();gid('svT').focus()">+ Add video</button>`;
   box.classList.remove("hidden");
   box.innerHTML = `<div class="svbar"><div class="svhead">&#9654; Review before you start${list.length?` <span>(${list.length})</span>`:""}</div>`
-    + (list.length ? `<ul class="svlist">${items}</ul>` : `<p class="svnone">No review videos for this sub-unit yet.</p>`) + form + `</div>`;
+    + rvRowHtml(key) + (list.length ? `<ul class="svlist">${items}</ul>` : (adm ? `<p class="svnone">No review videos for this sub-unit yet.</p>` : "")) + form + `</div>`;
 }
 function svEdit(id){ svForm = {id}; svOpen[activeSubKey] = true; renderSubVideos(); const t = gid("svT"); if(t) t.focus(); }
 async function svSave(){
@@ -2371,11 +2425,12 @@ async function openAccess(){
   const b = gid("accessBody"); gid("accessVeil").classList.remove("hidden"); b.innerHTML = "<p>Loading&hellip;</p>";
   try{
     accSources = [...new Set(Object.values(manifestFull||manifest||{}).reduce((a,u)=>a.concat(Object.values(u).reduce((b2,sb2)=>b2.concat((sb2.files||[]).map(f=>f.source||"Sameh Allithy Target")),[])),[]))].sort();
-    const [p, a, st, up] = await Promise.all([sb.from("profiles").select("user_id,email,display_name,role"), sb.from("source_access").select("user_id,sources"), sb.from("user_status").select("user_id,status,reason"), sb.from("user_profiles").select("user_id,phone,avatar")]);
+    const [p, a, st, up, ed] = await Promise.all([sb.from("profiles").select("user_id,email,display_name,role"), sb.from("source_access").select("user_id,sources"), sb.from("user_status").select("user_id,status,reason"), sb.from("user_profiles").select("user_id,phone,avatar"), sb.from("review_editors").select("user_id")]);
+    const edSet = new Set(((ed&&ed.data)||[]).map(r=>r.user_id));
     const um = new Map(((up&&up.data)||[]).map(r=>[r.user_id, r]));
     if(p.error) throw p.error; if(a.error) throw a.error;
     const m = new Map((a.data||[]).map(r=>[r.user_id, r.sources||[]])), sm = new Map(((st&&st.data)||[]).map(r=>[r.user_id, r]));
-    accRows = (p.data||[]).filter(x=>x.role!=="admin").map(x=>({id:x.user_id, email:x.email||"", name:x.display_name||"", src:new Set(m.get(x.user_id)||[]), has:m.has(x.user_id), st:(sm.get(x.user_id)||{}).status||"active", phone:(um.get(x.user_id)||{}).phone||"", av:(um.get(x.user_id)||{}).avatar||""}))
+    accRows = (p.data||[]).filter(x=>x.role!=="admin").map(x=>({id:x.user_id, email:x.email||"", name:x.display_name||"", src:new Set(m.get(x.user_id)||[]), has:m.has(x.user_id), st:(sm.get(x.user_id)||{}).status||"active", phone:(um.get(x.user_id)||{}).phone||"", ed:edSet.has(x.user_id), av:(um.get(x.user_id)||{}).avatar||""}))
       .sort((x,y)=>(x.has-y.has) || (x.name||x.email).toLowerCase().localeCompare((y.name||y.email).toLowerCase()));
     accSel = new Set(); accQ = ""; renderAccess();
   }catch(e){ b.innerHTML = `<p>Could not load: ${aiEsc(e.message||String(e))}<br>Make sure source-access-setup.sql and platform-extras-setup.sql were run in Supabase.</p>`; }
@@ -2389,7 +2444,7 @@ function renderAccess(){
       <select id="accBulkSrc" aria-label="Source for bulk action"><option value="*">All sources</option>${accSources.map(x=>`<option value="${aiEsc(x)}">${aiEsc(x)}</option>`).join("")}</select>
       <button type="button" class="mx-start" onclick="accBulk(true)">Grant to selected</button><button type="button" class="mx-back" onclick="accBulk(false)">Revoke from selected</button>
       <button type="button" class="mx-back" onclick="accMessage()">&#9993; Message selected</button></div>
-    <div class="mx-hist"><table class="acc-table"><thead><tr><th><input type="checkbox" id="accAll" aria-label="Select all shown" onchange="accSelAll(this.checked)"></th><th>Student</th>${accSources.map(x=>`<th class="acc-h">${aiEsc(x)}</th>`).join("")}<th>Account</th></tr></thead><tbody id="accBody"></tbody></table></div>`;
+    <div class="mx-hist"><table class="acc-table"><thead><tr><th><input type="checkbox" id="accAll" aria-label="Select all shown" onchange="accSelAll(this.checked)"></th><th>Student</th>${accSources.map(x=>`<th class="acc-h">${aiEsc(x)}</th>`).join("")}<th class="acc-h">Explanations editor</th><th>Account</th></tr></thead><tbody id="accBody"></tbody></table></div>`;
   renderAccessRows();
 }
 function accShown(){ const q = accQ.trim().toLowerCase(); return accRows.filter(r=>(accShowDel || r.st!=="deleted") && (!q || r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q))); }
@@ -2402,7 +2457,7 @@ function renderAccessRows(){
   gid("accInfo").textContent = accRows.filter(r=>r.st!=="deleted").length+" students" + (none ? " \u00b7 "+none+" without any source yet (shown first)" : "") + (dis ? " \u00b7 "+dis+" disabled" : "") + " \u00b7 selected: "+accSel.size;
   gid("accBody").innerHTML = rows.map(r=>`<tr class="${r.st!=="active"?"acc-off":(r.has?"":"acc-new")}"><td><input type="checkbox" ${accSel.has(r.id)?"checked":""} aria-label="Select ${aiEsc(r.email)}" onchange="accPick('${r.id}',this.checked)"></td><td><div class="acc-who"><span class="ab-av acc-av">${r.av?`<img src="${aiEsc(r.av)}" alt="">`:aiEsc((r.name||r.email||"?").charAt(0).toUpperCase())}</span><span>${r.name?aiEsc(r.name)+"<br>":""}<span class="mx-note">${r.phone?aiEsc(r.phone)+" &middot; ":""}${aiEsc(r.email)}${r.st!=="active"?` \u00b7 <b class="acc-st">${r.st}</b>`:(r.has?"":" \u00b7 no access yet")}</span></span></div></td>`
     + accSources.map(x=>`<td class="acc-c"><input type="checkbox" ${r.src.has(x)?"checked":""} data-s="${aiEsc(x)}" aria-label="${aiEsc(x)} for ${aiEsc(r.email)}" onchange="accToggle('${r.id}',this.dataset.s,this.checked)"></td>`).join("")
-    + `<td class="acc-act">${accActions(r)}<button type="button" class="acc-b" title="Send a message" onclick="inboxCompose(['${r.id}']);openInbox(true)">&#9993;</button></td></tr>`).join("") || `<tr><td colspan="${accSources.length+3}" class="mx-note">No students match.</td></tr>`;
+    + `<td class="acc-c"><input type="checkbox" ${r.ed?"checked":""} aria-label="Explanations editor: ${aiEsc(r.email)}" title="May write and publish review explanations" onchange="accEditor('${r.id}',this.checked)"></td><td class="acc-act">${accActions(r)}<button type="button" class="acc-b" title="Send a message" onclick="inboxCompose(['${r.id}']);openInbox(true)">&#9993;</button></td></tr>`).join("") || `<tr><td colspan="${accSources.length+4}" class="mx-note">No students match.</td></tr>`;
 }
 function accPick(id, on){ on ? accSel.add(id) : accSel.delete(id); renderAccessRows(); }
 function accSelAll(on){ accShown().forEach(r=>{ on ? accSel.add(r.id) : accSel.delete(r.id); }); renderAccessRows(); gid("accAll").checked = on; }
@@ -2423,6 +2478,13 @@ async function accBulk(grant){
   const v = gid("accBulkSrc").value, list = v==="*" ? accSources : [v];
   rows.forEach(r=>list.forEach(x=>{ grant ? r.src.add(x) : r.src.delete(x); }));
   if(!(await accSave(rows))) await openAccess(); else renderAccessRows();
+}
+async function accEditor(id, on){
+  const r = accRows.find(x=>x.id===id); if(!r) return;
+  const q = on ? sb.from("review_editors").upsert({user_id:id, granted_by:userId}, {onConflict:"user_id"}) : sb.from("review_editors").delete().eq("user_id", id);
+  const { error } = await q;
+  if(error){ alert("Could not update: "+(error.message||error)+"\nMake sure reviews-setup.sql was run in Supabase."); r.ed = !on; renderAccessRows(); return; }
+  r.ed = on;
 }
 async function usrStatus(id, st){
   const r = accRows.find(x=>x.id===id); if(!r) return;
@@ -2632,7 +2694,7 @@ const TOURS = {
   ],
   practice:[
     {s:"#practiceBar", t:"الرجوع إلى الفهرس", x:"زر «Curriculum» يعيدك إلى قائمة الأقسام والوحدات، ويظهر بجانبه مسار الموضوع الحالي."},
-    {s:"#subVideos", t:"فيديوهات المراجعة", x:"قبل أن تبدأ الحل شاهد فيديوهات شرح هذا الموضوع. يُفتح الفيديو في لوحة بجانب السؤال لتتابع الحل أثناء المشاهدة."},
+    {s:"#subVideos", t:"المراجعة قبل البدء", x:"اقرأ شرح الموضوع (زر Read explanation) وشاهد فيديوهات المراجعة قبل أن تبدأ الحل. يُفتح الشرح في وضع قراءة يمكن تكبيره بملء الشاشة، ويُفتح الفيديو في لوحة بجانب السؤال."},
     {s:".qgrid", t:"أرقام الأسئلة", x:"اضغط على أي رقم للانتقال إلى السؤال. الدائرة الخضراء تعني إجابة صحيحة من أول محاولة، والصفراء صحيحة من المحاولة الثانية، والحمراء إجابة خاطئة."},
     {s:".qimg-wrap", t:"السؤال", x:"اقرأ السؤال في الصورة ثم اختر إجابتك من الأزرار A–D أسفله. يمكنك استخدام لوحة المفاتيح أيضًا: الحروف A–D أو الأرقام 1–4 للإجابة، والسهمان للتنقل."},
     {s:".options", t:"اختيار الإجابة", x:"إذا أخطأت في المحاولة الأولى تُتاح لك فرصة ثانية، وبعد الإجابة يظهر لك الصواب والخطأ."},
@@ -2791,6 +2853,191 @@ async function profilePassword(){
   if(error){ profileMsg(error.message); return; }
   gid("pfPw1").value = ""; gid("pfPw2").value = ""; profileMsg("Your password was updated.", true);
 }
+
+/* ===== Review explanations per sub-unit: editors (admin or granted students) write, save drafts and publish; students only read ===== */
+let rvPub = {}, rvDraft = {}, rvEditor = false, rvDirty = false, rvRange = null, rvReaderSize = 1, rvEdKey = null;
+function rvCan(){ return attIsAdmin() || rvEditor; }
+function rvParts(key){ const i = key.indexOf("::"); return {unit:+key.slice(0,i), sub:key.slice(i+2)}; }
+async function loadReviewMeta(){
+  rvPub = {}; rvDraft = {}; rvEditor = false;
+  try{
+    const adm = attIsAdmin();
+    if(!adm){ const e = await sb.from("review_editors").select("user_id").eq("user_id", userId).maybeSingle(); rvEditor = !!(e && e.data); }
+    const p = await sb.from("sub_reviews").select("unit,sub,published_at").limit(3000);
+    if(!p.error) (p.data||[]).forEach(r=>{ rvPub[r.unit+"::"+r.sub] = r.published_at; });
+    if(adm || rvEditor){ const d = await sb.from("sub_review_drafts").select("unit,sub,updated_at").limit(3000); if(!d.error) (d.data||[]).forEach(r=>{ rvDraft[r.unit+"::"+r.sub] = r.updated_at; }); }
+  }catch(e){ console.warn("Review explanations unavailable", e); }
+  if(view==="home") renderHome(); else renderSubVideos();
+}
+function rvRowHtml(key){
+  const pub = rvPub[key], dr = rvDraft[key], can = rvCan(), pending = pub && dr && Date.parse(dr) > Date.parse(pub);
+  const date = pub ? new Date(pub).toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"}) : "";
+  let status = "";
+  if(pub) status = `<span class="rv-st ok">Published &middot; ${date}</span>` + (can && pending ? `<span class="rv-st warn">Unpublished changes</span>` : "");
+  else if(can) status = dr ? `<span class="rv-st warn">Draft &mdash; not published</span>` : `<span class="rv-st none">No explanation yet</span>`;
+  const read = pub ? `<button type="button" class="rv-read" onclick="rvRead()">&#128214; Read explanation</button>` : "";
+  const edit = can ? `<button type="button" class="svadd rv-edit" onclick="rvEdit()">&#9998; ${pub||dr ? "Edit explanation" : "Write explanation"}</button>` : "";
+  const none = (!pub && !can) ? `<span class="svnone">No explanation has been added for this topic yet.</span>` : "";
+  return `<div class="rv-row"><b>Explanation</b>${status}${none}<span class="rv-sp"></span>${read}${edit}</div>`;
+}
+/* ---- reader (students and editors; read-only, full-screen mode) ---- */
+async function rvRead(){
+  const key = activeSubKey; if(!key) return; const {unit, sub} = rvParts(key);
+  rvOpenReader(sub, '<p class="mx-note">Loading&hellip;</p>');
+  try{
+    const { data, error } = await sb.from("sub_reviews").select("published_html,published_at").eq("unit", unit).eq("sub", sub).maybeSingle();
+    if(error) throw error;
+    gid("rvDoc").innerHTML = data ? rtSanitize(data.published_html) : '<p class="mx-note">No explanation has been added for this topic yet.</p>';
+  }catch(e){ gid("rvDoc").innerHTML = '<p class="mx-note">The explanation could not be loaded. Please try again.</p>'; }
+}
+function rvOpenReader(title, html){
+  gid("rvTitle").textContent = title; gid("rvDoc").innerHTML = html;
+  gid("readerVeil").classList.remove("hidden"); gid("readerVeil").classList.remove("full"); rvFullLabel();
+  gid("rvDoc").parentElement.scrollTop = 0; document.body.classList.add("rv-lock");
+}
+function rvClose(){
+  if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+  gid("readerVeil").classList.add("hidden"); gid("readerVeil").classList.remove("full");
+  if(gid("rvEditVeil").classList.contains("hidden")) document.body.classList.remove("rv-lock");
+}
+function rvFullLabel(){ const f = gid("readerVeil").classList.contains("full"); gid("rvFullBtn").innerHTML = f ? "&#10530; Exit full screen" : "&#9974; Full screen"; }
+function rvToggleFull(){
+  const v = gid("readerVeil"), going = !v.classList.contains("full");
+  v.classList.toggle("full", going); rvFullLabel();
+  try{
+    if(going && v.requestFullscreen) v.requestFullscreen().catch(()=>{});
+    else if(!going && document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  }catch(e){}
+}
+document.addEventListener("fullscreenchange", ()=>{ const v = gid("readerVeil"); if(!document.fullscreenElement && v.classList.contains("full")){ v.classList.remove("full"); rvFullLabel(); } });
+function rvSize(d){ rvReaderSize = Math.max(.8, Math.min(1.8, rvReaderSize + d*.12)); gid("readerVeil").style.setProperty("--rvs", rvReaderSize); }
+document.addEventListener("keydown", e=>{
+  if(e.key!=="Escape") return;
+  const v = gid("readerVeil"); if(v && !v.classList.contains("hidden")){ if(v.classList.contains("full") && !document.fullscreenElement){ v.classList.remove("full"); rvFullLabel(); } else if(!document.fullscreenElement) rvClose(); return; }
+  const ed = gid("rvEditVeil"); if(ed && !ed.classList.contains("hidden")) rvEditClose();
+});
+/* ---- editor (admin or granted editors only) ---- */
+const RV_FONTS = ["Arial","Tahoma","Verdana","Georgia","Times New Roman","Courier New"];
+function rvToolbar(){
+  const B = (fn,label,title)=>`<button type="button" class="rte-b" title="${title}" aria-label="${title}" onmousedown="event.preventDefault()" onclick="${fn}">${label}</button>`;
+  const C = (cmd,label,title,arg)=>B(`rvCmd('${cmd}'${arg?`,'${arg}'`:""})`,label,title);
+  const al = k=>{ const w = k==="J" ? [12,12,12,12] : [12,7,12,7]; return `<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">` + w.map((ww,i)=>`<rect x="${k==="R"?14-ww:k==="C"?(16-ww)/2:2}" y="${2+i*4}" width="${ww}" height="2" rx="1" fill="currentColor"/>`).join("") + `</svg>`; };
+  const SEL = (label, fn, opts)=>`<select class="rte-sel" aria-label="${label}" title="${label}" onchange="${fn}(this)"><option value="">${label}</option>${opts}</select>`;
+  return C("undo","&#8630;","Undo")+C("redo","&#8631;","Redo")+`<i class="rte-sep"></i>`
+   + SEL("Style","rvBlock",`<option value="P">Paragraph</option><option value="H1">Heading 1</option><option value="H2">Heading 2</option><option value="H3">Heading 3</option><option value="H4">Heading 4</option><option value="BLOCKQUOTE">Quote</option>`)
+   + SEL("Font","rvFont",RV_FONTS.map(f=>`<option value="${f}" style="font-family:${f}">${f}</option>`).join(""))
+   + SEL("Size","rvSizeSel",`<option value="2">Small</option><option value="3">Normal</option><option value="4">Medium</option><option value="5">Large</option><option value="6">X-Large</option><option value="7">XX-Large</option>`)+`<i class="rte-sep"></i>`
+   + C("bold","<b>B</b>","Bold")+C("italic","<i>I</i>","Italic")+C("underline","<u>U</u>","Underline")+C("strikeThrough","<s>S</s>","Strikethrough")+C("subscript","x<sub>2</sub>","Subscript")+C("superscript","x<sup>2</sup>","Superscript")
+   + `<label class="rv-col" title="Text color">A<input type="color" value="#0f5c4c" aria-label="Text color" onchange="rvCmd('foreColor',this.value)"></label><label class="rv-col rv-bg" title="Background (highlight) color">&#9608;<input type="color" value="#fff2a8" aria-label="Background color" onchange="rvBg(this.value)"></label><i class="rte-sep"></i>`
+   + C("justifyLeft",al("L"),"Align left")+C("justifyCenter",al("C"),"Align center")+C("justifyRight",al("R"),"Align right")+C("justifyFull",al("J"),"Justify")
+   + B("rvDir('ltr')","LTR","Left to right")+B("rvDir('rtl')","RTL","Right to left (Arabic)")+`<i class="rte-sep"></i>`
+   + C("insertUnorderedList","&#8226;&#8801;","Bulleted list")+C("insertOrderedList","1.&#8801;","Numbered list")+C("outdent","&#8676;","Decrease indent")+C("indent","&#8677;","Increase indent")+`<i class="rte-sep"></i>`
+   + B("rvLink()","&#128279;","Insert link")+C("unlink","&#10006;&#128279;","Remove link")+B("gid('rvImg').click()","&#128444;","Insert image")+C("insertHorizontalRule","&mdash;","Horizontal line")+C("removeFormat","T<sub>x</sub>","Clear formatting")+`<i class="rte-sep"></i>`
+   + `<span class="rv-tt">Table</span>`+B("rvTable()","&#9638;+","Insert table")+B("rvTableOp('rowAbove')","&#8593;&#9644;","Add row above")+B("rvTableOp('rowBelow')","&#8595;&#9644;","Add row below")+B("rvTableOp('rowDel')","&#9644;&#10005;","Delete row")
+   + B("rvTableOp('colLeft')","&#8592;&#9646;","Add column left")+B("rvTableOp('colRight')","&#8594;&#9646;","Add column right")+B("rvTableOp('colDel')","&#9646;&#10005;","Delete column")+B("rvTableOp('header')","H","Toggle header row")+B("rvTableOp('tableDel')","&#128465;","Delete table")
+   + `<input type="file" id="rvImg" accept="image/*" hidden onchange="rvImage(this)">`;
+}
+document.addEventListener("selectionchange", ()=>{ const b = gid("rvBody"), sel = getSelection(); if(b && sel.rangeCount && b.contains(sel.anchorNode)) rvRange = sel.getRangeAt(0).cloneRange(); });
+function rvFocus(){ const b = gid("rvBody"); b.focus(); if(rvRange && b.contains(rvRange.startContainer)){ const s2 = getSelection(); s2.removeAllRanges(); s2.addRange(rvRange); } return b; }
+function rvTouch(){ rvDirty = true; const el = gid("rvEdStatus"); if(el){ el.textContent = "Unsaved changes"; el.className = "rv-st warn"; } }
+function rvCmd(cmd, arg){ rvFocus(); document.execCommand("styleWithCSS", false, true); document.execCommand(cmd, false, arg||null); rvTouch(); }
+function rvBlock(sel){ const v = sel.value; sel.value = ""; if(v) rvCmd("formatBlock", v); }
+function rvFont(sel){ const v = sel.value; sel.value = ""; if(v) rvCmd("fontName", v); }
+function rvSizeSel(sel){ const v = sel.value; sel.value = ""; if(v) rvCmd("fontSize", v); }
+function rvBg(c){ rvFocus(); document.execCommand("styleWithCSS", false, true); if(!document.execCommand("hiliteColor", false, c)) document.execCommand("backColor", false, c); rvTouch(); }
+function rvDir(d){
+  const b = rvFocus(); let n = getSelection().anchorNode; if(n && n.nodeType===3) n = n.parentNode;
+  let k = n && n.closest ? n.closest("div,p,li,td,th,h1,h2,h3,h4,blockquote") : null;
+  if(!k || k===b){ document.execCommand("formatBlock", false, "div"); n = getSelection().anchorNode; if(n && n.nodeType===3) n = n.parentNode; k = n && n.closest ? n.closest("div,p,li,td,th,h1,h2,h3,h4,blockquote") : null; }
+  if(k && k!==b){ k.setAttribute("dir", d); rvTouch(); }
+}
+function rvLink(){
+  rvFocus(); let u = prompt("Link address (https://…)", "https://"); if(!u) return; u = u.trim();
+  if(!/^(https?:\/\/|mailto:)/i.test(u)) u = "https://" + u;
+  if(getSelection().isCollapsed) document.execCommand("insertHTML", false, `<a href="${aiEsc(u)}">${aiEsc(u)}</a>`); else document.execCommand("createLink", false, u);
+  rvTouch();
+}
+function rvTable(){
+  const v = prompt("Table size (rows x columns), e.g. 3x4", "3x3"); if(!v) return;
+  const m = /^\s*(\d{1,2})\s*[x,\u00d7*]\s*(\d{1,2})\s*$/i.exec(v);
+  if(!m || +m[1]<1 || +m[2]<1 || +m[1]>30 || +m[2]>10){ alert("Use a format like 3x4 (max 30 rows and 10 columns)."); return; }
+  let h = "<table><tbody>"; for(let r=0;r<+m[1];r++){ h += "<tr>" + "<td><br></td>".repeat(+m[2]) + "</tr>"; }
+  rvCmd("insertHTML", h + "</tbody></table><div><br></div>");
+}
+function rvCell(){ let n = getSelection().anchorNode; if(n && n.nodeType===3) n = n.parentNode; const c = n && n.closest ? n.closest("td,th") : null; return (c && gid("rvBody").contains(c)) ? c : null; }
+function rvTableOp(op){
+  rvFocus(); const c = rvCell(); if(!c){ alert("Click inside a table cell first."); return; }
+  const row = c.parentElement, table = c.closest("table"), rows = [...table.rows], ci = c.cellIndex;
+  const mk = tag=>{ const e = document.createElement(tag||"td"); e.innerHTML = "<br>"; return e; };
+  if(op==="rowAbove" || op==="rowBelow"){ const nr = document.createElement("tr"); [...row.cells].forEach(()=>nr.appendChild(mk("td"))); row.parentNode.insertBefore(nr, op==="rowAbove" ? row : row.nextSibling); }
+  else if(op==="rowDel"){ if(rows.length<=1) table.remove(); else row.remove(); }
+  else if(op==="colLeft" || op==="colRight"){ rows.forEach(r=>{ const ref = r.cells[ci], nc = mk(ref && ref.tagName==="TH" ? "th" : "td"); if(ref) r.insertBefore(nc, op==="colLeft" ? ref : ref.nextSibling); else r.appendChild(nc); }); }
+  else if(op==="colDel"){ if(row.cells.length<=1) table.remove(); else rows.forEach(r=>{ if(r.cells[ci]) r.cells[ci].remove(); }); }
+  else if(op==="header"){ const first = table.rows[0], toTh = first.cells[0].tagName==="TD"; [...first.cells].forEach(x=>{ const nn = document.createElement(toTh ? "th" : "td"); nn.innerHTML = x.innerHTML; x.replaceWith(nn); }); }
+  else if(op==="tableDel"){ if(confirm("Delete this table?")) table.remove(); }
+  rvTouch();
+}
+function rvImage(inp){ const f = inp.files && inp.files[0]; inp.value = ""; if(f) rvInsertFile(f); }
+function rvInsertFile(f){
+  if(!/^image\//.test(f.type)){ alert("Please choose an image file."); return; }
+  const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = ()=>{ const k = Math.min(1, 1100/Math.max(img.width, img.height)), c = document.createElement("canvas"); c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0,0,c.width,c.height); x.drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url); rvCmd("insertImage", c.toDataURL("image/jpeg", 0.8)); };
+  img.onerror = ()=>{ URL.revokeObjectURL(url); alert("Could not read this image."); };
+  img.src = url;
+}
+function rvPaste(e){ const f = [...((e.clipboardData && e.clipboardData.files) || [])].find(x=>/^image\//.test(x.type)); if(f){ e.preventDefault(); rvInsertFile(f); } }
+function rvHtml(){ return rtSanitize(gid("rvBody").innerHTML); }
+function rvHas(html){ const t = document.createElement("template"); t.innerHTML = html; return !!(t.content.textContent.trim() || /<(img|table)\b/i.test(html)); }
+async function rvEdit(){
+  if(!rvCan()) return;
+  const key = activeSubKey; if(!key) return; const {unit, sub} = rvParts(key); rvEdKey = key; rvDirty = false; rvRange = null;
+  gid("rvEdTitle").textContent = "Explanation \u2014 " + sub; gid("rvTb").innerHTML = rvToolbar(); gid("rvBody").innerHTML = "";
+  gid("rvEditVeil").classList.remove("hidden"); document.body.classList.add("rv-lock");
+  let html = "", src = "";
+  try{
+    const d = await sb.from("sub_review_drafts").select("html").eq("unit", unit).eq("sub", sub).maybeSingle();
+    if(d.data){ html = d.data.html; src = "draft"; }
+    else{ const p = await sb.from("sub_reviews").select("published_html").eq("unit", unit).eq("sub", sub).maybeSingle(); if(p.data){ html = p.data.published_html; src = "published"; } }
+  }catch(e){ alert("Could not load the explanation. Make sure reviews-setup.sql was run in Supabase."); }
+  gid("rvBody").innerHTML = rtSanitize(html);
+  const el = gid("rvEdStatus"), pub = rvPub[key];
+  el.textContent = src==="draft" ? (pub ? "Draft (differs from published)" : "Draft \u2014 not published") : (src==="published" ? "Published" : "New \u2014 not saved yet"); el.className = "rv-st " + (src==="published" ? "ok" : "none");
+  gid("rvUnpub").style.display = pub ? "" : "none";
+  gid("rvBody").focus();
+}
+function rvEditClose(){
+  if(rvDirty && !confirm("You have unsaved changes. Close without saving?")) return;
+  gid("rvEditVeil").classList.add("hidden"); rvDirty = false;
+  if(gid("readerVeil").classList.contains("hidden")) document.body.classList.remove("rv-lock");
+}
+function rvPreview(){ rvOpenReader("Preview \u2014 " + rvParts(rvEdKey).sub, rvHtml() || '<p class="mx-note">Nothing written yet.</p>'); }
+async function rvSaveDraft(quiet){
+  const html = rvHtml(), {unit, sub} = rvParts(rvEdKey);
+  if(html.length > 2500000){ alert("This explanation is too large (probably too many or too large images). Remove an image and try again."); return false; }
+  const now = new Date().toISOString();
+  const { error } = await sb.from("sub_review_drafts").upsert({unit, sub, html, updated_at:now, updated_by:userId}, {onConflict:"unit,sub"});
+  if(error){ alert("Could not save the draft: "+(error.message||error)+"\nMake sure reviews-setup.sql was run in Supabase."); return false; }
+  rvDraft[rvEdKey] = now; rvDirty = false;
+  const el = gid("rvEdStatus"); el.textContent = "Draft saved"; el.className = "rv-st ok"; renderSubVideos(); return true;
+}
+async function rvPublish(){
+  const html = rvHtml(); if(!rvHas(html)){ alert("Write something before publishing."); return; }
+  if(!confirm("Publish this explanation? Students will be able to read it.")) return;
+  if(!(await rvSaveDraft())) return;
+  const {unit, sub} = rvParts(rvEdKey), now = new Date().toISOString();
+  const { error } = await sb.from("sub_reviews").upsert({unit, sub, published_html:html, published_at:now, updated_by:userId}, {onConflict:"unit,sub"});
+  if(error){ alert("Could not publish: "+(error.message||error)); return; }
+  rvPub[rvEdKey] = now; rvDraft[rvEdKey] = now;
+  const el = gid("rvEdStatus"); el.textContent = "Published"; el.className = "rv-st ok"; gid("rvUnpub").style.display = ""; renderSubVideos(); if(view==="home") renderHome();
+}
+async function rvUnpublish(){
+  if(!confirm("Unpublish this explanation? Students will no longer see it (your draft is kept).")) return;
+  const {unit, sub} = rvParts(rvEdKey);
+  const { error } = await sb.from("sub_reviews").delete().eq("unit", unit).eq("sub", sub);
+  if(error){ alert("Could not unpublish: "+(error.message||error)); return; }
+  delete rvPub[rvEdKey]; const el = gid("rvEdStatus"); el.textContent = "Unpublished (draft kept)"; el.className = "rv-st none"; gid("rvUnpub").style.display = "none"; renderSubVideos();
+}
 const explainOpen = {};
 function toggleExplain(qid){
   explainOpen[qid] = !explainOpen[qid];
@@ -2837,9 +3084,9 @@ function retry(qid){
 
 /* ===== Rich-text notes (stored as sanitized HTML prefixed with <!--rt-->; old plain-text notes still work) ===== */
 const RT = "<!--rt-->", NOTE_MAX = 900000;
-const RT_TAGS = new Set("B STRONG I EM U S STRIKE SUB SUP BR P DIV SPAN UL OL LI TABLE THEAD TBODY TR TD TH IMG H1 H2 H3 BLOCKQUOTE FONT HR".split(" "));
+const RT_TAGS = new Set("B STRONG I EM U S STRIKE SUB SUP BR P DIV SPAN UL OL LI TABLE THEAD TBODY TR TD TH IMG H1 H2 H3 H4 BLOCKQUOTE FONT HR A".split(" "));
 const RT_DROP = /^(SCRIPT|STYLE|IFRAME|OBJECT|EMBED|LINK|META|SVG|MATH|FORM|INPUT|BUTTON|TEXTAREA|SELECT|NOSCRIPT)$/;
-const RT_STYLE = /^(text-align|direction|font-size|color|background-color|font-weight|font-style|text-decoration|text-decoration-line)$/;
+const RT_STYLE = /^(text-align|direction|font-size|color|background-color|font-weight|font-style|text-decoration|text-decoration-line|font-family)$/;
 function rtClean(node){
   [...node.childNodes].forEach(ch=>{
     if(ch.nodeType===3) return;
@@ -2857,11 +3104,13 @@ function rtClean(node){
       else if(n==="dir" && /^(ltr|rtl|auto)$/i.test(v)) return;
       else if(T==="IMG" && n==="src" && /^data:image\/(png|jpe?g|gif|webp);base64,[a-z0-9+\/=]+$/i.test(v)) return;
       else if(T==="IMG" && n==="alt") return;
+      else if(T==="A" && n==="href" && /^(https?:\/\/|mailto:)/i.test(v)) return;
       else if(T==="FONT" && ((n==="size" && /^[1-7]$/.test(v)) || (n==="color" && /^#?[0-9a-z]{3,20}$/i.test(v)))) return;
       else if((T==="TD"||T==="TH") && (n==="colspan"||n==="rowspan") && /^\d{1,2}$/.test(v)) return;
       else ch.removeAttribute(a.name);
     });
     if(ch.tagName==="IMG" && !ch.getAttribute("src")){ ch.remove(); return; }
+    if(ch.tagName==="A" && ch.getAttribute("href")){ ch.setAttribute("target","_blank"); ch.setAttribute("rel","noopener noreferrer"); }
     rtClean(ch);
   });
 }
@@ -3999,7 +4248,7 @@ function homeUnitHtml(u, q){
       const m = /^(\S+)\s+(.*)$/.exec(r.s), num = m ? m[1] : "", name = m ? m[2] : r.s;
       const sp = r.total ? Math.round(r.done/r.total*100) : 0;
       const cnt = !r.total ? "&ndash;" : r.left===0 ? `&#10003; ${r.total}` : `${r.done}/${r.total}`;
-      return `<li><button class="dsub" ${r.total?"":"disabled"} onclick="openSub(${u.n}, this.dataset.s)" data-s="${aiEsc(r.s)}"><span class="sn">${aiEsc(num)}</span><span class="st">${aiEsc(name)}${(subVideos[u.n+"::"+r.s]||[]).length ? ` <em class="svb" title="Review videos">&#9654; ${(subVideos[u.n+"::"+r.s]||[]).length}</em>` : ""}</span><span class="sc${r.total&&r.left===0?" done":""}">${cnt}</span>`
+      return `<li><button class="dsub" ${r.total?"":"disabled"} onclick="openSub(${u.n}, this.dataset.s)" data-s="${aiEsc(r.s)}"><span class="sn">${aiEsc(num)}</span><span class="st">${aiEsc(name)}${(subVideos[u.n+"::"+r.s]||[]).length ? ` <em class="svb" title="Review videos">&#9654; ${(subVideos[u.n+"::"+r.s]||[]).length}</em>` : ""}${rvPub[u.n+"::"+r.s] ? ` <em class="svb" title="Explanation available">&#128214;</em>` : ""}</span><span class="sc${r.total&&r.left===0?" done":""}">${cnt}</span>`
         + (r.total ? `<span class="sbar"><i style="width:${sp}%"></i></span>` : "") + `</button></li>`;
     }).join("") + `</ul></details>`;
   return {html, tot, done, nSubs: rows.length};
