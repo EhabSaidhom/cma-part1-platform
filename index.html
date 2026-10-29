@@ -740,6 +740,15 @@ body.has-video{padding-inline-end:var(--vw)}
 .acc-who{display:flex;gap:10px;align-items:center}.acc-av{width:34px;height:34px;font-size:.85rem}
 #phoneBanner button{border:1px solid #0f5c4c;background:#fff;color:#0f5c4c;border-radius:8px;padding:3px 10px;font:inherit;cursor:pointer}
 @media(max-width:600px){.pf-grid{grid-template-columns:1fr}}
+
+.av{flex:none;width:32px;height:32px;border-radius:50%;color:#fff;display:grid;place-items:center;font-weight:800;font-size:.85rem;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.inb-av{width:36px;height:36px}
+.inb-t{flex-direction:row!important;align-items:center;gap:10px}
+.inb-tx{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.inb-b{display:flex!important;gap:8px;align-items:flex-end;max-width:88%!important}
+.inb-b.mine{flex-direction:row-reverse}
+.inb-bc{min-width:0}
 </style>
 </head>
 <body>
@@ -1932,7 +1941,7 @@ function chatRender(qid){
     const name = (m.author_name||"Student") + (dup ? " #"+String(m.user_id).slice(-4) : "");
     let hue = 0; for(const c of String(m.user_id)) hue = (hue*31 + c.charCodeAt(0)) % 360;
     const mine = m.user_id===userId;
-    html += `<div class="chat-msg${mine?" mine":""}"><span class="chat-av" style="background:hsl(${hue} 45% 42%)" aria-hidden="true">${aiEsc((m.author_name||"?").charAt(0).toUpperCase())}</span>
+    html += `<div class="chat-msg${mine?" mine":""}">${avHtml(m.user_id, m.author_name, "chat-av")}
       <div class="chat-bd"><div class="chat-meta"><b>${aiEsc(name)}</b><span title="${aiEsc(new Date(m.created_at).toLocaleString())}">${chatAgo(m.created_at)}</span>${(mine||isAdm)?`<button type="button" class="chat-del" aria-label="Delete message" title="Delete message" onclick="chatDel(${qid},${m.id})">&#10005;</button>`:""}</div>
       <div class="chat-txt" dir="auto">${aiEsc(m.body).replace(/\n/g,"<br>")}</div></div></div>`;
   });
@@ -1949,6 +1958,7 @@ async function chatLoad(qid){
     chatErr = null; chatCache[qid] = data || []; chatCounts[qid] = chatCache[qid].length;
   }catch(e){ chatErr = e; console.warn("Discussion unavailable", e); }
   if(chatQid===qid){ chatRender(qid); chatBadges(); }
+  if(chatCache[qid]) avatarsFor(chatCache[qid].map(m=>m.user_id)).then(ch=>{ if(ch && chatQid===qid) chatRender(qid); });
 }
 function chatBadges(){
   document.querySelectorAll(".qbtn[data-qid]").forEach(b=>{
@@ -2479,6 +2489,7 @@ async function inboxLoad(silent){
     setInboxBadge(inbSum());
     if(inb.sel && inb.mode==="list") await inboxThread(inb.sel, true);
     if(!(silent && inb.mode==="compose")) inboxRender();
+    avatarsFor(inb.threads.map(t=>t.user_id).concat(inb.msgs.map(m=>m.sender_id))).then(ch=>{ if(ch && inb.mode==="list") inboxRender(); });
   }catch(e){
     console.warn("Inbox unavailable", e);
     gid("inboxBody").innerHTML = `<h2 style="margin:0 0 6px">Inbox</h2><p class="mx-note">The inbox is not available yet.${adm?" Make sure platform-extras-setup.sql was run in Supabase.":""}</p>`;
@@ -2488,6 +2499,7 @@ async function inboxThread(id, quiet){
   const { data, error } = await sb.from("inbox_messages").select("id,sender_id,from_admin,body,created_at,read_at").eq("thread_id", id).order("created_at", {ascending:true}).limit(500);
   if(error) return;
   inb.sel = id; inb.mode = "list"; inb.msgs = data || [];
+  avatarsFor(inb.msgs.map(m=>m.sender_id)).then(ch=>{ if(ch && inb.sel===id && inb.mode==="list") inboxRender(); });
   if(inb.unread[id]){ await sb.rpc("mark_read", {p_thread:id}); inb.unread[id] = 0; setInboxBadge(inbSum()); }
   if(!quiet) inboxRender();
 }
@@ -2495,14 +2507,14 @@ function inboxRender(){
   const adm = attIsAdmin(), body = gid("inboxBody"); if(!body) return;
   const list = inb.threads.map(t=>{
     const n = inb.unread[t.id]||0, who = adm ? aiEsc(inbName(t.user_id)) : "Platform admin";
-    return `<button type="button" class="inb-t${t.id===inb.sel?" on":""}${n?" unread":""}" onclick="inboxThread(${t.id})"><span class="inb-s">${aiEsc(t.subject)}</span><span class="inb-m">${who}${t.kind==="contact"?" &middot; Contact":""} &middot; ${chatAgo(t.last_at)}</span>${n?`<i class="inb-n">${n}</i>`:""}</button>`;
+    return `<button type="button" class="inb-t${t.id===inb.sel?" on":""}${n?" unread":""}" onclick="inboxThread(${t.id})">${adm ? avHtml(t.user_id, inbName(t.user_id), "inb-av") : `<span class="av inb-av" style="background:var(--brand)" aria-hidden="true">A</span>`}<span class="inb-tx"><span class="inb-s">${aiEsc(t.subject)}</span><span class="inb-m">${who}${t.kind==="contact"?" &middot; Contact":""} &middot; ${chatAgo(t.last_at)}</span></span>${n?`<i class="inb-n">${n}</i>`:""}</button>`;
   }).join("") || `<p class="mx-note" style="padding:12px">No messages yet.</p>`;
   let right;
   if(inb.mode==="compose") right = inboxComposeHtml(adm);
   else if(inb.sel){
     const th = inb.threads.find(x=>x.id===inb.sel);
     right = `<div class="inb-ch"><button type="button" class="mx-back inb-bk" onclick="inb.sel=null;inboxRender()">&larr;</button><div><b>${aiEsc(th?th.subject:"")}</b><div class="mx-note">${adm ? aiEsc(inbName(th&&th.user_id))+(th&&th.topic?" &middot; "+aiEsc(th.topic):"") : "Platform admin"}</div></div></div>
-      <div class="inb-msgs" id="inbMsgs">${inb.msgs.map(m=>{ const mine = m.from_admin===adm; return `<div class="inb-b${mine?" mine":""}"><div class="inb-bt" dir="auto">${aiEsc(m.body).replace(/\n/g,"<br>")}</div><div class="inb-bm">${mine?"You":(m.from_admin?"Platform admin":aiEsc(inbName(th&&th.user_id)))} &middot; ${chatAgo(m.created_at)}</div></div>`; }).join("")}</div>
+      <div class="inb-msgs" id="inbMsgs">${inb.msgs.map(m=>{ const mine = m.from_admin===adm; const nm = mine ? ((myProfile&&myProfile.display_name)||userEmail) : (m.from_admin ? "Admin" : inbName(th&&th.user_id)); return `<div class="inb-b${mine?" mine":""}">${avHtml(m.sender_id, nm, "inb-av")}<div class="inb-bc"><div class="inb-bt" dir="auto">${aiEsc(m.body).replace(/\n/g,"<br>")}</div><div class="inb-bm">${mine?"You":(m.from_admin?"Platform admin":aiEsc(inbName(th&&th.user_id)))} &middot; ${chatAgo(m.created_at)}</div></div></div>`; }).join("")}</div>
       <div class="chat-form"><textarea id="inbText" rows="2" maxlength="4000" dir="auto" placeholder="Write a reply..." oninput="inb.draft[inb.sel]=this.value" onkeydown="if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();inboxReply()}">${aiEsc(inb.draft[inb.sel]||"")}</textarea><button type="button" id="inbSendBtn" onclick="inboxReply()">Send</button></div>`;
   } else right = `<div class="inb-empty">Select a conversation${adm?"":", or write to the platform admin with “New message”"}.</div>`;
   body.innerHTML = `<div class="inb-head"><h2 style="margin:0">Inbox</h2><button type="button" class="mx-start" onclick="inboxCompose()">&#9993; ${adm?"New message":"Contact the admin"}</button></div>
@@ -2687,6 +2699,23 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ ["accessVeil","i
 
 /* ===== My profile: personal info, mobile number and photo ===== */
 let myExtra = null, profDraft = null;
+const avatarCache = {};
+function avHtml(uid, name, cls){
+  const a = (uid && uid===userId) ? (myExtra && myExtra.avatar) : avatarCache[uid];
+  let hue = 0; for(const c of String(uid||name||"")) hue = (hue*31 + c.charCodeAt(0)) % 360;
+  return `<span class="av ${cls||""}" style="background:hsl(${hue} 45% 42%)" aria-hidden="true">${a ? `<img src="${aiEsc(a)}" alt="">` : aiEsc(((name||"?").trim().charAt(0)||"?").toUpperCase())}</span>`;
+}
+async function avatarsFor(uids){
+  const need = [...new Set(uids)].filter(u=>u && u!==userId && !(u in avatarCache)); if(!need.length) return false;
+  try{
+    for(let i=0;i<need.length;i+=100){
+      const chunk = need.slice(i,i+100), { data, error } = await sb.rpc("get_avatars", {p_ids:chunk});
+      if(error) throw error;
+      chunk.forEach(u=>{ avatarCache[u] = null; }); (data||[]).forEach(r=>{ avatarCache[r.user_id] = r.avatar || null; });
+    }
+  }catch(e){ need.forEach(u=>{ if(!(u in avatarCache)) avatarCache[u] = null; }); console.warn("Photos unavailable", e); }
+  return true;
+}
 function phoneOk(v){ return /^\+?[0-9 ()\-]{7,20}$/.test(v||"") && (v.replace(/\D/g,"").length>=8) && (v.replace(/\D/g,"").length<=15); }
 function paintAvatar(){
   const el = gid("profileAv"); if(!el) return;
@@ -2694,7 +2723,7 @@ function paintAvatar(){
   if(myExtra && myExtra.avatar){ el.innerHTML = `<img src="${aiEsc(myExtra.avatar)}" alt="">`; } else { el.textContent = (nm||"?").trim().charAt(0).toUpperCase() || "?"; }
 }
 async function loadProfileExtra(user){
-  myExtra = null;
+  myExtra = null; Object.keys(avatarCache).forEach(k=>delete avatarCache[k]);
   try{
     const { data, error } = await sb.from("user_profiles").select("phone,country,city,avatar").eq("user_id", userId).maybeSingle();
     if(error) throw error;
