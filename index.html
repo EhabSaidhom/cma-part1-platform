@@ -729,6 +729,17 @@ body.has-video{padding-inline-end:var(--vw)}
 .tour-bt{display:flex;gap:8px;align-items:center}
 .tour-bt button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;font-size:.86rem;cursor:pointer}
 .tour-bt .tour-nx{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}.tour-bt .tour-skip{border:0;color:var(--muted)}
+
+.avatar-btn{width:36px;height:36px;padding:0!important;border-radius:50%!important;overflow:hidden;display:grid;place-items:center;font-weight:800}
+.avatar-btn img,.pf-av img,.acc-av img{width:100%;height:100%;object-fit:cover;display:block}
+.pf-top{display:flex;gap:16px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.pf-av{width:96px;height:96px;font-size:2rem}.pf-ph{display:flex;gap:8px;flex-wrap:wrap;align-items:center;max-width:340px}.pf-up{cursor:pointer}
+.pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.pf-grid input,.pf-pw input{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.pf-pw{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}.pf-pw summary{cursor:pointer;font-weight:700;color:var(--brand);margin-bottom:10px}
+.acc-who{display:flex;gap:10px;align-items:center}.acc-av{width:34px;height:34px;font-size:.85rem}
+#phoneBanner button{border:1px solid #0f5c4c;background:#fff;color:#0f5c4c;border-radius:8px;padding:3px 10px;font:inherit;cursor:pointer}
+@media(max-width:600px){.pf-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -738,6 +749,7 @@ body.has-video{padding-inline-end:var(--vw)}
     <h2>Welcome</h2>
     <p>Sign in to save your progress and mistake log. It syncs across all your devices.</p>
     <input type="text" id="nameInput" placeholder="Full name (for new accounts)" autocomplete="name">
+    <input type="tel" id="phoneInput" placeholder="Mobile number with country code, e.g. +20 100 000 0000 (for new accounts)" autocomplete="tel" inputmode="tel" style="margin-top:8px">
     <input type="email" id="emailInput" placeholder="name@example.com" autocomplete="email" style="margin-top:8px">
     <input type="password" id="passInput" placeholder="Password (min 6 characters)" autocomplete="current-password" style="margin-top:8px">
     <div style="display:flex;gap:8px;margin-top:10px">
@@ -752,6 +764,9 @@ body.has-video{padding-inline-end:var(--vw)}
   <div class="dash-box" id="dashboardBox"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeDashboard()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="dashboardBody"></div></div>
 </div>
 
+<div class="modal-veil hidden dash-veil" id="profileVeil">
+  <div class="dash-box admin-box" style="max-width:640px"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeProfile()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="profileBody"></div></div>
+</div>
 <div class="modal-veil hidden dash-veil" id="inboxVeil">
   <div class="dash-box admin-box"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeInbox()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="inboxBody"></div></div>
 </div>
@@ -773,6 +788,7 @@ body.has-video{padding-inline-end:var(--vw)}
     <h1>CMA Part 1 Practice Platform</h1>
     <div class="sub">Nonprofit educational platform &middot; Financial Planning, Performance, and Analytics</div></div></div>
   <div class="user-bar">
+    <button type="button" class="avatar-btn" id="profileBtn" onclick="openProfile()" title="My profile" aria-label="My profile"><span id="profileAv">?</span></button>
     <span id="userEmailLbl"></span>
     <button class="dash-link mx-nav" onclick="openMock()">&#128221; Mock Exam</button>
     <button class="dash-link" onclick="openDashboard()">&#128202; My Performance</button>
@@ -802,6 +818,7 @@ body.has-video{padding-inline-end:var(--vw)}
     <button id="firstBtn" onclick="reviewList('first')">&#127942; First try</button>
   </div>
 </div>
+<div id="phoneBanner" class="hidden" style="background:#e6f2ee;color:#0f5c4c;text-align:center;padding:8px;font-size:.88rem">Add your mobile number to complete your profile. <button type="button" onclick="openProfile()" style="margin-inline-start:8px">Open my profile</button> <button type="button" onclick="gid('phoneBanner').classList.add('hidden');sessionStorage.setItem('cma_phone_dismiss','1')" aria-label="Dismiss">&#10005;</button></div>
 <div id="nameBanner" class="hidden" style="background:#fff3cd;color:#7a5b00;text-align:center;padding:8px;font-size:.82rem;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap">
   <span>Add your name so it appears correctly on your certificates:</span>
   <input id="nameBannerInput" placeholder="Full name" style="padding:5px 8px;border:1px solid #e0c46a;border-radius:6px;font-family:inherit">
@@ -1091,6 +1108,7 @@ async function startSession(user){
   await loadUserData();
   await loadManifest();
   await loadMyProfile();
+  await loadProfileExtra(user);
   await loadAccess(); applyAccess();
   buildTree(); render();
   if(location.hash==="#practice") history.replaceState(null,"",location.pathname+location.search);
@@ -1239,11 +1257,13 @@ function classifyStudent(hasAnyRow, answeredCt, accuracy, lastActive){
   return "good";
 }
 async function loadAllStudentsData(){
-  const [{data:profiles0, error:e1}, {data:progress, error:e2}, stq] = await Promise.all([
+  const [{data:profiles0, error:e1}, {data:progress, error:e2}, stq, upq] = await Promise.all([
     sb.from("profiles").select("user_id,email,display_name,role"),
     sb.from("user_progress_admin").select("user_id,updated_at,answered,flagged"),
-    sb.from("user_status").select("user_id,status")
+    sb.from("user_status").select("user_id,status"),
+    sb.from("user_profiles").select("user_id,phone")
   ]);
+  const phoneBy = {}; ((upq && upq.data)||[]).forEach(x=>{ phoneBy[x.user_id] = x.phone||""; });
   if(e1) throw e1; if(e2) throw e2;
   const gone = new Set(((stq && stq.data)||[]).filter(x=>x.status==="deleted").map(x=>x.user_id));
   const profiles = (profiles0||[]).filter(p=>!gone.has(p.user_id));
@@ -1258,7 +1278,7 @@ async function loadAllStudentsData(){
     const lastActive = row && row.updated_at ? new Date(row.updated_at) : null;
     const status = classifyStudent(!!row, stats.answered, accuracy, lastActive);
     return {
-      user_id:p.user_id, email:p.email||"", name:p.display_name||"", role:p.role||"student", answeredObj:ans,
+      user_id:p.user_id, email:p.email||"", phone:phoneBy[p.user_id]||"", name:p.display_name||"", role:p.role||"student", answeredObj:ans,
       correct:stats.correct, wrong:stats.wrong, answered:stats.answered,
       accuracy, completion, lastActive, status
     };
@@ -1437,9 +1457,9 @@ function openStudentDetail(uid){
   document.getElementById("adminDetail").scrollIntoView({behavior:"smooth", block:"nearest"});
 }
 function exportAdminCsv(){
-  const rows = [["Name","Email","Answered","Correct","Wrong","Accuracy %","Completion %","Last Active","Status"]];
+  const rows = [["Name","Email","Mobile","Answered","Correct","Wrong","Accuracy %","Completion %","Last Active","Status"]];
   (adminStudents||[]).forEach(s=>{
-    rows.push([s.name, s.email, s.answered, s.correct, s.wrong, s.accuracy, s.completion,
+    rows.push([s.name, s.email, s.phone||"", s.answered, s.correct, s.wrong, s.accuracy, s.completion,
       s.lastActive ? s.lastActive.toISOString().slice(0,10) : "", STATUS_LABEL[s.status]]);
   });
   const csv = rows.map(r=>r.map(v=>{
@@ -1463,13 +1483,17 @@ async function doAuth(mode){
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.textContent = "Please enter a valid email address"; return; }
   if(pass.length < 6){ msg.textContent = "Password must be at least 6 characters"; return; }
   if(mode === "up" && !name){ msg.textContent = "Please enter your full name"; return; }
-  const res = mode === "up" ? await sb.auth.signUp({email, password: pass})
+  const phone = document.getElementById("phoneInput").value.trim();
+  if(mode === "up" && !phoneOk(phone)){ msg.textContent = "Please enter a valid mobile number with the country code, e.g. +20 100 000 0000"; return; }
+  const res = mode === "up" ? await sb.auth.signUp({email, password: pass, options:{data:{full_name:name, phone}}})
                             : await sb.auth.signInWithPassword({email, password: pass});
   if(res.error){ msg.textContent = res.error.message; return; }
   if(!res.data.session){ msg.textContent = "Account created. Check your email to confirm, then sign in."; return; }
   if(mode === "up" && name){
     try{ await sb.from("profiles").update({display_name:name}).eq("user_id", res.data.session.user.id); }
     catch(e){ console.warn("Could not save name", e); }
+    try{ await sb.from("user_profiles").upsert({user_id:res.data.session.user.id, phone, updated_at:new Date().toISOString()}, {onConflict:"user_id"}); }
+    catch(e){ console.warn("Could not save phone", e); }
   }
   await startSession(res.data.session.user);
 }
@@ -1481,7 +1505,7 @@ async function switchUser(){
   document.getElementById("adminBtn").classList.add("hidden"); document.getElementById("accessBtn").classList.add("hidden");
   document.getElementById("newsAdminBtn").classList.add("hidden"); setInboxBadge(0); inb.threads = []; inb.sel = null; inb.names = {};
   document.getElementById("newsBar").classList.add("hidden"); newsItems = [];
-  document.getElementById("nameBanner").classList.add("hidden");
+  document.getElementById("nameBanner").classList.add("hidden"); gid("phoneBanner").classList.add("hidden"); myExtra = null; paintAvatar();
   document.getElementById("loginVeil").classList.remove("hidden");
 }
 async function loadMyProfile(){
@@ -2337,10 +2361,11 @@ async function openAccess(){
   const b = gid("accessBody"); gid("accessVeil").classList.remove("hidden"); b.innerHTML = "<p>Loading&hellip;</p>";
   try{
     accSources = [...new Set(Object.values(manifestFull||manifest||{}).reduce((a,u)=>a.concat(Object.values(u).reduce((b2,sb2)=>b2.concat((sb2.files||[]).map(f=>f.source||"Sameh Allithy Target")),[])),[]))].sort();
-    const [p, a, st] = await Promise.all([sb.from("profiles").select("user_id,email,display_name,role"), sb.from("source_access").select("user_id,sources"), sb.from("user_status").select("user_id,status,reason")]);
+    const [p, a, st, up] = await Promise.all([sb.from("profiles").select("user_id,email,display_name,role"), sb.from("source_access").select("user_id,sources"), sb.from("user_status").select("user_id,status,reason"), sb.from("user_profiles").select("user_id,phone,avatar")]);
+    const um = new Map(((up&&up.data)||[]).map(r=>[r.user_id, r]));
     if(p.error) throw p.error; if(a.error) throw a.error;
     const m = new Map((a.data||[]).map(r=>[r.user_id, r.sources||[]])), sm = new Map(((st&&st.data)||[]).map(r=>[r.user_id, r]));
-    accRows = (p.data||[]).filter(x=>x.role!=="admin").map(x=>({id:x.user_id, email:x.email||"", name:x.display_name||"", src:new Set(m.get(x.user_id)||[]), has:m.has(x.user_id), st:(sm.get(x.user_id)||{}).status||"active"}))
+    accRows = (p.data||[]).filter(x=>x.role!=="admin").map(x=>({id:x.user_id, email:x.email||"", name:x.display_name||"", src:new Set(m.get(x.user_id)||[]), has:m.has(x.user_id), st:(sm.get(x.user_id)||{}).status||"active", phone:(um.get(x.user_id)||{}).phone||"", av:(um.get(x.user_id)||{}).avatar||""}))
       .sort((x,y)=>(x.has-y.has) || (x.name||x.email).toLowerCase().localeCompare((y.name||y.email).toLowerCase()));
     accSel = new Set(); accQ = ""; renderAccess();
   }catch(e){ b.innerHTML = `<p>Could not load: ${aiEsc(e.message||String(e))}<br>Make sure source-access-setup.sql and platform-extras-setup.sql were run in Supabase.</p>`; }
@@ -2365,7 +2390,7 @@ function accActions(r){
 function renderAccessRows(){
   const rows = accShown(), none = accRows.filter(r=>!r.has && r.st!=="deleted").length, dis = accRows.filter(r=>r.st==="disabled").length;
   gid("accInfo").textContent = accRows.filter(r=>r.st!=="deleted").length+" students" + (none ? " \u00b7 "+none+" without any source yet (shown first)" : "") + (dis ? " \u00b7 "+dis+" disabled" : "") + " \u00b7 selected: "+accSel.size;
-  gid("accBody").innerHTML = rows.map(r=>`<tr class="${r.st!=="active"?"acc-off":(r.has?"":"acc-new")}"><td><input type="checkbox" ${accSel.has(r.id)?"checked":""} aria-label="Select ${aiEsc(r.email)}" onchange="accPick('${r.id}',this.checked)"></td><td>${r.name?aiEsc(r.name)+"<br>":""}<span class="mx-note">${aiEsc(r.email)}${r.st!=="active"?` \u00b7 <b class="acc-st">${r.st}</b>`:(r.has?"":" \u00b7 no access yet")}</span></td>`
+  gid("accBody").innerHTML = rows.map(r=>`<tr class="${r.st!=="active"?"acc-off":(r.has?"":"acc-new")}"><td><input type="checkbox" ${accSel.has(r.id)?"checked":""} aria-label="Select ${aiEsc(r.email)}" onchange="accPick('${r.id}',this.checked)"></td><td><div class="acc-who"><span class="ab-av acc-av">${r.av?`<img src="${aiEsc(r.av)}" alt="">`:aiEsc((r.name||r.email||"?").charAt(0).toUpperCase())}</span><span>${r.name?aiEsc(r.name)+"<br>":""}<span class="mx-note">${r.phone?aiEsc(r.phone)+" &middot; ":""}${aiEsc(r.email)}${r.st!=="active"?` \u00b7 <b class="acc-st">${r.st}</b>`:(r.has?"":" \u00b7 no access yet")}</span></span></div></td>`
     + accSources.map(x=>`<td class="acc-c"><input type="checkbox" ${r.src.has(x)?"checked":""} data-s="${aiEsc(x)}" aria-label="${aiEsc(x)} for ${aiEsc(r.email)}" onchange="accToggle('${r.id}',this.dataset.s,this.checked)"></td>`).join("")
     + `<td class="acc-act">${accActions(r)}<button type="button" class="acc-b" title="Send a message" onclick="inboxCompose(['${r.id}']);openInbox(true)">&#9993;</button></td></tr>`).join("") || `<tr><td colspan="${accSources.length+3}" class="mx-note">No students match.</td></tr>`;
 }
@@ -2658,7 +2683,85 @@ function endTour(done){
   if(tour && done){ try{ localStorage.setItem("cma_tour_"+tour.name, "1"); }catch(e){} }
   tour = null;
 }
-document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ ["accessVeil","inboxVeil","aboutVeil"].forEach(id=>{ const v=gid(id); if(v && !v.classList.contains("hidden")){ v.classList.add("hidden"); if(id==="inboxVeil") clearInterval(inb.timer); } }); } });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ ["accessVeil","inboxVeil","aboutVeil","profileVeil"].forEach(id=>{ const v=gid(id); if(v && !v.classList.contains("hidden")){ v.classList.add("hidden"); if(id==="inboxVeil") clearInterval(inb.timer); } }); } });
+
+/* ===== My profile: personal info, mobile number and photo ===== */
+let myExtra = null, profDraft = null;
+function phoneOk(v){ return /^\+?[0-9 ()\-]{7,20}$/.test(v||"") && (v.replace(/\D/g,"").length>=8) && (v.replace(/\D/g,"").length<=15); }
+function paintAvatar(){
+  const el = gid("profileAv"); if(!el) return;
+  const nm = (myProfile && myProfile.display_name) || userEmail || "?";
+  if(myExtra && myExtra.avatar){ el.innerHTML = `<img src="${aiEsc(myExtra.avatar)}" alt="">`; } else { el.textContent = (nm||"?").trim().charAt(0).toUpperCase() || "?"; }
+}
+async function loadProfileExtra(user){
+  myExtra = null;
+  try{
+    const { data, error } = await sb.from("user_profiles").select("phone,country,city,avatar").eq("user_id", userId).maybeSingle();
+    if(error) throw error;
+    myExtra = data || null;
+    const meta = (user && user.user_metadata) || {};
+    if(!(myExtra && myExtra.phone) && phoneOk(meta.phone)){   // phone typed at sign-up (account created before the email was confirmed)
+      const row = Object.assign({}, myExtra||{}, {user_id:userId, phone:meta.phone.trim(), updated_at:new Date().toISOString()});
+      const r = await sb.from("user_profiles").upsert(row, {onConflict:"user_id"}); if(!r.error) myExtra = row;
+    }
+    gid("phoneBanner").classList.toggle("hidden", !!(myExtra && myExtra.phone) || sessionStorage.getItem("cma_phone_dismiss")==="1");
+  }catch(e){ console.warn("user_profiles unavailable", e); }
+  paintAvatar();
+}
+function openProfile(){
+  const m = gid("moreMenu"); if(m) m.open = false;
+  profDraft = Object.assign({phone:"", country:"", city:"", avatar:""}, myExtra||{}); profDraft.name = (myProfile && myProfile.display_name) || "";
+  gid("profileVeil").classList.remove("hidden"); profileRender();
+}
+function closeProfile(){ gid("profileVeil").classList.add("hidden"); }
+function profileRender(){
+  const d = profDraft, nm = d.name || userEmail || "?";
+  gid("profileBody").innerHTML = `<h2 style="margin:0 0 12px">My profile</h2>
+    <div class="pf-top"><div class="ab-av pf-av" id="pfAv">${d.avatar?`<img src="${aiEsc(d.avatar)}" alt="Profile photo">`:aiEsc(nm.trim().charAt(0).toUpperCase())}</div>
+      <div class="pf-ph"><label class="mx-back pf-up">Change photo<input type="file" accept="image/*" hidden onchange="profilePhoto(this)"></label>${d.avatar?`<button type="button" class="mx-back" onclick="profDraft.avatar='';profileRender()">Remove</button>`:""}<span class="mx-note">A square photo works best. It is resized automatically.</span></div></div>
+    <div class="pf-grid">
+      <label class="ab-f">Full name<input id="pfName" type="text" maxlength="120" value="${aiEsc(d.name)}" autocomplete="name"></label>
+      <label class="ab-f">Email (cannot be changed)<input type="email" value="${aiEsc(userEmail)}" disabled></label>
+      <label class="ab-f">Mobile number<input id="pfPhone" type="tel" inputmode="tel" maxlength="20" placeholder="+20 100 000 0000" value="${aiEsc(d.phone||"")}" dir="ltr" autocomplete="tel"></label>
+      <label class="ab-f">Country<input id="pfCountry" type="text" maxlength="80" value="${aiEsc(d.country||"")}" autocomplete="country-name"></label>
+      <label class="ab-f">City<input id="pfCity" type="text" maxlength="80" value="${aiEsc(d.city||"")}" autocomplete="address-level2"></label>
+    </div>
+    <div id="pfMsg" class="mx-warn hidden"></div>
+    <div class="inb-actions"><button type="button" class="mx-start" onclick="profileSave()">Save changes</button><button type="button" class="mx-back" onclick="closeProfile()">Close</button></div>
+    <details class="pf-pw"><summary>Change password</summary><div class="pf-grid"><label class="ab-f">New password<input id="pfPw1" type="password" minlength="6" autocomplete="new-password"></label><label class="ab-f">Confirm new password<input id="pfPw2" type="password" minlength="6" autocomplete="new-password"></label></div><button type="button" class="mx-back" onclick="profilePassword()">Update password</button></details>`;
+}
+function profileMsg(t, ok){ const m = gid("pfMsg"); m.textContent = t; m.classList.remove("hidden"); m.style.background = ok ? "#e6f2ee" : ""; m.style.color = ok ? "#0f5c4c" : ""; m.style.borderColor = ok ? "#b9d9cf" : ""; }
+function profilePhoto(inp){
+  const f = inp.files && inp.files[0]; inp.value = ""; if(!f) return;
+  if(!/^image\//.test(f.type)){ profileMsg("Please choose an image file."); return; }
+  const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = ()=>{ const S = 256, k = Math.max(S/img.width, S/img.height), c = document.createElement("canvas"); c.width = c.height = S;
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0,0,S,S); x.drawImage(img, (S-img.width*k)/2, (S-img.height*k)/2, img.width*k, img.height*k);
+    URL.revokeObjectURL(url); profDraft.avatar = c.toDataURL("image/jpeg", 0.85); profDraft.name = gid("pfName").value; profDraft.phone = gid("pfPhone").value; profDraft.country = gid("pfCountry").value; profDraft.city = gid("pfCity").value; profileRender(); };
+  img.onerror = ()=>{ URL.revokeObjectURL(url); profileMsg("Could not read this image."); };
+  img.src = url;
+}
+async function profileSave(){
+  const name = gid("pfName").value.trim(), phone = gid("pfPhone").value.trim(), country = gid("pfCountry").value.trim(), city = gid("pfCity").value.trim();
+  if(!name){ profileMsg("Please enter your full name."); return; }
+  if(phone && !phoneOk(phone)){ profileMsg("Please enter a valid mobile number with the country code, e.g. +20 100 000 0000"); return; }
+  try{
+    if(!myProfile || myProfile.display_name!==name){ const r = await sb.from("profiles").update({display_name:name}).eq("user_id", userId); if(r.error) throw r.error; }
+    const row = {user_id:userId, phone:phone||null, country:country||null, city:city||null, avatar:profDraft.avatar||null, updated_at:new Date().toISOString()};
+    const r2 = await sb.from("user_profiles").upsert(row, {onConflict:"user_id"}); if(r2.error) throw r2.error;
+    myProfile = myProfile || {}; myProfile.display_name = name; myExtra = row; profDraft.name = name;
+    gid("nameBanner").classList.add("hidden"); gid("phoneBanner").classList.toggle("hidden", !!phone);
+    paintAvatar(); profileMsg("Your profile was saved.", true);
+  }catch(e){ console.warn(e); profileMsg("Could not save your profile: "+(e.message||e)+(/user_profiles|schema cache|does not exist/i.test(e.message||"") ? " (the profile table is not set up yet)" : "")); }
+}
+async function profilePassword(){
+  const a = gid("pfPw1").value, b = gid("pfPw2").value;
+  if(a.length<6){ profileMsg("Password must be at least 6 characters."); return; }
+  if(a!==b){ profileMsg("The two passwords do not match."); return; }
+  const { error } = await sb.auth.updateUser({password:a});
+  if(error){ profileMsg(error.message); return; }
+  gid("pfPw1").value = ""; gid("pfPw2").value = ""; profileMsg("Your password was updated.", true);
+}
 const explainOpen = {};
 function toggleExplain(qid){
   explainOpen[qid] = !explainOpen[qid];
