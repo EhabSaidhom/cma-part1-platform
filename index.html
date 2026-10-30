@@ -725,7 +725,7 @@ body.has-video{padding-inline-end:var(--vw)}
 .tour-hole{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(8,22,18,.68);border:2px solid #fff;pointer-events:none;transition:all .2s}
 .tour-card{position:fixed;background:var(--panel);color:var(--ink);border-radius:16px;padding:16px 18px;box-shadow:0 12px 40px rgba(0,0,0,.35);font-size:.92rem;line-height:1.8}
 .tour-card h4{margin:2px 0 6px;font-size:1.05rem;color:var(--brand)}.tour-card p{margin:0 0 12px}
-.tour-n{font-size:.72rem;color:var(--muted)}
+.tour-n{font-size:.72rem;color:var(--muted);direction:ltr;text-align:right;unicode-bidi:isolate}
 .tour-bt{display:flex;gap:8px;align-items:center}
 .tour-bt button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:8px 16px;font:inherit;font-size:.86rem;cursor:pointer}
 .tour-bt .tour-nx{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}.tour-bt .tour-skip{border:0;color:var(--muted)}
@@ -794,6 +794,13 @@ body.rv-lock{overflow:hidden}
 .rv-veil.full .rv-doc{max-width:900px;font-size:calc(1.18rem*var(--rvs,1));padding-top:38px}
 .rv-veil.full .rv-bar{padding:8px 14px;background:var(--bg)}
 @media(max-width:700px){.rv-veil{padding:0}.rv-panel,#rvEditVeil .rv-panel{border-radius:0;max-height:100vh;width:100%}.rv-doc{padding:18px 16px 80px}.rv-bar{gap:6px}.rv-tools button{padding:8px 10px}}
+
+.tour-card{overflow:auto}
+#tourX{margin:0 0 12px;font-size:.92rem;line-height:1.8}
+.tr-lg{display:flex;gap:10px;align-items:center;margin:7px 0;font-size:.88rem;line-height:1.6}
+.tr-d{flex:none;width:18px;height:18px;border-radius:50%;position:relative;display:inline-block;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.tr-d.g{background:#22a559}.tr-d.y{background:#f2b200}.tr-d.r{background:#d93025}.tr-d.note{background:var(--brand);width:11px;height:11px;margin:0 3.5px}
+.tr-d.chat{background:#2563eb}.tr-d.flag{background:transparent;border:2.5px solid var(--flag);border-radius:5px;box-shadow:none}
 </style>
 </head>
 <body>
@@ -860,7 +867,10 @@ body.rv-lock{overflow:hidden}
     <details class="more" id="moreMenu"><summary aria-label="More tools">&#8943; More</summary><div class="more-menu">
       <button class="dash-link" onclick="openAbout()">&#8505; About Us</button>
       <button class="dash-link" onclick="openContact()">&#9993; Contact me</button>
-      <button class="dash-link" onclick="startTour('home')">&#127891; How it works (tour)</button>
+      <button class="dash-link" onclick="startTour('home')">&#127891; Tour: Home page</button>
+      <button class="dash-link" onclick="startTour('practice')">&#127891; Tour: Question page</button>
+      <button class="dash-link" onclick="startTour('mock')">&#127891; Tour: Mock Exam</button>
+      <button class="dash-link hidden" id="tourAdminBtn" onclick="startTour('admin')">&#127891; Tour: Admin tools</button>
       <button class="dash-link" onclick="exportProgress()" title="Download your solving history as a file">&#11015; Export History</button>
       <button class="dash-link" onclick="document.getElementById('histFile').click()" title="Upload a previously exported solving history">&#11014; Import History</button>
       <input type="file" id="histFile" accept=".json,application/json" hidden onchange="importProgress(this)">
@@ -1565,7 +1575,7 @@ async function switchUser(){
   userId = ""; userEmail = ""; answered = {}; flagged = {}; myProfile = null; mockHistory = []; mockRun = null; mock.phase = "setup"; answeredHidden = {}; flaggedHidden = {}; accessSet = null; accessRestricted = false;
   document.getElementById("passInput").value = "";
   attachCache = {}; attachKeyLoaded = null;
-  document.getElementById("adminBtn").classList.add("hidden"); document.getElementById("accessBtn").classList.add("hidden");
+  document.getElementById("adminBtn").classList.add("hidden"); document.getElementById("accessBtn").classList.add("hidden"); gid("tourAdminBtn").classList.add("hidden");
   document.getElementById("newsAdminBtn").classList.add("hidden"); setInboxBadge(0); inb.threads = []; inb.sel = null; inb.names = {}; rvPub = {}; rvDraft = {}; rvEditor = false;
   document.getElementById("newsBar").classList.add("hidden"); newsItems = [];
   document.getElementById("nameBanner").classList.add("hidden"); gid("phoneBanner").classList.add("hidden"); myExtra = null; paintAvatar();
@@ -1580,7 +1590,7 @@ async function loadMyProfile(){
   const nameOk = myProfile && myProfile.display_name && myProfile.display_name.trim();
   document.getElementById("nameBanner").classList.toggle("hidden", !!nameOk);
   document.getElementById("adminBtn").classList.toggle("hidden", !(myProfile && myProfile.role === "admin"));
-  document.getElementById("accessBtn").classList.toggle("hidden", !(myProfile && myProfile.role === "admin"));
+  document.getElementById("accessBtn").classList.toggle("hidden", !(myProfile && myProfile.role === "admin")); gid("tourAdminBtn").classList.toggle("hidden", !(myProfile && myProfile.role === "admin"));
   document.getElementById("newsAdminBtn").classList.toggle("hidden", !(myProfile && myProfile.role === "admin"));
 }
 async function saveMyName(){
@@ -2679,79 +2689,121 @@ async function aboutSave(){
   aboutData = d; aboutEdit = false; aboutRender();
 }
 
-/* ===== Interactive Arabic tour (how the platform works) ===== */
+/* ===== Interactive Arabic tours (how the platform works) ===== */
+const TL = (cls, txt)=>`<div class="tr-lg"><i class="tr-d ${cls}"></i><span>${txt}</span></div>`;
+const MORE_EL = ()=>{ const m = document.querySelector(".more-menu"); return (gid("moreMenu") && gid("moreMenu").open && m) ? m : document.querySelector("#moreMenu > summary"); };
+const MORE_OPEN = ()=>{ gid("moreMenu").open = true; }, MORE_CLOSE = ()=>{ gid("moreMenu").open = false; };
 const TOURS = {
   home:[
-    {t:"مرحبًا بك في منصة التدريب", x:"منصة للتدرّب على أسئلة اختبار CMA الجزء الأول. في هذه الجولة القصيرة نتعرّف على أهم أجزاء المنصة وطريقة العمل بها. يمكنك إيقافها في أي وقت."},
-    {s:".sec", t:"أقسام المنهج ووحداته", x:"ينقسم المنهج إلى ستة أقسام، لكل قسم لونه ونسبته ووصفه. اضغط على أي وحدة لتظهر مواضيعها الفرعية، ثم اضغط على الموضوع لتبدأ حل أسئلته."},
+    {t:"مرحبًا بك في منصة التدريب", x:"منصة للتدرّب على أسئلة اختبار CMA الجزء الأول. في هذه الجولة نتعرّف على الصفحة الرئيسية وأدواتها. وهناك جولات أخرى لصفحة الأسئلة وللاختبار التجريبي من قائمة «More». يمكنك إيقاف الجولة في أي وقت."},
+    {s:".sec", t:"أقسام المنهج ووحداته", x:"ينقسم المنهج إلى ستة أقسام، لكل قسم لونه ونسبته ووصفه. اضغط على أي وحدة لتظهر مواضيعها الفرعية مع تقدّمك فيها (عدد المُجاب/الكلي)، ثم اضغط على الموضوع لتبدأ حل أسئلته."},
+    {s:".dsub .svb", t:"علامات الموضوعات", x:"▶ بجانب الموضوع تعني وجود فيديوهات مراجعة له، و📖 تعني وجود شرح مكتوب منشور. شاهد الفيديو واقرأ الشرح قبل أن تبدأ الحل."},
     {s:"#homeSearch", t:"البحث", x:"ابحث باسم الوحدة أو رقمها أو موضوعها للوصول إليها بسرعة."},
     {s:"#homeSrcSelect", t:"مصادر الأسئلة", x:"اختر مصدر الأسئلة الذي تريده أو اترك كل المصادر. ويمكنك تفعيل «Only not answered» لعرض الأسئلة التي لم تجب عنها بعد فقط."},
-    {s:".mx-cta:not(.tour-cta)", t:"الاختبار التجريبي Mock Exam", x:"ابنِ اختبارًا مخصّصًا من المصادر والأقسام التي تختارها. لا تظهر الإجابات إلا بعد التسليم، ثم تحصل على النتيجة والزمن وتقرير بأخطائك وشهادة قابلة للطباعة، ويمكنك إيقاف الاختبار واستكماله لاحقًا."},
-    {s:"#reviewBar", t:"مراجعة أخطائك", x:"من هنا تراجع الأسئلة التي أخطأت فيها (Review Mistakes)، أو علّمتها بعلامة (Flagged)، أو كتبت عليها ملاحظات (Comments)، أو أجبت عنها صحيحًا من المحاولة الأولى (First try)."},
-    {s:".user-bar .dash-link[onclick*=openDashboard]", t:"أداؤك", x:"في «My Performance» تجد إحصاءات تقدّمك: نسبة الدقة، والتقدم في كل وحدة، والزمن المستغرق."},
-    {s:"#inboxBtn", t:"الرسائل", x:"تواصل مع إدارة المنصة وتلقَّ رسائلها من هنا. يظهر عدد الرسائل غير المقروءة على الزر."},
-    {s:"#moreMenu > summary", t:"المزيد", x:"تجد في «More»: نبذة عن المنصة (About Us)، والتواصل معنا (Contact me)، وتصدير سجل حلّك أو استيراده."}
+    {s:".mx-cta:not(.tour-cta)", t:"الاختبار التجريبي Mock Exam", x:"ابنِ اختبارًا مخصّصًا من المصادر والأقسام التي تختارها. لا تظهر الإجابات إلا بعد التسليم، ثم تحصل على النتيجة والزمن وتقريرًا بأخطائك وشهادة قابلة للطباعة، ويمكنك إيقاف الاختبار واستكماله لاحقًا."},
+    {s:"#reviewBar", t:"مراجعة أخطائك وملاحظاتك", x:"Review Mistakes: الأسئلة التي أخطأت فيها. Flagged: الأسئلة التي علّمتها بنجمة. Comments: الأسئلة التي كتبت عليها ملاحظات. First try: الأسئلة التي أجبت عنها صحيحة من المحاولة الأولى. تجمع هذه الأزرار أسئلتك من كل الوحدات في مكان واحد."},
+    {s:"#progressLine", t:"عدّاد التقدم", x:"يعرض عدد الأسئلة التي أجبت عنها حتى الآن في كل المنصة."},
+    {s:".user-bar .dash-link[onclick*=openDashboard]", t:"أداؤك My Performance", x:"إحصاءات تقدّمك: نسبة الدقة، والتقدم في كل وحدة، ومقارنة المصادر، والزمن المستغرق في الحل."},
+    {s:"#newsBtn", t:"الأخبار", x:"إعلانات الإدارة عن تحديثات المنصة. تظهر نقطة حمراء عند وجود خبر جديد، ويمرّ شريط الأخبار أعلى الصفحة ويمكنك إغلاقه."},
+    {s:"#inboxBtn", t:"الرسائل والتواصل مع الإدارة", x:"من Inbox تتلقى رسائل الإدارة وتردّ عليها. ولإرسال سؤال أو مشكلة أو اقتراح اضغط «Contact the admin» داخل Inbox أو «Contact me» من قائمة More. يصلك الرد في نفس المحادثة، ويظهر عدد الرسائل غير المقروءة على الزر."},
+    {s:"#profileBtn", t:"ملفك الشخصي", x:"اضغط على صورتك لتحديث اسمك ورقم الموبايل والدولة والمدينة وصورتك الشخصية، ولتغيير كلمة المرور. وتظهر صورتك لزملائك في النقاش (Discussion) وفي الرسائل."},
+    {s:MORE_EL, pre:MORE_OPEN, post:MORE_CLOSE, t:"قائمة المزيد", x:"About Us: نبذة عن المنصة وهدفها وفريق العمل (بالعربية والإنجليزية). Contact me: مراسلة الإدارة. Tour: جولات تعريفية. Export / Import History: تصدير سجل حلّك كملف واستيراده لاحقًا أو على جهاز آخر."}
   ],
   practice:[
+    {t:"جولة صفحة الأسئلة", x:"سنستعرض أدوات حل أسئلة الموضوع: المراجعة قبل البدء، وأرقام الأسئلة وألوانها، والتعليقات، والنقاش مع الزملاء، والتواصل مع الإدارة. ما يظهر فقط بعد الإجابة (مثل الشرح) سيُعرض في الجولة إن كنت قد أجبت عن السؤال."},
     {s:"#practiceBar", t:"الرجوع إلى الفهرس", x:"زر «Curriculum» يعيدك إلى قائمة الأقسام والوحدات، ويظهر بجانبه مسار الموضوع الحالي."},
-    {s:"#subVideos", t:"المراجعة قبل البدء", x:"اقرأ شرح الموضوع (زر Read explanation) وشاهد فيديوهات المراجعة قبل أن تبدأ الحل. يُفتح الشرح في وضع قراءة يمكن تكبيره بملء الشاشة، ويُفتح الفيديو في لوحة بجانب السؤال."},
-    {s:".qgrid", t:"أرقام الأسئلة", x:"اضغط على أي رقم للانتقال إلى السؤال. الدائرة الخضراء تعني إجابة صحيحة من أول محاولة، والصفراء صحيحة من المحاولة الثانية، والحمراء إجابة خاطئة."},
-    {s:".qimg-wrap", t:"السؤال", x:"اقرأ السؤال في الصورة ثم اختر إجابتك من الأزرار A–D أسفله. يمكنك استخدام لوحة المفاتيح أيضًا: الحروف A–D أو الأرقام 1–4 للإجابة، والسهمان للتنقل."},
-    {s:".options", t:"اختيار الإجابة", x:"إذا أخطأت في المحاولة الأولى تُتاح لك فرصة ثانية، وبعد الإجابة يظهر لك الصواب والخطأ."},
-    {s:"#explainBtn", t:"شرح الإجابة", x:"بعد الإجابة اضغط «Show explanation» (أو مفتاح E) لتعرف لماذا كل إجابة صحيحة أو خاطئة."},
-    {s:".rte", t:"ملاحظاتك", x:"اكتب ملاحظاتك وقوانينك لكل سؤال، مع تنسيق النص وإضافة جداول وصور وتغيير اتجاه الكتابة بين العربية والإنجليزية."},
-    {s:"#chatPanel", t:"نقاش السؤال", x:"ناقش السؤال مع زملائك. يظهر عدد الرسائل على رقم السؤال."},
-    {s:".cert-btn", t:"شهادة الموضوع", x:"بعد حل كل أسئلة هذا الموضوع في المصدر الحالي يمكنك إصدار شهادة قابلة للطباعة."}
+    {s:".rv-row", t:"Review before you start: الشرح المكتوب", x:"إن نشر الأدمن شرحًا للموضوع يظهر زر «Read explanation» لقراءته في وضع قراءة هادئ يمكنك فيه تكبير الخط أو فتحه بملء الشاشة. وإن لم يُضف بعد تظهر عبارة «No explanation has been added for this topic yet»."},
+    {s:".svlist", t:"Review before you start: الفيديوهات المسجّلة", x:"فيديوهات شرح مسجّلة للموضوع (YouTube أو Google Drive). عند الضغط على فيديو يُفتح في لوحة بجانب الأسئلة فتتابع الشرح وتحل في الوقت نفسه، وتُغلق اللوحة بزر ✕ أو بمفتاح Esc."},
+    {s:()=>{ const c = document.querySelector(".nav-row .filters"); return c; }, t:"إحصاءات الموضوع السريعة", x:"All: كل الأسئلة. Not Attempted / Correct / Wrong / Flagged: اضغط على أي منها لتنتقل إلى أول سؤال من هذا النوع. Success و First-try: نسبة نجاحك ونسبة الصحيح من أول محاولة. «Clear solve history» يمسح سجل حلّ هذا الموضوع."},
+    {s:".srcbar", t:"مصادر الأسئلة", x:"إن كان للموضوع أسئلة من أكثر من مصدر (مثل Gleim 2025 أو Amro Taison) فبدّل بينها من هنا، والرقم بجانب كل مصدر هو عدد أسئلته."},
+    {s:".qgrid", t:"أرقام الأسئلة وعلاماتها", h:`اضغط على أي رقم للانتقال إلى السؤال، ولاحظ العلامات:${TL("g","<b>دائرة خضراء</b>: صحيح من أول محاولة")}${TL("y","<b>دائرة صفراء</b>: صحيح من المحاولة الثانية")}${TL("r","<b>دائرة حمراء</b>: إجابة خاطئة (Failed)")}${TL("note","<b>نقطة داكنة أعلى يسار الرقم</b>: يوجد تعليق/ملاحظة كتبتها على السؤال")}${TL("chat","<b>دائرة زرقاء برقم أعلى اليمين</b>: عدد رسائل النقاش على السؤال")}${TL("flag","<b>إطار ملوّن</b>: سؤال علّمته بنجمة Flag")}`},
+    {s:".qhead .tools button:first-child", t:"تعليم السؤال Flag", x:"علّم أي سؤال بنجمة لتعود إليه لاحقًا من زر «Flagged» أعلى الصفحة."},
+    {s:".cert-btn", t:"شهادة الموضوع", x:"بعد حل كل أسئلة هذا الموضوع في المصدر الحالي يمكنك إصدار شهادة قابلة للطباعة بدرجتك."},
+    {s:".tag-row", t:"بيانات السؤال وروابطه", x:"يعرض المصدر ورقم الصفحة في الكتاب ورقم المرجع. وقد تظهر هنا روابط شرح فيديو خاصة بالسؤال تُفتح في اللوحة الجانبية."},
+    {s:".qimg-wrap", t:"السؤال", x:"اقرأ نص السؤال في الصورة، ثم اختر إجابتك من الأزرار A–D أسفله."},
+    {s:".options", t:"اختيار الإجابة والمحاولة الثانية", x:"اضغط A–D (أو اضغط الحرف أو الأرقام 1–4 من لوحة المفاتيح). إذا أخطأت في المحاولة الأولى تُعرض عليك فرصة ثانية: إن أصبت تُسجَّل «صحيح من المحاولة الثانية» (أصفر)، وإن أخطأت مرتين تُسجَّل «Failed» (أحمر). ومن أصاب من أول مرة تُسجَّل له خضراء."},
+    {s:".result-banner", t:"نتيجة الإجابة", x:"بعد الإجابة تظهر نتيجتك والإجابة الصحيحة والزمن الذي استغرقته."},
+    {s:"#aiBox", t:"مدرّس الذكاء الاصطناعي AI Tutor", x:"قبل الإجابة اطلب تلميحًا (Give me a hint) دون كشف الإجابة، وبعدها اطلب شرح السؤال (Explain this question). يظهر بجانب العنوان عدد الطلبات المتبقية لك اليوم."},
+    {s:"#explainBtn", t:"شرح الإجابة", x:"بعد الإجابة اضغط «Show explanation» (أو مفتاح E) لتعرف لماذا كل إجابة صحيحة أو خاطئة. الشرح مخفي افتراضيًا حتى تطلبه."},
+    {s:".source-box", t:"التعليقات والملاحظات", x:"اكتب ما تريد تذكّره عن السؤال (قوانين، أخطاء، ملخص) مع تنسيق النص وإضافة جداول وصور وتغيير اتجاه الكتابة. تُحفظ تلقائيًا، وتظهر نقطة داكنة على رقم السؤال عند وجود تعليق، ويمكنك مراجعة كل تعليقاتك من زر «Comments» أعلى الصفحة."},
+    {s:".footer-nav", t:"التنقل وإعادة المحاولة", x:"Previous / Next للتنقل بين الأسئلة. «Retry» يتيح لك إعادة السؤال للتدريب، لكن السؤال الذي سُجّل «Failed» يبقى مسجّلًا كذلك حتى لو أجبت عنه صحيحًا بعد ذلك."},
+    {s:"#chatPanel", t:"النقاش مع الزملاء Discussion", x:"ناقش السؤال مع زملائك: اكتب رسالتك ثم Enter للإرسال (Shift+Enter لسطر جديد). تظهر صورة كل كاتب واسمه الأول، ويظهر عدد الرسائل على رقم السؤال. يمكنك حذف رسائلك أنت فقط."},
+    {s:"#reviewBar", t:"مراجعة أخطائك من كل الوحدات", x:"Review Mistakes وFlagged وComments وFirst try تجمع لك الأسئلة المناسبة من كل الموضوعات في مكان واحد."},
+    {s:"#inboxBtn", t:"التواصل مع الإدارة", x:"عندك مشكلة في سؤال أو اقتراح؟ راسل الإدارة من Inbox (زر «Contact the admin») أو من «Contact me» في قائمة More، وسيصلك الرد داخل المنصة."},
+    {t:"اختصارات لوحة المفاتيح", h:`<div class="tr-lg"><b dir="ltr">A – D</b><span>أو <b dir="ltr">1 – 4</b> للإجابة</span></div><div class="tr-lg"><b dir="ltr">← →</b><span>للتنقل بين الأسئلة</span></div><div class="tr-lg"><b dir="ltr">E</b><span>لإظهار أو إخفاء الشرح</span></div><div class="tr-lg"><b dir="ltr">Esc</b><span>لإغلاق لوحة الفيديو أو النوافذ</span></div>`}
   ],
   mock:[
     {t:"الاختبار التجريبي", x:"هنا تبني اختبارًا مخصّصًا من أسئلة المنصة. تختار المصادر والأقسام وعدد الأسئلة ثم تبدأ."},
+    {s:".mx-resume", t:"اختبار قيد التنفيذ", x:"إن أوقفت اختبارًا سابقًا بزر «Save & exit» تظهر هنا بطاقة تعرض تقدّمك، فاضغط «Resume» لتكمله من حيث توقفت (الزمن أثناء التوقف لا يُحسب)، أو «Discard» لإلغائه."},
     {s:"#mockView .mx-col:nth-child(1) .mx-card:nth-child(1)", t:"١. المصادر", x:"اختر مصدرًا واحدًا أو أكثر."},
     {s:"#mockView .mx-col:nth-child(1) .mx-card:nth-child(2)", t:"٢. الأقسام والوحدات", x:"حدّد الأقسام أو الوحدات التي تريد الاختبار فيها. الأرقام تبيّن عدد الأسئلة المتاحة في كل منها."},
     {s:"#mockView .mx-col:nth-child(2) .mx-card:nth-child(1)", t:"٣. حالة السؤال", x:"اختر كل الأسئلة، أو التي لم تجب عنها، أو التي أخطأت فيها سابقًا، أو المعلَّمة."},
-    {s:"#mockView .mx-col:nth-child(2) .mx-card:nth-child(2)", t:"٤. التوزيع", x:"إما حسب أوزان الأقسام أو عشوائيًا بين كل ما اخترته."},
+    {s:"#mockView .mx-col:nth-child(2) .mx-card:nth-child(2)", t:"٤. التوزيع", x:"إما حسب أوزان الأقسام (وهي من إعدادات المنصة وليست توزيعًا رسميًا مؤكدًا) أو عشوائيًا بين كل ما اخترته."},
     {s:"#mockView .mx-col:nth-child(2) .mx-card:nth-child(3)", t:"٥. عدد الأسئلة", x:"اكتب عدد الأسئلة. يظهر العدد المتاح فعليًا وتنبيه إن تجاوزته."},
-    {s:"#mxStart", t:"ابدأ الاختبار", x:"أثناء الاختبار لا تظهر الإجابات الصحيحة. يمكنك تغيير إجاباتك ووضع علامة مراجعة، وإيقاف الاختبار بزر «Save & exit» لتكمله لاحقًا. عند الانتهاء اضغط «Finish exam» لتظهر النتيجة والتقرير والشهادة."}
+    {s:"#mxStart", t:"ابدأ الاختبار", x:"بعد الضغط تُحمَّل الأسئلة المختارة ثم يبدأ الاختبار."},
+    {t:"أثناء الاختبار", x:"تظهر الأسئلة واحدًا واحدًا بلا إظهار للإجابات الصحيحة. تستطيع تغيير إجاباتك والرجوع لأي سؤال من لوحة أرقام الأسئلة، ووضع علامة «Mark for review» (مفتاح M). مفاتيح A–D أو 1–4 للإجابة والأسهم للتنقل. ولا يوجد مؤقت، لكن يُحسب زمن حلّك الفعلي."},
+    {t:"الإيقاف والاستكمال", x:"زر «Save & exit» يحفظ اختبارك وتكمله لاحقًا من أي جهاز. ويُحفظ الاختبار تلقائيًا مع كل إجابة."},
+    {t:"النتيجة والشهادة", x:"عند الضغط على «Finish exam» وتأكيد التسليم تظهر درجتك وعدد الصحيح والخطأ والزمن، وأداؤك حسب القسم والوحدة، وقائمة الأسئلة الخاطئة مع الشرح، وأزرار للتدرّب على الوحدات الضعيفة أو إعادة الأسئلة الخاطئة. ويمكنك إصدار شهادة بالنتيجة، وتجد محاولاتك السابقة أسفل صفحة الإعداد."}
+  ],
+  admin:[
+    {t:"جولة أدوات الأدمن", x:"هذه الجولة للأدمن فقط. تشرح أدوات إدارة المستخدمين والمحتوى والتواصل."},
+    {s:MORE_EL, pre:MORE_OPEN, post:MORE_CLOSE, t:"قائمة More للأدمن", x:"Users & Access: تعطيل الدارس أو حذفه (حذف ناعم يمكن استرجاعه)، ومنح المصادر لكل دارس أو لمجموعة، ومنح صلاحية «Explanations editor»، وإرسال رسالة. Manage News: كتابة الأخبار. Admin Dashboard: إحصاءات كل الدارسين وتصدير CSV."},
+    {s:"#inboxBtn", t:"الرسائل (Inbox)", x:"أرسل رسالة لدارس أو لعدة دارسين أو لكل الدارسين («New message»)، وتلقَّ رسائل «Contact me» من الدارسين وردّ عليها. لكل دارس محادثة خاصة به."},
+    {s:".sec", t:"المحتوى داخل الموضوعات", x:"افتح أي موضوع: ستجد في «Review before you start» أزرار «+ Add video» لإضافة فيديوهات المراجعة وتعديلها، و«Write explanation» لكتابة الشرح المكتوب (مسودة ثم نشر) ويستطيع المحرر الذي تمنحه الصلاحية فعل ذلك أيضًا. وفي النقاش تستطيع حذف أي رسالة."},
+    {t:"صفحة About Us", x:"من More ثم About Us اضغط «Edit» لتحرير نبذة المنصة وهدفها وأسماء فريق العمل وصورهم بالعربية والإنجليزية."},
+    {t:"انتهت الجولة", x:"يمكنك إعادة أي جولة من قائمة More في أي وقت."}
   ]
 };
 let tour = null;
 function startTour(name){
   const m = gid("moreMenu"); if(m) m.open = false;
-  if(name==="home" && view!=="home"){ if(view==="practice") goHome(); else if(view==="mock") mockExit(); setTimeout(()=>startTour(name), 350); return; }
-  if(name==="mock" && view!=="mock"){ openMock(); setTimeout(()=>startTour(name), 400); return; }
-  if(name==="practice" && view!=="practice") return;
+  if(name==="admin" && !attIsAdmin()) return;
+  if((name==="home"||name==="admin") && view!=="home"){ if(view==="practice") goHome(); else if(view==="mock") mockExit(); setTimeout(()=>startTour(name), 400); return; }
+  if(name==="mock" && view!=="mock"){ openMock(); setTimeout(()=>startTour(name), 450); return; }
+  if(name==="practice" && view!=="practice"){ alert("افتح أي موضوع من الفهرس أولًا، ثم اضغط زر «جولة» أعلى الصفحة (أو اختر Tour: Question page من قائمة More)."); return; }
   endTour(); tour = {name, i:-1};
   const v = document.createElement("div"); v.id = "tourVeil"; v.className = "tour-veil";
-  v.innerHTML = `<div id="tourHole" class="tour-hole"></div><div id="tourCard" class="tour-card" dir="rtl" role="dialog" aria-live="polite"><div class="tour-n" id="tourN"></div><h4 id="tourT"></h4><p id="tourX"></p><div class="tour-bt"><button type="button" class="tour-skip" onclick="endTour()">تخطي</button><span style="flex:1"></span><button type="button" id="tourPrev" onclick="tourGo(-1)">السابق</button><button type="button" id="tourNext" class="tour-nx" onclick="tourGo(1)">التالي</button></div></div>`;
+  v.innerHTML = `<div id="tourHole" class="tour-hole"></div><div id="tourCard" class="tour-card" dir="rtl" role="dialog" aria-live="polite"><div class="tour-n" id="tourN"></div><h4 id="tourT"></h4><div id="tourX"></div><div class="tour-bt"><button type="button" class="tour-skip" onclick="endTour()">تخطي</button><span style="flex:1"></span><button type="button" id="tourPrev" onclick="tourGo(-1)">السابق</button><button type="button" id="tourNext" class="tour-nx" onclick="tourGo(1)">التالي</button></div></div>`;
   document.body.appendChild(v);
   window.addEventListener("resize", tourPlace); document.addEventListener("keydown", tourKey);
   tourGo(1);
 }
-function tourEl(st){ if(!st.s) return null; const e = document.querySelector(st.s); return (e && e.getBoundingClientRect().width>0) ? e : null; }
+function tourEl(st){ if(!st.s) return null; const e = typeof st.s==="function" ? st.s() : document.querySelector(st.s); return (e && e.getBoundingClientRect().width>0) ? e : null; }
 function tourGo(d){
-  if(!tour) return; const steps = TOURS[tour.name];
+  if(!tour) return; const steps = TOURS[tour.name], prev = steps[tour.i];
+  if(prev && prev.post) prev.post();
   let i = tour.i + d;
   while(i>=0 && i<steps.length && steps[i].s && !tourEl(steps[i])) i += d;
-  if(i<0) return;
+  if(i<0){ if(prev && prev.pre) prev.pre(); return; }
   if(i>=steps.length){ endTour(true); return; }
   tour.i = i; const st = steps[i], vis = steps.filter(x=>!x.s || tourEl(x)), pos = vis.indexOf(st)+1;
-  gid("tourT").textContent = st.t; gid("tourX").textContent = st.x; gid("tourN").textContent = pos+" / "+vis.length;
+  if(st.pre) st.pre();
+  gid("tourT").textContent = st.t || "";
+  if(st.h) gid("tourX").innerHTML = st.h; else gid("tourX").textContent = st.x || "";
+  gid("tourN").textContent = pos+" / "+vis.length;
   let last = true; for(let j=i+1;j<steps.length;j++){ if(!steps[j].s || tourEl(steps[j])){ last = false; break; } }
   gid("tourNext").textContent = last ? "إنهاء" : "التالي"; gid("tourPrev").style.visibility = pos>1 ? "visible" : "hidden";
-  const e = tourEl(st); if(e) e.scrollIntoView({block:"center", behavior:"auto"});
+  const e = tourEl(st); if(e && !st.pre) e.scrollIntoView({block:"center", behavior:"auto"});
   tourPlace();
 }
 function tourPlace(){
   if(!tour) return; const st = TOURS[tour.name][tour.i], e = st && tourEl(st), hole = gid("tourHole"), card = gid("tourCard"); if(!card) return;
-  const W = innerWidth, H = innerHeight, cw = Math.min(380, W-24);
-  card.style.width = cw+"px";
-  if(!e){ hole.style.cssText = "display:none"; card.style.left = (W-cw)/2+"px"; card.style.top = Math.max(20, H/2-110)+"px"; return; }
+  const W = innerWidth, H = innerHeight, cw = Math.min(400, W-24);
+  card.style.width = cw+"px"; card.style.maxHeight = (H-24)+"px";
+  if(!e){ hole.style.cssText = "display:none"; card.style.left = (W-cw)/2+"px"; card.style.top = Math.max(12, (H-card.offsetHeight)/2)+"px"; return; }
   const r = e.getBoundingClientRect(), pad = 6, hh = Math.min(r.height, H-20);
   hole.style.cssText = `display:block;left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${hh+pad*2}px`;
-  const ch = card.offsetHeight, below = H - (r.top+hh+pad) , top = below > ch+20 ? r.top+hh+pad+12 : (r.top-pad-ch-12 > 10 ? r.top-pad-ch-12 : Math.max(10, H-ch-12));
-  card.style.top = top+"px"; card.style.left = Math.max(12, Math.min(W-cw-12, r.left+r.width/2-cw/2))+"px";
+  const ch = card.offsetHeight, below = H - (r.top+hh+pad), above = r.top-pad;
+  let top = below > ch+20 ? r.top+hh+pad+12 : (above > ch+20 ? r.top-pad-ch-12 : Math.max(10, H-ch-12));
+  let left = Math.max(12, Math.min(W-cw-12, r.left+r.width/2-cw/2));
+  if(top < r.top+hh+pad && top+ch > r.top-pad && below <= ch+20 && above <= ch+20){   // no room above or below: put the card beside the target
+    left = (r.left > W/2) ? Math.max(12, r.left-pad-cw-12) : Math.min(W-cw-12, r.right+pad+12); top = Math.max(10, Math.min(H-ch-12, r.top));
+  }
+  card.style.top = top+"px"; card.style.left = left+"px";
 }
 function tourKey(e){ if(e.key==="Escape") endTour(); }
 function endTour(done){
+  if(tour){ const st = TOURS[tour.name][tour.i]; if(st && st.post) st.post(); }
   const v = gid("tourVeil"); if(v) v.remove();
   window.removeEventListener("resize", tourPlace); document.removeEventListener("keydown", tourKey);
   if(tour && done){ try{ localStorage.setItem("cma_tour_"+tour.name, "1"); }catch(e){} }
