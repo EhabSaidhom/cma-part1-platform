@@ -1948,14 +1948,14 @@ function render(){
       </div>
     </div>
     <div class="tag-row">${pageBadges}</div>
-    <div class="qimg-wrap"><img src="${q.image}" alt="Question text (cropped from source PDF)"></div>
+    <div class="qimg-wrap"><img src="${q.image}" alt="Question text (cropped from source PDF)" decoding="async" fetchpriority="high"></div>
     <div class="pick-label">Select your answer <span class="kbd-hint">A&ndash;D or 1&ndash;4 &middot; &larr; &rarr; to navigate</span></div>
     <div class="options">${optsHtml}</div>
     ${bannerHtml}
     ${aiPanelHtml(q)}
     <div class="explain-title ${isAns?'show':''}"><button type="button" id="explainBtn" class="explain-btn" aria-expanded="${exOpen}" aria-controls="explainBox" onclick="toggleExplain(${q.id})">${exOpen?"&#9662; Hide explanation":"&#9656; Show explanation"}</button><span class="ex-sub">Why each answer is right or wrong &middot; press E</span></div>
     <div class="explain ${exOpen?'show':''}" id="explainBox">
-      <div class="qimg-wrap"><img src="${q.explainImage}" alt="Explanation (cropped from source PDF)"></div>
+      <div class="qimg-wrap"><img src="${q.explainImage}" alt="Explanation (cropped from source PDF)" loading="lazy" decoding="async"></div>
     </div>
     <div class="source-box">
       <h4>My notes for this question</h4>
@@ -1973,6 +1973,7 @@ function render(){
   attachAfterRender();
   aiAfterRender();
   chatAfterRender(q.id);
+  try{ const k = activeSet.findIndex(x=>x.id===q.id), nx = activeSet[k+1]; if(nx && nx.image && !String(nx.image).startsWith("data:")){ const im = new Image(); im.src = nx.image; } }catch(e){}
 }
 
 
@@ -2329,13 +2330,14 @@ function mockRenderLoading(){
 
 /* ---- exam ---- */
 function mockRenderExam(){
+  try{ const nx = mock.qs[mock.idx+1]; if(nx && nx.image && !String(nx.image).startsWith("data:")){ const im = new Image(); im.src = nx.image; } }catch(e){}
   const i = mock.idx, q = mock.qs[i], n = mock.qs.length, a = mock.ans[i], done = mock.ans.filter(x=>x!=null).length;
   const pal = mock.qs.map((_,k)=>`<button type="button" class="mx-pb${k===i?" cur":""}${mock.ans[k]!=null?" ans":""}${mock.rev[k]?" rev":""}" onclick="mockGo(${k})" aria-label="Question ${k+1}${mock.ans[k]!=null?", answered":""}${mock.rev[k]?", marked for review":""}">${k+1}</button>`).join("");
   gid("mockView").innerHTML = `<div class="mx-wrap mx-exam">
     <div class="mx-top"><button type="button" class="mx-back" onclick="mockExit()" title="Your progress is saved automatically. You can resume later from the Mock Exam page.">&larr; Save &amp; exit</button><div class="mx-prog" aria-live="polite"><b>Question ${i+1} of ${n}</b><span>${done} answered</span></div><button type="button" class="mx-finish" onclick="mockFinish()">Finish exam</button></div>
     ${mock.note?`<div class="mx-warn">${aiEsc(mock.note)}</div>`:""}
     <div class="mx-body"><div class="mx-main card">
-      <div class="qimg-wrap"><img src="${q.image}" alt="Question ${i+1}"></div>
+      <div class="qimg-wrap"><img src="${q.image}" alt="Question ${i+1}" decoding="async"></div>
       <div class="pick-label">Select your answer <span class="kbd-hint">A&ndash;D or 1&ndash;4 &middot; &larr; &rarr; navigate &middot; M mark</span></div>
       <div class="options">${["A","B","C","D"].map((L,k)=>`<div class="opt${a===k?" sel":""}" role="button" tabindex="0" aria-pressed="${a===k}" aria-label="Answer ${L}" onclick="mockAnswer(${k})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();mockAnswer(${k})}">${L}</div>`).join("")}</div>
       <div class="mx-nav"><button type="button" onclick="mockStep(-1)" ${i===0?"disabled":""}>&larr; Previous</button><button type="button" class="mx-mark${mock.rev[i]?" on":""}" onclick="mockMark()">${mock.rev[i]?"&#9873; Marked":"&#9872; Mark for review"}</button><button type="button" onclick="mockStep(1)" ${i===n-1?"disabled":""}>Next &rarr;</button></div>
@@ -2393,7 +2395,7 @@ function mockRenderResult(){
 function mockFillW(d){
   const b = d.querySelector(".mx-wb"); if(!d.open || b.dataset.f) return; b.dataset.f = "1";
   const i = +d.dataset.i, q = mock.qs[i];
-  b.innerHTML = `<div class="qimg-wrap"><img src="${q.image}" alt="Question ${i+1}"></div>` + (q.explainImage ? `<div class="qimg-wrap"><img src="${q.explainImage}" alt="Explanation for question ${i+1}"></div>` : "");
+  b.innerHTML = `<div class="qimg-wrap"><img src="${q.image}" alt="Question ${i+1}"></div>` + (q.explainImage ? `<div class="qimg-wrap"><img src="${q.explainImage}" alt="Explanation for question ${i+1}" decoding="async"></div>` : "");
 }
 function mockPractice(n, sub){ openSub(n, sub); }
 function mockRetake(){
@@ -3895,10 +3897,18 @@ function aiSend(){
   const t=i.value.trim(); if(!t) return;
   i.value=""; aiAsk("ask", t);
 }
+async function imgAsDataUrl(src){
+  if(!src || String(src).startsWith("data:")) return src;
+  const r = await fetch(src); if(!r.ok) throw new Error("image");
+  const b = await r.blob();
+  return await new Promise((res, rej)=>{ const fr = new FileReader(); fr.onload = ()=>res(fr.result); fr.onerror = ()=>rej(new Error("image")); fr.readAsDataURL(b); });
+}
 async function aiAsk(mode, text){
   if(aiBusy) return;
   const q = activeSet.find(x=>x.id===current); if(!q) return;
-  if(!String(q.image||"").startsWith("data:image")){ aiPush(q.id,{role:"assistant",kind:mode,content:"AI help is not available for this question.",err:true}); aiPaint(); return; }
+  let qImg = null, exImg = null;
+  try{ qImg = await imgAsDataUrl(q.image); exImg = q.explainImage ? await imgAsDataUrl(q.explainImage) : null; }catch(e){ qImg = null; }
+  if(!String(qImg||"").startsWith("data:image")){ aiPush(q.id,{role:"assistant",kind:mode,content:"AI help is not available for this question.",err:true}); aiPaint(); return; }
   const th = aiThreads[q.id] = aiThreads[q.id] || [];
   let messages = [];
   if(mode==="ask"){
@@ -3909,7 +3919,7 @@ async function aiAsk(mode, text){
   aiBusy = true; aiPaint();
   try{
     const { data, error } = await sb.functions.invoke("ai-tutor", { body:{
-      mode, qid:q.id, question_image:q.image, explain_image:q.explainImage||null, answered:isDone(q.id),
+      mode, qid:q.id, question_image:qImg, explain_image:exImg, answered:isDone(q.id),
       correct_letter:letters[q.correct], user_letter:(a&&a.choice!=null)?letters[a.choice]:null, messages } });
     if(error){
       let info = {}; try{ info = await error.context.json(); }catch(e){}
