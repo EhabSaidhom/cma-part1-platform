@@ -828,6 +828,65 @@ body.rv-lock{overflow:hidden}
 .msel-only{display:none;border:0;background:none;color:var(--brand);font:inherit;font-size:.72rem;font-weight:700;text-decoration:underline;cursor:pointer}
 .msel-i:hover .msel-only,.msel-i:focus-within .msel-only{display:inline}
 @media(max-width:700px){.msel{flex:1 1 100%}.msel-b{width:100%}.msel-p{left:0;right:0;width:100%;max-width:none}}
+
+/* ===== sidebar layout ===== */
+#appShell{display:flex;align-items:flex-start;min-height:100vh}
+#appMain{flex:1;min-width:0}
+#sidebar{position:sticky;top:0;align-self:flex-start;height:100vh;width:248px;flex:none;display:flex;flex-direction:column;background:var(--panel);border-inline-end:1px solid var(--line);z-index:40;transition:width .18s ease}
+.sb-top{display:flex;align-items:center;gap:10px;padding:14px 12px 10px}
+.sb-logo{border-radius:50%;flex:none;box-shadow:0 0 0 1px var(--line)}
+.sb-brand{font-weight:800;font-size:1.02rem;color:var(--ink);white-space:nowrap}.sb-brand em{font-style:normal;color:var(--brand)}
+.sb-collapse{margin-inline-start:auto;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0;flex:none}
+.sb-collapse:hover{color:var(--brand);border-color:var(--brand)}.sb-collapse .sb-ic{width:15px;height:15px;transition:transform .18s}
+.sb-nav{flex:1;overflow-y:auto;padding:4px 10px 10px;scrollbar-width:thin}
+.sb-group{padding:8px 0 6px;border-bottom:1px solid var(--line)}.sb-group:last-child{border-bottom:0}
+.sb-group:not(:has(.sb-item:not(.hidden),.sb-sub)){display:none}
+.sb-h{display:flex;align-items:center;gap:8px;padding:6px 8px 5px;font-size:.66rem;font-weight:800;letter-spacing:.09em;color:var(--muted)}
+.sb-d{width:6px;height:6px;border-radius:50%;flex:none;background:var(--brand)}
+.sb-d.o{background:#e08a1e}.sb-d.b{background:#2563eb}.sb-d.p{background:#7b3fa0}.sb-d.t{background:#0e7490}.sb-d.r{background:#b4233a}
+.sb-item{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:40px;padding:8px 10px;border:0;border-radius:10px;background:none;color:var(--ink);font:inherit;font-size:.88rem;font-weight:600;text-align:start;cursor:pointer;list-style:none}
+.sb-item::-webkit-details-marker{display:none}
+.sb-item:hover{background:var(--bg)}
+.sb-item.active,.sb-item.on{background:var(--brand-soft);color:var(--brand);box-shadow:inset 3px 0 0 var(--brand)}
+.sb-item .sb-ic{width:20px;height:20px;flex:none;color:var(--muted)}.sb-item.active .sb-ic,.sb-item.on .sb-ic,.sb-item:hover .sb-ic{color:var(--brand)}
+.sb-l{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-item .inb-n{margin-inline-start:auto}
+.sb-item .news-dot{position:static;margin-inline-start:auto;width:9px;height:9px}
+.sb-sub{margin:0}.sb-sub[open]>summary{color:var(--brand)}
+.sb-subi{display:block;width:100%;text-align:start;padding:7px 10px 7px 44px;border:0;background:none;color:var(--muted);font:inherit;font-size:.82rem;cursor:pointer;border-radius:8px}
+.sb-subi:hover{background:var(--bg);color:var(--brand)}
+.sb-foot{padding:8px 10px 12px;border-top:1px solid var(--line)}
+.sb-prof{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-radius:12px;background:var(--bg);cursor:pointer;text-align:start;color:var(--ink);font:inherit;margin-bottom:6px}
+.sb-prof:hover{background:var(--brand-soft)}
+.sb-av{width:38px;height:38px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;overflow:hidden;flex:none}.sb-av img{width:100%;height:100%;object-fit:cover}
+.sb-pt{display:flex;flex-direction:column;min-width:0}.sb-pt b{font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sb-pt small{font-size:.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-small{min-height:34px;font-size:.8rem;font-weight:500;color:var(--muted)}.sb-small .sb-ic{width:17px;height:17px}
+#sbScrim,#mobBar{display:none}
+/* collapsed (icon rail) */
+@media(min-width:901px){
+  body.sb-rail #sidebar{width:68px}
+  body.sb-rail .sb-brand,body.sb-rail .sb-l,body.sb-rail .sb-pt,body.sb-rail .sb-h span,body.sb-rail .sb-subi{display:none}
+  body.sb-rail .sb-top{flex-direction:column;padding:12px 0 6px;gap:10px}body.sb-rail .sb-collapse{margin:0}body.sb-rail .sb-collapse .sb-ic{transform:rotate(180deg)}
+  body.sb-rail .sb-h{justify-content:center;padding:4px 0}
+  body.sb-rail .sb-item{justify-content:center;padding:9px 0}
+  body.sb-rail .sb-item .inb-n{position:absolute;top:2px;inset-inline-end:6px;margin:0;min-width:15px;height:15px;font-size:.6rem;line-height:15px}
+  body.sb-rail .sb-item .news-dot{position:absolute;top:7px;inset-inline-end:11px}
+  body.sb-rail .sb-prof{justify-content:center;padding:6px 0;background:none}
+  body.sb-rail .sb-nav{padding-inline:8px}
+}
+/* phone: drawer */
+@media(max-width:900px){
+  #sidebar{position:fixed;left:0;top:0;bottom:0;width:284px;transform:translateX(-104%);transition:transform .22s ease;z-index:300;box-shadow:0 0 40px rgba(0,0,0,.35)}
+  body.sb-open #sidebar{transform:none}
+  body.sb-open #sbScrim{display:block;position:fixed;inset:0;background:rgba(8,22,18,.5);z-index:290}
+  .sb-collapse{display:none}
+  #mobBar{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:35;padding:8px 12px;background:linear-gradient(135deg,#0b5b4b,#117766);color:#fff}
+  #mobBar b{font-size:1rem}
+  #mobBar img{border-radius:50%;background:#f5faf8}
+  .mob-menu{position:relative;width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
+  .mob-menu .sb-ic{width:21px;height:21px}
+  .mob-menu .inb-n{position:absolute;top:-4px;inset-inline-end:-4px}
+}
 </style>
 </head>
 <body>
@@ -881,44 +940,10 @@ body.rv-lock{overflow:hidden}
   <div class="dash-box admin-box" id="adminBox"><div class="modal-x-wrap"><button type="button" class="modal-x" onclick="closeAdmin()" aria-label="Close" title="Close (Esc)">&#10005;</button></div><div id="adminBody"></div></div>
 </div>
 
-<header class="top">
-  <div class="brand"><img class="logo-img" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%2256%2056%20308%20308%22%20width%3D%22308%22%20height%3D%22308%22%3E%3Cdefs%3E%0A%20%3ClinearGradient%20id%3D%22emerald%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23117766%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23064C40%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23F2C66D%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23D79D36%22%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%3Cg%20transform%3D%22translate%28210%20210%29%22%3E%0A%20%3Ccircle%20r%3D%22150%22%20fill%3D%22%23F5FAF8%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%224%22%2F%3E%0A%20%3Ccircle%20r%3D%22126%22%20fill%3D%22none%22%20stroke%3D%22url%28%23emerald%29%22%20stroke-width%3D%2213%22%2F%3E%0A%20%3Ccircle%20r%3D%22105%22%20fill%3D%22none%22%20stroke%3D%22%23B7D6CB%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%223%2010%22%2F%3E%0A%20%3Cg%20fill%3D%22%230B5B4B%22%3E%0A%20%20%3Cpath%20d%3D%22M0-137l9%2022-9-5-9%205z%22%2F%3E%3Cpath%20d%3D%22M137%200l-22%209%205-9-5-9z%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M0%20137l-9-22%209%205%209-5z%22%2F%3E%3Cpath%20d%3D%22M-137%200l22-9-5%209%205%209z%22%2F%3E%0A%20%3C%2Fg%3E%0A%20%3Cpath%20d%3D%22M-72%2058V-7h26v65zm42%200V-37h26v95zm42%200V-74h26v132z%22%20fill%3D%22url%28%23emerald%29%22%20rx%3D%224%22%2F%3E%0A%20%3Cpath%20d%3D%22M-82%2034L-28-12%2012-1%2073-69%22%20fill%3D%22none%22%20stroke%3D%22url%28%23gold%29%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Cpath%20d%3D%22M48-71l28%200-3%2028%22%20fill%3D%22none%22%20stroke%3D%22%23D79D36%22%20stroke-width%3D%2211%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Ccircle%20cx%3D%22-82%22%20cy%3D%2234%22%20r%3D%227%22%20fill%3D%22%23D79D36%22%2F%3E%0A%20%3Cpath%20d%3D%22M0-106l12%2034%2035%201-27%2021%2010%2034L0-37l-30%2021%2010-34-27-21%2035-1z%22%20fill%3D%22%23FFFFFF%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%222%22%20opacity%3D%22.92%22%2F%3E%0A%20%3Ccircle%20r%3D%2211%22%20fill%3D%22%23D79D36%22%2F%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E" alt="CMA Compass logo" width="46" height="46"><div>
-    <h1>CMA Compass</h1>
-    <div class="sub">Part 1 Practice Platform &middot; Your Steps to CMA Success</div></div></div>
-  <div class="user-bar">
-    <button type="button" class="avatar-btn" id="profileBtn" onclick="openProfile()" title="My profile" aria-label="My profile"><span id="profileAv">?</span></button>
-    <span id="userEmailLbl"></span>
-    <button class="dash-link mx-nav" onclick="openMock()">&#128221; Mock Exam</button>
-    <button class="dash-link" onclick="openDashboard()">&#128202; My Performance</button>
-    <button class="dash-link" id="inboxBtn" onclick="openInbox()" title="Messages">&#128172; Inbox<span id="inboxN" class="inb-n hidden"></span></button>
-    <button class="dash-link" id="newsBtn" onclick="openNewsList()" title="Platform news">&#128226; News<span id="newsDot" class="news-dot hidden"></span></button>
-    <details class="more" id="moreMenu"><summary aria-label="More tools">&#8943; More</summary><div class="more-menu">
-      <button class="dash-link" onclick="openAbout()">&#8505; About Us</button>
-      <button class="dash-link" onclick="openContact()">&#9993; Contact me</button>
-      <button class="dash-link" onclick="startTour('home')">&#127891; Tour: Home page</button>
-      <button class="dash-link" onclick="startTour('practice')">&#127891; Tour: Question page</button>
-      <button class="dash-link" onclick="startTour('mock')">&#127891; Tour: Mock Exam</button>
-      <button class="dash-link hidden" id="tourAdminBtn" onclick="startTour('admin')">&#127891; Tour: Admin tools</button>
-      <button class="dash-link" onclick="exportProgress()" title="Download your solving history as a file">&#11015; Export History</button>
-      <button class="dash-link" onclick="document.getElementById('histFile').click()" title="Upload a previously exported solving history">&#11014; Import History</button>
-      <input type="file" id="histFile" accept=".json,application/json" hidden onchange="importProgress(this)">
-      <button class="dash-link hidden" id="newsAdminBtn" onclick="openNewsAdmin()" title="Write or remove platform news">&#9998; Manage News</button>
-      <button class="dash-link hidden" id="adminBtn" onclick="openAdminDashboard()">&#128737; Admin Dashboard</button>
-      <button class="dash-link hidden" id="accessBtn" onclick="openAccess()">&#128101; Users &amp; Access</button>
-    </div></details>
-    <button onclick="switchUser()">Sign Out</button>
-  </div>
-</header>
+<div id="appShell"><aside id="sidebar" aria-label="Main navigation"><div class="sb-top"><img class="sb-logo" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%2256%2056%20308%20308%22%20width%3D%22308%22%20height%3D%22308%22%3E%3Cdefs%3E%0A%20%3ClinearGradient%20id%3D%22emerald%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23117766%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23064C40%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23F2C66D%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23D79D36%22%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%3Cg%20transform%3D%22translate%28210%20210%29%22%3E%0A%20%3Ccircle%20r%3D%22150%22%20fill%3D%22%23F5FAF8%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%224%22%2F%3E%0A%20%3Ccircle%20r%3D%22126%22%20fill%3D%22none%22%20stroke%3D%22url%28%23emerald%29%22%20stroke-width%3D%2213%22%2F%3E%0A%20%3Ccircle%20r%3D%22105%22%20fill%3D%22none%22%20stroke%3D%22%23B7D6CB%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%223%2010%22%2F%3E%0A%20%3Cg%20fill%3D%22%230B5B4B%22%3E%0A%20%20%3Cpath%20d%3D%22M0-137l9%2022-9-5-9%205z%22%2F%3E%3Cpath%20d%3D%22M137%200l-22%209%205-9-5-9z%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M0%20137l-9-22%209%205%209-5z%22%2F%3E%3Cpath%20d%3D%22M-137%200l22-9-5%209%205%209z%22%2F%3E%0A%20%3C%2Fg%3E%0A%20%3Cpath%20d%3D%22M-72%2058V-7h26v65zm42%200V-37h26v95zm42%200V-74h26v132z%22%20fill%3D%22url%28%23emerald%29%22%20rx%3D%224%22%2F%3E%0A%20%3Cpath%20d%3D%22M-82%2034L-28-12%2012-1%2073-69%22%20fill%3D%22none%22%20stroke%3D%22url%28%23gold%29%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Cpath%20d%3D%22M48-71l28%200-3%2028%22%20fill%3D%22none%22%20stroke%3D%22%23D79D36%22%20stroke-width%3D%2211%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Ccircle%20cx%3D%22-82%22%20cy%3D%2234%22%20r%3D%227%22%20fill%3D%22%23D79D36%22%2F%3E%0A%20%3Cpath%20d%3D%22M0-106l12%2034%2035%201-27%2021%2010%2034L0-37l-30%2021%2010-34-27-21%2035-1z%22%20fill%3D%22%23FFFFFF%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%222%22%20opacity%3D%22.92%22%2F%3E%0A%20%3Ccircle%20r%3D%2211%22%20fill%3D%22%23D79D36%22%2F%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E" alt="CMA Compass logo" width="34" height="34"><span class="sb-brand">CMA <em>Compass</em></span><button type="button" class="sb-collapse" id="sbCollapse" onclick="sbToggle()" aria-label="Collapse or expand the menu" title="Collapse / expand"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button></div><nav class="sb-nav"><div class="sb-group" id="sbLearn"><div class="sb-h"><i class="sb-d g"></i><span>LEARNING</span></div><button type="button" class="sb-item " id="navHome" onclick="sbGo('home')" title="Curriculum"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg><span class="sb-l">Curriculum</span></button><button type="button" class="sb-item " id="navMock" onclick="sbGo('mock')" title="Mock Exam"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg><span class="sb-l">Mock Exam</span></button></div><div class="sb-group" id="reviewBar"><div class="sb-h"><i class="sb-d o"></i><span>REVIEW</span></div><button type="button" class="sb-item " id="wrongBtn" onclick="sbGo('review','wrong')" title="Review Mistakes"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6M9 9l6 6"/></svg><span class="sb-l">Review Mistakes</span></button><button type="button" class="sb-item " id="flaggedBtn" onclick="sbGo('review','flagged')" title="Flagged"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/></svg><span class="sb-l">Flagged</span></button><button type="button" class="sb-item " id="commentBtn" onclick="sbGo('review','comment')" title="Comments"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="sb-l">Comments</span></button><button type="button" class="sb-item " id="firstBtn" onclick="sbGo('review','first')" title="First try"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg><span class="sb-l">First try</span></button></div><div class="sb-group" id="sbProg"><div class="sb-h"><i class="sb-d b"></i><span>PROGRESS</span></div><button type="button" class="sb-item " id="perfBtn" onclick="sbGo('perf')" title="My Performance"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V11M10 21V4M16 21v-7M22 21H2"/></svg><span class="sb-l">My Performance</span></button></div><div class="sb-group" id="sbComm"><div class="sb-h"><i class="sb-d p"></i><span>COMMUNICATION</span></div><button type="button" class="sb-item " id="inboxBtn" onclick="sbGo('inbox')" title="Inbox"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span class="sb-l">Inbox</span><span id="inboxN" class="inb-n hidden"></span></button><button type="button" class="sb-item " id="newsBtn" onclick="sbGo('news')" title="News"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h3l8 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M18 9a4 4 0 0 1 0 6"/></svg><span class="sb-l">News</span><span id="newsDot" class="news-dot hidden"></span></button><button type="button" class="sb-item " id="contactBtn" onclick="sbGo('contact')" title="Contact me"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-11 11"/><path d="M22 2 15 22l-4-9-9-4z"/></svg><span class="sb-l">Contact me</span></button></div><div class="sb-group" id="sbPlatform"><div class="sb-h"><i class="sb-d t"></i><span>PLATFORM</span></div><button type="button" class="sb-item " id="aboutBtn" onclick="sbGo('about')" title="About Us"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span class="sb-l">About Us</span></button><details class="sb-sub" id="sbTours"><summary class="sb-item" title="Tours"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m16 8-2.5 5.5L8 16l2.5-5.5z"/></svg><span class="sb-l">Tours (Arabic)</span></summary><button type="button" class="sb-subi" onclick="sbGo('tour','home')">Home page</button><button type="button" class="sb-subi" onclick="sbGo('tour','practice')">Question page</button><button type="button" class="sb-subi" onclick="sbGo('tour','mock')">Mock Exam</button><button type="button" class="sb-subi hidden" id="tourAdminBtn" onclick="sbGo('tour','admin')">Admin tools</button></details></div><div class="sb-group" id="sbAdmin"><div class="sb-h"><i class="sb-d r"></i><span>ADMIN</span></div><button type="button" class="sb-item hidden" id="accessBtn" onclick="sbGo('access')" title="Users & Access"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M17 4.5a3.5 3.5 0 0 1 0 7M22 20c0-2.6-1.6-4.6-4-5.5"/></svg><span class="sb-l">Users & Access</span></button><button type="button" class="sb-item hidden" id="adminBtn" onclick="sbGo('admin')" title="Admin Dashboard"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg><span class="sb-l">Admin Dashboard</span></button><button type="button" class="sb-item hidden" id="newsAdminBtn" onclick="sbGo('newsadmin')" title="Manage News"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span class="sb-l">Manage News</span></button></div></nav><div class="sb-foot"><button type="button" class="sb-prof" id="profileBtn" onclick="sbGo('profile')" title="My profile" aria-label="My profile"><span class="sb-av" id="profileAv">?</span><span class="sb-pt"><b id="profName">My Profile</b><small id="userEmailLbl"></small></span></button><button type="button" class="sb-item sb-small" id="exportBtn" onclick="sbGo('export')" title="Export History"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 21h16"/></svg><span class="sb-l">Export History</span></button><button type="button" class="sb-item sb-small" id="importBtn" onclick="sbGo('import')" title="Import History"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m0 0L8 7m4-4 4 4"/><path d="M4 21h16"/></svg><span class="sb-l">Import History</span></button><input type="file" id="histFile" accept=".json,application/json" hidden onchange="importProgress(this)"><button type="button" class="sb-item sb-small" id="signOutBtn" onclick="sbGo('out')" title="Sign Out"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg><span class="sb-l">Sign Out</span></button></div></aside><div id="sbScrim" onclick="sbClose()"></div><div id="appMain"><div id="mobBar"><button type="button" class="mob-menu" onclick="sbOpen()" aria-label="Open the menu"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%2256%2056%20308%20308%22%20width%3D%22308%22%20height%3D%22308%22%3E%3Cdefs%3E%0A%20%3ClinearGradient%20id%3D%22emerald%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23117766%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23064C40%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23F2C66D%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23D79D36%22%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%3Cg%20transform%3D%22translate%28210%20210%29%22%3E%0A%20%3Ccircle%20r%3D%22150%22%20fill%3D%22%23F5FAF8%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%224%22%2F%3E%0A%20%3Ccircle%20r%3D%22126%22%20fill%3D%22none%22%20stroke%3D%22url%28%23emerald%29%22%20stroke-width%3D%2213%22%2F%3E%0A%20%3Ccircle%20r%3D%22105%22%20fill%3D%22none%22%20stroke%3D%22%23B7D6CB%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%223%2010%22%2F%3E%0A%20%3Cg%20fill%3D%22%230B5B4B%22%3E%0A%20%20%3Cpath%20d%3D%22M0-137l9%2022-9-5-9%205z%22%2F%3E%3Cpath%20d%3D%22M137%200l-22%209%205-9-5-9z%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M0%20137l-9-22%209%205%209-5z%22%2F%3E%3Cpath%20d%3D%22M-137%200l22-9-5%209%205%209z%22%2F%3E%0A%20%3C%2Fg%3E%0A%20%3Cpath%20d%3D%22M-72%2058V-7h26v65zm42%200V-37h26v95zm42%200V-74h26v132z%22%20fill%3D%22url%28%23emerald%29%22%20rx%3D%224%22%2F%3E%0A%20%3Cpath%20d%3D%22M-82%2034L-28-12%2012-1%2073-69%22%20fill%3D%22none%22%20stroke%3D%22url%28%23gold%29%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Cpath%20d%3D%22M48-71l28%200-3%2028%22%20fill%3D%22none%22%20stroke%3D%22%23D79D36%22%20stroke-width%3D%2211%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Ccircle%20cx%3D%22-82%22%20cy%3D%2234%22%20r%3D%227%22%20fill%3D%22%23D79D36%22%2F%3E%0A%20%3Cpath%20d%3D%22M0-106l12%2034%2035%201-27%2021%2010%2034L0-37l-30%2021%2010-34-27-21%2035-1z%22%20fill%3D%22%23FFFFFF%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%222%22%20opacity%3D%22.92%22%2F%3E%0A%20%3Ccircle%20r%3D%2211%22%20fill%3D%22%23D79D36%22%2F%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E" alt="" width="30" height="30"><b>CMA Compass</b><span style="flex:1"></span><button type="button" class="mob-menu" onclick="sbGo('inbox')" aria-label="Inbox"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span id="inboxN2" class="inb-n hidden"></span></button></div>
+
 <div id="newsBar" class="newsbar hidden"></div>
 <div style="text-align:center;padding:6px;font-size:.78rem;color:var(--muted)" id="progressLine">Loading...</div>
-<div id="reviewBar" class="review-bar">
-  <div class="tree-actions">
-    <button id="wrongBtn" onclick="reviewList('wrong')">Review Mistakes</button>
-    <button id="flaggedBtn" onclick="reviewList('flagged')">&#9873; Flagged</button>
-    <button id="commentBtn" onclick="reviewList('comment')">&#128221; Comments</button>
-    <button id="firstBtn" onclick="reviewList('first')">&#127942; First try</button>
-  </div>
-</div>
 <div id="phoneBanner" class="hidden" style="background:#e6f2ee;color:#0f5c4c;text-align:center;padding:8px;font-size:.88rem">Add your mobile number to complete your profile. <button type="button" onclick="openProfile()" style="margin-inline-start:8px">Open my profile</button> <button type="button" onclick="gid('phoneBanner').classList.add('hidden');sessionStorage.setItem('cma_phone_dismiss','1')" aria-label="Dismiss">&#10005;</button></div>
 <div id="nameBanner" class="hidden" style="background:#fff3cd;color:#7a5b00;text-align:center;padding:8px;font-size:.82rem;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap">
   <span>Add your name so it appears correctly on your certificates:</span>
@@ -966,6 +991,7 @@ body.rv-lock{overflow:hidden}
 </div>
 
 <footer id="siteFooter" class="site-footer"><img class="ft-logo" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%2256%2056%20308%20308%22%20width%3D%22308%22%20height%3D%22308%22%3E%3Cdefs%3E%0A%20%3ClinearGradient%20id%3D%22emerald%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23117766%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23064C40%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23F2C66D%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23D79D36%22%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%3Cg%20transform%3D%22translate%28210%20210%29%22%3E%0A%20%3Ccircle%20r%3D%22150%22%20fill%3D%22%23F5FAF8%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%224%22%2F%3E%0A%20%3Ccircle%20r%3D%22126%22%20fill%3D%22none%22%20stroke%3D%22url%28%23emerald%29%22%20stroke-width%3D%2213%22%2F%3E%0A%20%3Ccircle%20r%3D%22105%22%20fill%3D%22none%22%20stroke%3D%22%23B7D6CB%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%223%2010%22%2F%3E%0A%20%3Cg%20fill%3D%22%230B5B4B%22%3E%0A%20%20%3Cpath%20d%3D%22M0-137l9%2022-9-5-9%205z%22%2F%3E%3Cpath%20d%3D%22M137%200l-22%209%205-9-5-9z%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M0%20137l-9-22%209%205%209-5z%22%2F%3E%3Cpath%20d%3D%22M-137%200l22-9-5%209%205%209z%22%2F%3E%0A%20%3C%2Fg%3E%0A%20%3Cpath%20d%3D%22M-72%2058V-7h26v65zm42%200V-37h26v95zm42%200V-74h26v132z%22%20fill%3D%22url%28%23emerald%29%22%20rx%3D%224%22%2F%3E%0A%20%3Cpath%20d%3D%22M-82%2034L-28-12%2012-1%2073-69%22%20fill%3D%22none%22%20stroke%3D%22url%28%23gold%29%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Cpath%20d%3D%22M48-71l28%200-3%2028%22%20fill%3D%22none%22%20stroke%3D%22%23D79D36%22%20stroke-width%3D%2211%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Ccircle%20cx%3D%22-82%22%20cy%3D%2234%22%20r%3D%227%22%20fill%3D%22%23D79D36%22%2F%3E%0A%20%3Cpath%20d%3D%22M0-106l12%2034%2035%201-27%2021%2010%2034L0-37l-30%2021%2010-34-27-21%2035-1z%22%20fill%3D%22%23FFFFFF%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%222%22%20opacity%3D%22.92%22%2F%3E%0A%20%3Ccircle%20r%3D%2211%22%20fill%3D%22%23D79D36%22%2F%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E" alt="" width="22" height="22"><b>CMA Compass</b><span>&middot;</span><button type="button" onclick="openAbout()">About Us</button><span>&middot;</span><button type="button" onclick="openContact()">Contact me</button><span>&middot;</span><button type="button" onclick="startTour('home')">&#127891; &#1603;&#1610;&#1601; &#1578;&#1593;&#1605;&#1604; &#1575;&#1604;&#1605;&#1606;&#1589;&#1577;&#1567;</button></footer>
+</div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================================================
@@ -2574,7 +2600,7 @@ function blockedOk(){ gid("blockedVeil").classList.add("hidden"); gid("loginVeil
 const INB_TOPICS = ["Question", "Technical problem", "Suggestion", "Other"];
 let inb = {threads:[], unread:{}, sel:null, msgs:[], names:{}, st:{}, mode:"list", timer:null, rec:new Set(), all:false, recQ:"", draft:{}};
 function inbSum(){ return Object.values(inb.unread).reduce((a,b)=>a+b, 0); }
-function setInboxBadge(n){ const b = gid("inboxN"); if(!b) return; b.textContent = n>99 ? "99+" : n; b.classList.toggle("hidden", !n); }
+function setInboxBadge(n){ ["inboxN","inboxN2"].forEach(id=>{ const b = gid(id); if(!b) return; b.textContent = n>99 ? "99+" : n; b.classList.toggle("hidden", !n); }); }
 async function inboxBadge(){
   if(!userId) return;
   try{
@@ -2738,24 +2764,24 @@ async function aboutSave(){
 
 /* ===== Interactive Arabic tours (how the platform works) ===== */
 const TL = (cls, txt)=>`<div class="tr-lg"><i class="tr-d ${cls}"></i><span>${txt}</span></div>`;
-const MORE_EL = ()=>{ const m = document.querySelector(".more-menu"); return (gid("moreMenu") && gid("moreMenu").open && m) ? m : document.querySelector("#moreMenu > summary"); };
-const MORE_OPEN = ()=>{ gid("moreMenu").open = true; }, MORE_CLOSE = ()=>{ gid("moreMenu").open = false; };
+const SB_OPEN = ()=>{ if(innerWidth<=900) sbOpen(); }, SB_CLOSE = ()=>sbClose();
 const TOURS = {
   home:[
-    {t:"مرحبًا بك في منصة التدريب", x:"منصة للتدرّب على أسئلة اختبار CMA الجزء الأول. في هذه الجولة نتعرّف على الصفحة الرئيسية وأدواتها. وهناك جولات أخرى لصفحة الأسئلة وللاختبار التجريبي من قائمة «More». يمكنك إيقاف الجولة في أي وقت."},
+    {t:"مرحبًا بك في منصة التدريب", x:"منصة للتدرّب على أسئلة اختبار CMA الجزء الأول. في هذه الجولة نتعرّف على الصفحة الرئيسية وأدواتها. وهناك جولات أخرى لصفحة الأسئلة وللاختبار التجريبي من القائمة الجانبية. يمكنك إيقاف الجولة في أي وقت."},
+    {s:"#sidebar", pre:SB_OPEN, post:SB_CLOSE, t:"القائمة الجانبية", x:"كل أدوات المنصة هنا: Curriculum للعودة إلى الأقسام، وMock Exam، ومراجعة الأخطاء، وأداؤك، والرسائل والأخبار، ونبذة عن المنصة، والجولات، وملفك الشخصي في أسفلها. يمكنك طيّها إلى أيقونات بزر السهم أعلاها. في صفحة الأسئلة والاختبار تُطوى تلقائيًا لتوسّع المساحة، ويُحفظ اختيارك. وعلى الهاتف تُفتح بزر ☰."},
     {s:".sec", t:"أقسام المنهج ووحداته", x:"ينقسم المنهج إلى ستة أقسام، لكل قسم لونه ونسبته ووصفه. اضغط على أي وحدة لتظهر مواضيعها الفرعية مع تقدّمك فيها (عدد المُجاب/الكلي)، ثم اضغط على الموضوع لتبدأ حل أسئلته."},
     {s:".dsub .svb", t:"علامات الموضوعات", x:"▶ بجانب الموضوع تعني وجود فيديوهات مراجعة له، و📖 تعني وجود شرح مكتوب منشور. شاهد الفيديو واقرأ الشرح قبل أن تبدأ الحل."},
     {s:"#homeSearch", t:"البحث", x:"ابحث باسم الوحدة أو رقمها أو موضوعها للوصول إليها بسرعة."},
     {s:"#srcMsel", t:"فلتر المصادر", x:"اختر مصدرًا واحدًا أو أكثر بعلامات الاختيار (يمكنك الضغط على «only» لاختيار مصدر واحد فقط). تُحسب كل الأعداد والتقدم حسب المصادر المختارة."},
     {s:"#secMsel", t:"فلتر الأقسام", x:"اختر قسمًا أو أكثر من أقسام المنهج الستة لتظهر بطاقاتها فقط، أو اترك كل الأقسام. ويمكنك تفعيل «Only not answered» لعرض الأسئلة التي لم تجب عنها بعد فقط."},
     {s:".mx-cta:not(.tour-cta)", t:"الاختبار التجريبي Mock Exam", x:"ابنِ اختبارًا مخصّصًا من المصادر والأقسام التي تختارها. لا تظهر الإجابات إلا بعد التسليم، ثم تحصل على النتيجة والزمن وتقريرًا بأخطائك وشهادة قابلة للطباعة، ويمكنك إيقاف الاختبار واستكماله لاحقًا."},
-    {s:"#reviewBar", t:"مراجعة أخطائك وملاحظاتك", x:"Review Mistakes: الأسئلة التي أخطأت فيها. Flagged: الأسئلة التي علّمتها بنجمة. Comments: الأسئلة التي كتبت عليها ملاحظات. First try: الأسئلة التي أجبت عنها صحيحة من المحاولة الأولى. تجمع هذه الأزرار أسئلتك من كل الوحدات في مكان واحد."},
+    {s:"#reviewBar", pre:SB_OPEN, post:SB_CLOSE, t:"مراجعة أخطائك وملاحظاتك", x:"في مجموعة REVIEW بالقائمة الجانبية: Review Mistakes: الأسئلة التي أخطأت فيها. Flagged: الأسئلة التي علّمتها بنجمة. Comments: الأسئلة التي كتبت عليها ملاحظات. First try: الأسئلة التي أجبت عنها صحيحة من المحاولة الأولى. تجمع هذه الأزرار أسئلتك من كل الوحدات في مكان واحد."},
     {s:"#progressLine", t:"عدّاد التقدم", x:"يعرض عدد الأسئلة التي أجبت عنها حتى الآن في كل المنصة."},
-    {s:".user-bar .dash-link[onclick*=openDashboard]", t:"أداؤك My Performance", x:"إحصاءات تقدّمك: نسبة الدقة، والتقدم في كل وحدة، ومقارنة المصادر، والزمن المستغرق في الحل."},
-    {s:"#newsBtn", t:"الأخبار", x:"إعلانات الإدارة عن تحديثات المنصة. تظهر نقطة حمراء عند وجود خبر جديد، ويمرّ شريط الأخبار أعلى الصفحة ويمكنك إغلاقه."},
-    {s:"#inboxBtn", t:"الرسائل والتواصل مع الإدارة", x:"من Inbox تتلقى رسائل الإدارة وتردّ عليها. ولإرسال سؤال أو مشكلة أو اقتراح اضغط «Contact the admin» داخل Inbox أو «Contact me» من قائمة More. يصلك الرد في نفس المحادثة، ويظهر عدد الرسائل غير المقروءة على الزر."},
-    {s:"#profileBtn", t:"ملفك الشخصي", x:"اضغط على صورتك لتحديث اسمك ورقم الموبايل والدولة والمدينة وصورتك الشخصية، ولتغيير كلمة المرور. وتظهر صورتك لزملائك في النقاش (Discussion) وفي الرسائل."},
-    {s:MORE_EL, pre:MORE_OPEN, post:MORE_CLOSE, t:"قائمة المزيد", x:"About Us: نبذة عن المنصة وهدفها وفريق العمل (بالعربية والإنجليزية). Contact me: مراسلة الإدارة. Tour: جولات تعريفية. Export / Import History: تصدير سجل حلّك كملف واستيراده لاحقًا أو على جهاز آخر."}
+    {s:"#perfBtn", pre:SB_OPEN, post:SB_CLOSE, t:"أداؤك My Performance", x:"إحصاءات تقدّمك: نسبة الدقة، والتقدم في كل وحدة، ومقارنة المصادر، والزمن المستغرق في الحل."},
+    {s:"#newsBtn", pre:SB_OPEN, post:SB_CLOSE, t:"الأخبار", x:"إعلانات الإدارة عن تحديثات المنصة. تظهر نقطة حمراء عند وجود خبر جديد، ويمرّ شريط الأخبار أعلى الصفحة ويمكنك إغلاقه."},
+    {s:"#inboxBtn", pre:SB_OPEN, post:SB_CLOSE, t:"الرسائل والتواصل مع الإدارة", x:"من Inbox تتلقى رسائل الإدارة وتردّ عليها. ولإرسال سؤال أو مشكلة أو اقتراح اضغط «Contact the admin» داخل Inbox أو «Contact me» من القائمة الجانبية. يصلك الرد في نفس المحادثة، ويظهر عدد الرسائل غير المقروءة على الزر."},
+    {s:"#profileBtn", pre:SB_OPEN, post:SB_CLOSE, t:"ملفك الشخصي", x:"اضغط على بطاقتك أسفل القائمة لتحديث اسمك ورقم الموبايل والدولة والمدينة وصورتك الشخصية، ولتغيير كلمة المرور. وتظهر صورتك لزملائك في النقاش (Discussion) وفي الرسائل."},
+    {s:"#sbPlatform", pre:SB_OPEN, post:SB_CLOSE, t:"مجموعة PLATFORM", x:"About Us: نبذة عن المنصة وهدفها وفريق العمل (بالعربية والإنجليزية). Tours: جولات تعريفية بالعربية. وفي أسفل القائمة: Export / Import History لتصدير سجل حلّك كملف واستيراده لاحقًا أو على جهاز آخر، وSign Out للخروج."}
   ],
   practice:[
     {t:"جولة صفحة الأسئلة", x:"سنستعرض أدوات حل أسئلة الموضوع: المراجعة قبل البدء، وأرقام الأسئلة وألوانها، والتعليقات، والنقاش مع الزملاء، والتواصل مع الإدارة. ما يظهر فقط بعد الإجابة (مثل الشرح) سيُعرض في الجولة إن كنت قد أجبت عن السؤال."},
@@ -2777,7 +2803,7 @@ const TOURS = {
     {s:".footer-nav", t:"التنقل وإعادة المحاولة", x:"Previous / Next للتنقل بين الأسئلة. «Retry» يتيح لك إعادة السؤال للتدريب، لكن السؤال الذي سُجّل «Failed» يبقى مسجّلًا كذلك حتى لو أجبت عنه صحيحًا بعد ذلك."},
     {s:"#chatPanel", t:"النقاش مع الزملاء Discussion", x:"ناقش السؤال مع زملائك: اكتب رسالتك ثم Enter للإرسال (Shift+Enter لسطر جديد). تظهر صورة كل كاتب واسمه الأول، ويظهر عدد الرسائل على رقم السؤال. يمكنك حذف رسائلك أنت فقط."},
     {s:"#reviewBar", t:"مراجعة أخطائك من كل الوحدات", x:"Review Mistakes وFlagged وComments وFirst try تجمع لك الأسئلة المناسبة من كل الموضوعات في مكان واحد."},
-    {s:"#inboxBtn", t:"التواصل مع الإدارة", x:"عندك مشكلة في سؤال أو اقتراح؟ راسل الإدارة من Inbox (زر «Contact the admin») أو من «Contact me» في قائمة More، وسيصلك الرد داخل المنصة."},
+    {s:"#inboxBtn", t:"التواصل مع الإدارة", x:"عندك مشكلة في سؤال أو اقتراح؟ راسل الإدارة من Inbox (زر «Contact the admin») أو من «Contact me» في القائمة الجانبية، وسيصلك الرد داخل المنصة."},
     {t:"اختصارات لوحة المفاتيح", h:`<div class="tr-lg"><b dir="ltr">A – D</b><span>أو <b dir="ltr">1 – 4</b> للإجابة</span></div><div class="tr-lg"><b dir="ltr">← →</b><span>للتنقل بين الأسئلة</span></div><div class="tr-lg"><b dir="ltr">E</b><span>لإظهار أو إخفاء الشرح</span></div><div class="tr-lg"><b dir="ltr">Esc</b><span>لإغلاق لوحة الفيديو أو النوافذ</span></div>`}
   ],
   mock:[
@@ -2795,11 +2821,11 @@ const TOURS = {
   ],
   admin:[
     {t:"جولة أدوات الأدمن", x:"هذه الجولة للأدمن فقط. تشرح أدوات إدارة المستخدمين والمحتوى والتواصل."},
-    {s:MORE_EL, pre:MORE_OPEN, post:MORE_CLOSE, t:"قائمة More للأدمن", x:"Users & Access: تعطيل الدارس أو حذفه (حذف ناعم يمكن استرجاعه)، ومنح المصادر لكل دارس أو لمجموعة، ومنح صلاحية «Explanations editor»، وإرسال رسالة. Manage News: كتابة الأخبار. Admin Dashboard: إحصاءات كل الدارسين وتصدير CSV."},
-    {s:"#inboxBtn", t:"الرسائل (Inbox)", x:"أرسل رسالة لدارس أو لعدة دارسين أو لكل الدارسين («New message»)، وتلقَّ رسائل «Contact me» من الدارسين وردّ عليها. لكل دارس محادثة خاصة به."},
+    {s:"#sbAdmin", pre:SB_OPEN, post:SB_CLOSE, t:"مجموعة ADMIN (للأدمن فقط)", x:"Users & Access: تعطيل الدارس أو حذفه (حذف ناعم يمكن استرجاعه)، ومنح المصادر لكل دارس أو لمجموعة، ومنح صلاحية «Explanations editor»، وإرسال رسالة. Manage News: كتابة الأخبار. Admin Dashboard: إحصاءات كل الدارسين وتصدير CSV."},
+    {s:"#inboxBtn", pre:SB_OPEN, post:SB_CLOSE, t:"الرسائل (Inbox)", x:"أرسل رسالة لدارس أو لعدة دارسين أو لكل الدارسين («New message»)، وتلقَّ رسائل «Contact me» من الدارسين وردّ عليها. لكل دارس محادثة خاصة به."},
     {s:".sec", t:"المحتوى داخل الموضوعات", x:"افتح أي موضوع: ستجد في «Review before you start» أزرار «+ Add video» لإضافة فيديوهات المراجعة وتعديلها، و«Write explanation» لكتابة الشرح المكتوب (مسودة ثم نشر) ويستطيع المحرر الذي تمنحه الصلاحية فعل ذلك أيضًا. وفي النقاش تستطيع حذف أي رسالة."},
-    {t:"صفحة About Us", x:"من More ثم About Us اضغط «Edit» لتحرير نبذة المنصة وهدفها وأسماء فريق العمل وصورهم بالعربية والإنجليزية."},
-    {t:"انتهت الجولة", x:"يمكنك إعادة أي جولة من قائمة More في أي وقت."}
+    {t:"صفحة About Us", x:"من القائمة الجانبية ثم About Us اضغط «Edit» لتحرير نبذة المنصة وهدفها وأسماء فريق العمل وصورهم بالعربية والإنجليزية."},
+    {t:"انتهت الجولة", x:"يمكنك إعادة أي جولة من القائمة الجانبية في أي وقت."}
   ]
 };
 let tour = null;
@@ -2808,7 +2834,7 @@ function startTour(name){
   if(name==="admin" && !attIsAdmin()) return;
   if((name==="home"||name==="admin") && view!=="home"){ if(view==="practice") goHome(); else if(view==="mock") mockExit(); setTimeout(()=>startTour(name), 400); return; }
   if(name==="mock" && view!=="mock"){ openMock(); setTimeout(()=>startTour(name), 450); return; }
-  if(name==="practice" && view!=="practice"){ alert("افتح أي موضوع من الفهرس أولًا، ثم اضغط زر «جولة» أعلى الصفحة (أو اختر Tour: Question page من قائمة More)."); return; }
+  if(name==="practice" && view!=="practice"){ alert("افتح أي موضوع من الفهرس أولًا، ثم اضغط زر «جولة» أعلى الصفحة (أو اختر Tours ثم Question page من القائمة الجانبية)."); return; }
   endTour(); tour = {name, i:-1};
   const v = document.createElement("div"); v.id = "tourVeil"; v.className = "tour-veil";
   v.innerHTML = `<div id="tourHole" class="tour-hole"></div><div id="tourCard" class="tour-card" dir="rtl" role="dialog" aria-live="polite"><div class="tour-n" id="tourN"></div><h4 id="tourT"></h4><div id="tourX"></div><div class="tour-bt"><button type="button" class="tour-skip" onclick="endTour()">تخطي</button><span style="flex:1"></span><button type="button" id="tourPrev" onclick="tourGo(-1)">السابق</button><button type="button" id="tourNext" class="tour-nx" onclick="tourGo(1)">التالي</button></div></div>`;
@@ -2832,7 +2858,7 @@ function tourGo(d){
   let last = true; for(let j=i+1;j<steps.length;j++){ if(!steps[j].s || tourEl(steps[j])){ last = false; break; } }
   gid("tourNext").textContent = last ? "إنهاء" : "التالي"; gid("tourPrev").style.visibility = pos>1 ? "visible" : "hidden";
   const e = tourEl(st); if(e && !st.pre) e.scrollIntoView({block:"center", behavior:"auto"});
-  tourPlace();
+  tourPlace(); if(st.pre) setTimeout(tourPlace, 320);
 }
 function tourPlace(){
   if(!tour) return; const st = TOURS[tour.name][tour.i], e = st && tourEl(st), hole = gid("tourHole"), card = gid("tourCard"); if(!card) return;
@@ -2882,6 +2908,7 @@ function phoneOk(v){ return /^\+?[0-9 ()\-]{7,20}$/.test(v||"") && (v.replace(/\
 function paintAvatar(){
   const el = gid("profileAv"); if(!el) return;
   const nm = (myProfile && myProfile.display_name) || userEmail || "?";
+  const pn = gid("profName"); if(pn) pn.textContent = (myProfile && myProfile.display_name) || "My Profile";
   if(myExtra && myExtra.avatar){ el.innerHTML = `<img src="${aiEsc(myExtra.avatar)}" alt="">`; } else { el.textContent = (nm||"?").trim().charAt(0).toUpperCase() || "?"; }
 }
 async function loadProfileExtra(user){
@@ -3179,6 +3206,44 @@ function mselSecRender(){
     get:()=>homeSecSel ? new Set(homeSecSel) : new Set(homeSecKeys()),
     set:set=>{ homeSecSel = set.size===homeSecKeys().length ? null : set; try{ localStorage.setItem("cma_home_secs", homeSecSel ? [...homeSecSel].join(",") : "all"); }catch(e){} },
     change:()=>renderHome()});
+}
+
+/* ===== Sidebar navigation ===== */
+const SB_KEY = {home:"cma_sb_home", focus:"cma_sb_focus"};
+function sbCat(){ return (view==="practice" || view==="mock") ? "focus" : "home"; }
+function sbPref(c){ try{ return localStorage.getItem(SB_KEY[c]) || (c==="focus" ? "rail" : "full"); }catch(e){ return c==="focus" ? "rail" : "full"; } }
+function sbApply(){
+  document.body.classList.toggle("sb-rail", sbPref(sbCat())==="rail");
+  const h = gid("navHome"), mk = gid("navMock");
+  if(h) h.classList.toggle("active", view==="home" || (view==="practice" && !reviewMode));
+  if(mk) mk.classList.toggle("active", view==="mock");
+  const b = gid("sbCollapse"); if(b) b.setAttribute("aria-expanded", String(sbPref(sbCat())!=="rail"));
+}
+function sbToggle(){ const c = sbCat(); try{ localStorage.setItem(SB_KEY[c], sbPref(c)==="rail" ? "full" : "rail"); }catch(e){} sbApply(); }
+function sbOpen(){ document.body.classList.add("sb-open"); }
+function sbClose(){ document.body.classList.remove("sb-open"); }
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") sbClose(); });
+function sbGo(what, arg){
+  if(mock.phase==="exam") mockLeave();                 // leaving an exam saves it so it can be resumed
+  sbClose();
+  switch(what){
+    case "home": if(view==="practice") goHome(); else if(view==="mock") mockExit(); else window.scrollTo({top:0}); break;
+    case "mock": if(view==="mock") mockRender(); else openMock(); break;
+    case "review": reviewList(arg); break;
+    case "perf": openDashboard(); break;
+    case "inbox": openInbox(); break;
+    case "news": openNewsList(); break;
+    case "contact": openContact(); break;
+    case "about": openAbout(); break;
+    case "tour": startTour(arg); break;
+    case "access": openAccess(); break;
+    case "admin": openAdminDashboard(); break;
+    case "newsadmin": openNewsAdmin(); break;
+    case "export": exportProgress(); break;
+    case "import": gid("histFile").click(); break;
+    case "profile": openProfile(); break;
+    case "out": switchUser(); break;
+  }
 }
 const explainOpen = {};
 function toggleExplain(qid){
@@ -4337,9 +4402,9 @@ function showView(v){
   gid("homeView").classList.toggle("hidden", v!=="home");
   gid("layout").classList.toggle("hidden", v!=="practice");
   gid("practiceBar").classList.toggle("hidden", v!=="practice");
-  gid("mockView").classList.toggle("hidden", v!=="mock"); gid("reviewBar").classList.toggle("hidden", v==="mock");
+  gid("mockView").classList.toggle("hidden", v!=="mock");
   if(v==="home"){ qTimer = {id:null, acc:0, since:null}; renderHome(); } else if(v==="mock"){ mockRender(); } else updateCrumb();
-  renderSubVideos();
+  renderSubVideos(); sbApply();
   window.scrollTo(0,0);
 }
 function applyTree(){ gid("layout").classList.add("tree-hidden"); }
