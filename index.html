@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CMA Part 1 Practice Platform</title>
+<title>CMA Compass — CMA Part 1 Practice Platform</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%2256%2056%20308%20308%22%20width%3D%22308%22%20height%3D%22308%22%3E%3Cdefs%3E%0A%20%3ClinearGradient%20id%3D%22emerald%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23117766%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23064C40%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23F2C66D%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23D79D36%22%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%3Cg%20transform%3D%22translate%28210%20210%29%22%3E%0A%20%3Ccircle%20r%3D%22150%22%20fill%3D%22%23F5FAF8%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%224%22%2F%3E%0A%20%3Ccircle%20r%3D%22126%22%20fill%3D%22none%22%20stroke%3D%22url%28%23emerald%29%22%20stroke-width%3D%2213%22%2F%3E%0A%20%3Ccircle%20r%3D%22105%22%20fill%3D%22none%22%20stroke%3D%22%23B7D6CB%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%223%2010%22%2F%3E%0A%20%3Cg%20fill%3D%22%230B5B4B%22%3E%0A%20%20%3Cpath%20d%3D%22M0-137l9%2022-9-5-9%205z%22%2F%3E%3Cpath%20d%3D%22M137%200l-22%209%205-9-5-9z%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M0%20137l-9-22%209%205%209-5z%22%2F%3E%3Cpath%20d%3D%22M-137%200l22-9-5%209%205%209z%22%2F%3E%0A%20%3C%2Fg%3E%0A%20%3Cpath%20d%3D%22M-72%2058V-7h26v65zm42%200V-37h26v95zm42%200V-74h26v132z%22%20fill%3D%22url%28%23emerald%29%22%20rx%3D%224%22%2F%3E%0A%20%3Cpath%20d%3D%22M-82%2034L-28-12%2012-1%2073-69%22%20fill%3D%22none%22%20stroke%3D%22url%28%23gold%29%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Cpath%20d%3D%22M48-71l28%200-3%2028%22%20fill%3D%22none%22%20stroke%3D%22%23D79D36%22%20stroke-width%3D%2211%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Ccircle%20cx%3D%22-82%22%20cy%3D%2234%22%20r%3D%227%22%20fill%3D%22%23D79D36%22%2F%3E%0A%20%3Cpath%20d%3D%22M0-106l12%2034%2035%201-27%2021%2010%2034L0-37l-30%2021%2010-34-27-21%2035-1z%22%20fill%3D%22%23FFFFFF%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%222%22%20opacity%3D%22.92%22%2F%3E%0A%20%3Ccircle%20r%3D%2211%22%20fill%3D%22%23D79D36%22%2F%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E">
+<meta name="theme-color" content="#0f5c4c">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -801,12 +803,38 @@ body.rv-lock{overflow:hidden}
 .tr-d{flex:none;width:18px;height:18px;border-radius:50%;position:relative;display:inline-block;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 .tr-d.g{background:#22a559}.tr-d.y{background:#f2b200}.tr-d.r{background:#d93025}.tr-d.note{background:var(--brand);width:11px;height:11px;margin:0 3.5px}
 .tr-d.chat{background:#2563eb}.tr-d.flag{background:transparent;border:2.5px solid var(--flag);border-radius:5px;box-shadow:none}
+
+/* brand */
+.logo-img{width:46px;height:46px;border-radius:50%;background:#f5faf8;box-shadow:0 0 0 2px rgba(255,255,255,.4),0 2px 8px rgba(0,0,0,.25);flex:none}
+.login-logo{display:block;width:min(300px,86%);height:auto;margin:0 auto 10px}
+.ft-logo{vertical-align:middle;margin-inline-end:6px;border-radius:50%}
+.site-footer b{color:var(--ink);margin-inline-end:6px}
+.cert-logo{display:block;height:70px;width:auto;margin:0 auto 4px}
+.ab-logo{display:block;height:72px;width:auto;margin:0 auto 12px}
+@media(max-width:560px){header.top h1{font-size:1rem}header.top .sub{display:none}}
+/* multi-select widget */
+.msel{position:relative}
+.msel-b{display:flex;align-items:center;gap:8px;max-width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--ink);font:inherit;font-size:.85rem;cursor:pointer;box-shadow:var(--shadow)}
+.msel-b.on{border-color:var(--brand);background:var(--brand-soft)}
+.msel-t{color:var(--muted);font-size:.74rem;font-weight:700}.msel-v{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
+.msel-c{color:var(--muted);font-size:.7rem}
+.msel-p{position:absolute;z-index:60;top:calc(100% + 6px);left:0;min-width:270px;max-width:92vw;max-height:60vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 34px rgba(0,0,0,.2);padding:6px}
+.msel-p.hidden{display:none}
+.msel-i{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:.86rem}
+.msel-i:hover{background:var(--brand-soft)}.msel-i input{width:17px;height:17px;accent-color:var(--brand);flex:none}
+.msel-i span{flex:1;display:flex;align-items:center;gap:8px;min-width:0}.msel-i em{margin-inline-start:auto;font-style:normal;color:var(--muted);font-size:.74rem}
+.msel-all{border-bottom:1px solid var(--line);border-radius:8px 8px 0 0;font-weight:800;margin-bottom:4px}
+.msel-d{width:10px;height:10px;border-radius:50%;flex:none}
+.msel-only{display:none;border:0;background:none;color:var(--brand);font:inherit;font-size:.72rem;font-weight:700;text-decoration:underline;cursor:pointer}
+.msel-i:hover .msel-only,.msel-i:focus-within .msel-only{display:inline}
+@media(max-width:700px){.msel{flex:1 1 100%}.msel-b{width:100%}.msel-p{left:0;right:0;width:100%;max-width:none}}
 </style>
 </head>
 <body>
 
 <div class="modal-veil hidden" id="loginVeil">
   <div class="modal-box">
+    <img class="login-logo" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221200%22%20height%3D%22420%22%20viewBox%3D%220%200%201200%20420%22%20role%3D%22img%22%20aria-labelledby%3D%22title%20desc%22%3E%0A%3Ctitle%20id%3D%22title%22%3ECMA%20Compass%3C%2Ftitle%3E%3Cdesc%20id%3D%22desc%22%3EA%20compass%20and%20rising%20financial%20chart%20symbol%20for%20a%20CMA%20learning%20platform%3C%2Fdesc%3E%0A%3Cdefs%3E%0A%20%3ClinearGradient%20id%3D%22emerald%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23117766%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23064C40%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23F2C66D%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23D79D36%22%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%0A%3Cg%20transform%3D%22translate%28210%20210%29%22%3E%0A%20%3Ccircle%20r%3D%22150%22%20fill%3D%22%23F5FAF8%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%224%22%2F%3E%0A%20%3Ccircle%20r%3D%22126%22%20fill%3D%22none%22%20stroke%3D%22url%28%23emerald%29%22%20stroke-width%3D%2213%22%2F%3E%0A%20%3Ccircle%20r%3D%22105%22%20fill%3D%22none%22%20stroke%3D%22%23B7D6CB%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%223%2010%22%2F%3E%0A%20%3Cg%20fill%3D%22%230B5B4B%22%3E%0A%20%20%3Cpath%20d%3D%22M0-137l9%2022-9-5-9%205z%22%2F%3E%3Cpath%20d%3D%22M137%200l-22%209%205-9-5-9z%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M0%20137l-9-22%209%205%209-5z%22%2F%3E%3Cpath%20d%3D%22M-137%200l22-9-5%209%205%209z%22%2F%3E%0A%20%3C%2Fg%3E%0A%20%3Cpath%20d%3D%22M-72%2058V-7h26v65zm42%200V-37h26v95zm42%200V-74h26v132z%22%20fill%3D%22url%28%23emerald%29%22%20rx%3D%224%22%2F%3E%0A%20%3Cpath%20d%3D%22M-82%2034L-28-12%2012-1%2073-69%22%20fill%3D%22none%22%20stroke%3D%22url%28%23gold%29%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Cpath%20d%3D%22M48-71l28%200-3%2028%22%20fill%3D%22none%22%20stroke%3D%22%23D79D36%22%20stroke-width%3D%2211%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Ccircle%20cx%3D%22-82%22%20cy%3D%2234%22%20r%3D%227%22%20fill%3D%22%23D79D36%22%2F%3E%0A%20%3Cpath%20d%3D%22M0-106l12%2034%2035%201-27%2021%2010%2034L0-37l-30%2021%2010-34-27-21%2035-1z%22%20fill%3D%22%23FFFFFF%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%222%22%20opacity%3D%22.92%22%2F%3E%0A%20%3Ccircle%20r%3D%2211%22%20fill%3D%22%23D79D36%22%2F%3E%0A%3C%2Fg%3E%0A%3Cg%20font-family%3D%22Aptos%2C%20Arial%2C%20sans-serif%22%3E%0A%20%3Ctext%20x%3D%22430%22%20y%3D%22183%22%20font-size%3D%2298%22%20font-weight%3D%22800%22%20letter-spacing%3D%22-4%22%20fill%3D%22%230B5B4B%22%3ECMA%3C%2Ftext%3E%0A%20%3Ctext%20x%3D%22690%22%20y%3D%22183%22%20font-size%3D%2288%22%20font-weight%3D%22500%22%20letter-spacing%3D%22-3%22%20fill%3D%22%23173C35%22%3ECompass%3C%2Ftext%3E%0A%20%3Crect%20x%3D%22435%22%20y%3D%22211%22%20width%3D%22630%22%20height%3D%225%22%20rx%3D%222.5%22%20fill%3D%22%23E6B653%22%2F%3E%0A%20%3Ctext%20x%3D%22438%22%20y%3D%22273%22%20font-size%3D%2232%22%20font-weight%3D%22600%22%20fill%3D%22%2349645D%22%3EYour%20Steps%20to%20CMA%20Success%3C%2Ftext%3E%0A%20%3Ctext%20x%3D%221060%22%20y%3D%22326%22%20text-anchor%3D%22start%22%20font-size%3D%2227%22%20fill%3D%22%2371847E%22%20direction%3D%22rtl%22%20unicode-bidi%3D%22plaintext%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20Arabic%2C%20sans-serif%22%3E%D8%AE%D8%B7%D9%88%D8%AA%D9%83%20%D8%A7%D9%84%D9%88%D8%A7%D8%AB%D9%82%D8%A9%20%D9%86%D8%AD%D9%88%20CMA%3C%2Ftext%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E" alt="CMA Compass — Your Steps to CMA Success">
     <h2>Welcome</h2>
     <p>Sign in to save your progress and mistake log. It syncs across all your devices.</p>
     <input type="text" id="nameInput" placeholder="Full name (for new accounts)" autocomplete="name">
@@ -854,9 +882,9 @@ body.rv-lock{overflow:hidden}
 </div>
 
 <header class="top">
-  <div class="brand"><span class="logo" aria-hidden="true">CMA</span><div>
-    <h1>CMA Part 1 Practice Platform</h1>
-    <div class="sub">Nonprofit educational platform &middot; Financial Planning, Performance, and Analytics</div></div></div>
+  <div class="brand"><img class="logo-img" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%2256%2056%20308%20308%22%20width%3D%22308%22%20height%3D%22308%22%3E%3Cdefs%3E%0A%20%3ClinearGradient%20id%3D%22emerald%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23117766%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23064C40%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23F2C66D%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23D79D36%22%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%3Cg%20transform%3D%22translate%28210%20210%29%22%3E%0A%20%3Ccircle%20r%3D%22150%22%20fill%3D%22%23F5FAF8%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%224%22%2F%3E%0A%20%3Ccircle%20r%3D%22126%22%20fill%3D%22none%22%20stroke%3D%22url%28%23emerald%29%22%20stroke-width%3D%2213%22%2F%3E%0A%20%3Ccircle%20r%3D%22105%22%20fill%3D%22none%22%20stroke%3D%22%23B7D6CB%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%223%2010%22%2F%3E%0A%20%3Cg%20fill%3D%22%230B5B4B%22%3E%0A%20%20%3Cpath%20d%3D%22M0-137l9%2022-9-5-9%205z%22%2F%3E%3Cpath%20d%3D%22M137%200l-22%209%205-9-5-9z%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M0%20137l-9-22%209%205%209-5z%22%2F%3E%3Cpath%20d%3D%22M-137%200l22-9-5%209%205%209z%22%2F%3E%0A%20%3C%2Fg%3E%0A%20%3Cpath%20d%3D%22M-72%2058V-7h26v65zm42%200V-37h26v95zm42%200V-74h26v132z%22%20fill%3D%22url%28%23emerald%29%22%20rx%3D%224%22%2F%3E%0A%20%3Cpath%20d%3D%22M-82%2034L-28-12%2012-1%2073-69%22%20fill%3D%22none%22%20stroke%3D%22url%28%23gold%29%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Cpath%20d%3D%22M48-71l28%200-3%2028%22%20fill%3D%22none%22%20stroke%3D%22%23D79D36%22%20stroke-width%3D%2211%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Ccircle%20cx%3D%22-82%22%20cy%3D%2234%22%20r%3D%227%22%20fill%3D%22%23D79D36%22%2F%3E%0A%20%3Cpath%20d%3D%22M0-106l12%2034%2035%201-27%2021%2010%2034L0-37l-30%2021%2010-34-27-21%2035-1z%22%20fill%3D%22%23FFFFFF%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%222%22%20opacity%3D%22.92%22%2F%3E%0A%20%3Ccircle%20r%3D%2211%22%20fill%3D%22%23D79D36%22%2F%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E" alt="CMA Compass logo" width="46" height="46"><div>
+    <h1>CMA Compass</h1>
+    <div class="sub">Part 1 Practice Platform &middot; Your Steps to CMA Success</div></div></div>
   <div class="user-bar">
     <button type="button" class="avatar-btn" id="profileBtn" onclick="openProfile()" title="My profile" aria-label="My profile"><span id="profileAv">?</span></button>
     <span id="userEmailLbl"></span>
@@ -902,7 +930,8 @@ body.rv-lock{overflow:hidden}
   <div class="home-hero"><div><h2>CMA Part 1 &mdash; Curriculum</h2><p>Choose a unit to start practicing its questions.</p></div><div class="hero-ctas"><button type="button" class="mx-cta tour-cta" onclick="startTour('home')">&#127891; &#1603;&#1610;&#1601; &#1578;&#1593;&#1605;&#1604; &#1575;&#1604;&#1605;&#1606;&#1589;&#1577;&#1567; <small>&#1580;&#1608;&#1604;&#1577; &#1578;&#1601;&#1575;&#1593;&#1604;&#1610;&#1577; &#1576;&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</small></button><button type="button" class="mx-cta" onclick="openMock()">&#128221; Mock Exam <small>Build a custom test</small></button></div></div>
   <div class="home-tools">
     <input type="search" id="homeSearch" placeholder="Search units or topics (e.g. variance, 8.2, budgeting)" oninput="renderHome()" aria-label="Search units and topics">
-    <select id="homeSrcSelect" onchange="setGlobalSource(this.value)" aria-label="Question source"></select>
+    <div class="msel" id="srcMsel"></div>
+    <div class="msel" id="secMsel"></div>
     <label><input type="checkbox" id="homeOnlyUn" onchange="setOnlyUnanswered(this.checked)"> Only not answered</label>
   </div>
   <div class="home-stats" id="homeStats"></div>
@@ -936,7 +965,7 @@ body.rv-lock{overflow:hidden}
   <div class="cert-sheet" id="certSheet"></div>
 </div>
 
-<footer id="siteFooter" class="site-footer"><button type="button" onclick="openAbout()">About Us</button><span>&middot;</span><button type="button" onclick="openContact()">Contact me</button><span>&middot;</span><button type="button" onclick="startTour('home')">&#127891; &#1603;&#1610;&#1601; &#1578;&#1593;&#1605;&#1604; &#1575;&#1604;&#1605;&#1606;&#1589;&#1577;&#1567;</button></footer>
+<footer id="siteFooter" class="site-footer"><img class="ft-logo" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%2256%2056%20308%20308%22%20width%3D%22308%22%20height%3D%22308%22%3E%3Cdefs%3E%0A%20%3ClinearGradient%20id%3D%22emerald%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23117766%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23064C40%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23F2C66D%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23D79D36%22%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%3Cg%20transform%3D%22translate%28210%20210%29%22%3E%0A%20%3Ccircle%20r%3D%22150%22%20fill%3D%22%23F5FAF8%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%224%22%2F%3E%0A%20%3Ccircle%20r%3D%22126%22%20fill%3D%22none%22%20stroke%3D%22url%28%23emerald%29%22%20stroke-width%3D%2213%22%2F%3E%0A%20%3Ccircle%20r%3D%22105%22%20fill%3D%22none%22%20stroke%3D%22%23B7D6CB%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%223%2010%22%2F%3E%0A%20%3Cg%20fill%3D%22%230B5B4B%22%3E%0A%20%20%3Cpath%20d%3D%22M0-137l9%2022-9-5-9%205z%22%2F%3E%3Cpath%20d%3D%22M137%200l-22%209%205-9-5-9z%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M0%20137l-9-22%209%205%209-5z%22%2F%3E%3Cpath%20d%3D%22M-137%200l22-9-5%209%205%209z%22%2F%3E%0A%20%3C%2Fg%3E%0A%20%3Cpath%20d%3D%22M-72%2058V-7h26v65zm42%200V-37h26v95zm42%200V-74h26v132z%22%20fill%3D%22url%28%23emerald%29%22%20rx%3D%224%22%2F%3E%0A%20%3Cpath%20d%3D%22M-82%2034L-28-12%2012-1%2073-69%22%20fill%3D%22none%22%20stroke%3D%22url%28%23gold%29%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Cpath%20d%3D%22M48-71l28%200-3%2028%22%20fill%3D%22none%22%20stroke%3D%22%23D79D36%22%20stroke-width%3D%2211%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Ccircle%20cx%3D%22-82%22%20cy%3D%2234%22%20r%3D%227%22%20fill%3D%22%23D79D36%22%2F%3E%0A%20%3Cpath%20d%3D%22M0-106l12%2034%2035%201-27%2021%2010%2034L0-37l-30%2021%2010-34-27-21%2035-1z%22%20fill%3D%22%23FFFFFF%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%222%22%20opacity%3D%22.92%22%2F%3E%0A%20%3Ccircle%20r%3D%2211%22%20fill%3D%22%23D79D36%22%2F%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E" alt="" width="22" height="22"><b>CMA Compass</b><span>&middot;</span><button type="button" onclick="openAbout()">About Us</button><span>&middot;</span><button type="button" onclick="openContact()">Contact me</button><span>&middot;</span><button type="button" onclick="startTour('home')">&#127891; &#1603;&#1610;&#1601; &#1578;&#1593;&#1605;&#1604; &#1575;&#1604;&#1605;&#1606;&#1589;&#1577;&#1567;</button></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================================================
@@ -1193,6 +1222,7 @@ async function startSession(user){
 }
 
 // ---------- Dashboard ----------
+const LOGO_FULL = "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221200%22%20height%3D%22420%22%20viewBox%3D%220%200%201200%20420%22%20role%3D%22img%22%20aria-labelledby%3D%22title%20desc%22%3E%0A%3Ctitle%20id%3D%22title%22%3ECMA%20Compass%3C%2Ftitle%3E%3Cdesc%20id%3D%22desc%22%3EA%20compass%20and%20rising%20financial%20chart%20symbol%20for%20a%20CMA%20learning%20platform%3C%2Fdesc%3E%0A%3Cdefs%3E%0A%20%3ClinearGradient%20id%3D%22emerald%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23117766%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23064C40%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23F2C66D%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23D79D36%22%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%0A%3Cg%20transform%3D%22translate%28210%20210%29%22%3E%0A%20%3Ccircle%20r%3D%22150%22%20fill%3D%22%23F5FAF8%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%224%22%2F%3E%0A%20%3Ccircle%20r%3D%22126%22%20fill%3D%22none%22%20stroke%3D%22url%28%23emerald%29%22%20stroke-width%3D%2213%22%2F%3E%0A%20%3Ccircle%20r%3D%22105%22%20fill%3D%22none%22%20stroke%3D%22%23B7D6CB%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%223%2010%22%2F%3E%0A%20%3Cg%20fill%3D%22%230B5B4B%22%3E%0A%20%20%3Cpath%20d%3D%22M0-137l9%2022-9-5-9%205z%22%2F%3E%3Cpath%20d%3D%22M137%200l-22%209%205-9-5-9z%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M0%20137l-9-22%209%205%209-5z%22%2F%3E%3Cpath%20d%3D%22M-137%200l22-9-5%209%205%209z%22%2F%3E%0A%20%3C%2Fg%3E%0A%20%3Cpath%20d%3D%22M-72%2058V-7h26v65zm42%200V-37h26v95zm42%200V-74h26v132z%22%20fill%3D%22url%28%23emerald%29%22%20rx%3D%224%22%2F%3E%0A%20%3Cpath%20d%3D%22M-82%2034L-28-12%2012-1%2073-69%22%20fill%3D%22none%22%20stroke%3D%22url%28%23gold%29%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Cpath%20d%3D%22M48-71l28%200-3%2028%22%20fill%3D%22none%22%20stroke%3D%22%23D79D36%22%20stroke-width%3D%2211%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Ccircle%20cx%3D%22-82%22%20cy%3D%2234%22%20r%3D%227%22%20fill%3D%22%23D79D36%22%2F%3E%0A%20%3Cpath%20d%3D%22M0-106l12%2034%2035%201-27%2021%2010%2034L0-37l-30%2021%2010-34-27-21%2035-1z%22%20fill%3D%22%23FFFFFF%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%222%22%20opacity%3D%22.92%22%2F%3E%0A%20%3Ccircle%20r%3D%2211%22%20fill%3D%22%23D79D36%22%2F%3E%0A%3C%2Fg%3E%0A%3Cg%20font-family%3D%22Aptos%2C%20Arial%2C%20sans-serif%22%3E%0A%20%3Ctext%20x%3D%22430%22%20y%3D%22183%22%20font-size%3D%2298%22%20font-weight%3D%22800%22%20letter-spacing%3D%22-4%22%20fill%3D%22%230B5B4B%22%3ECMA%3C%2Ftext%3E%0A%20%3Ctext%20x%3D%22690%22%20y%3D%22183%22%20font-size%3D%2288%22%20font-weight%3D%22500%22%20letter-spacing%3D%22-3%22%20fill%3D%22%23173C35%22%3ECompass%3C%2Ftext%3E%0A%20%3Crect%20x%3D%22435%22%20y%3D%22211%22%20width%3D%22630%22%20height%3D%225%22%20rx%3D%222.5%22%20fill%3D%22%23E6B653%22%2F%3E%0A%20%3Ctext%20x%3D%22438%22%20y%3D%22273%22%20font-size%3D%2232%22%20font-weight%3D%22600%22%20fill%3D%22%2349645D%22%3EYour%20Steps%20to%20CMA%20Success%3C%2Ftext%3E%0A%20%3Ctext%20x%3D%221060%22%20y%3D%22326%22%20text-anchor%3D%22start%22%20font-size%3D%2227%22%20fill%3D%22%2371847E%22%20direction%3D%22rtl%22%20unicode-bidi%3D%22plaintext%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20Arabic%2C%20sans-serif%22%3E%D8%AE%D8%B7%D9%88%D8%AA%D9%83%20%D8%A7%D9%84%D9%88%D8%A7%D8%AB%D9%82%D8%A9%20%D9%86%D8%AD%D9%88%20CMA%3C%2Ftext%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E", LOGO_ICON = "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%2256%2056%20308%20308%22%20width%3D%22308%22%20height%3D%22308%22%3E%3Cdefs%3E%0A%20%3ClinearGradient%20id%3D%22emerald%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23117766%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23064C40%22%2F%3E%3C%2FlinearGradient%3E%0A%20%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23F2C66D%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23D79D36%22%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%3Cg%20transform%3D%22translate%28210%20210%29%22%3E%0A%20%3Ccircle%20r%3D%22150%22%20fill%3D%22%23F5FAF8%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%224%22%2F%3E%0A%20%3Ccircle%20r%3D%22126%22%20fill%3D%22none%22%20stroke%3D%22url%28%23emerald%29%22%20stroke-width%3D%2213%22%2F%3E%0A%20%3Ccircle%20r%3D%22105%22%20fill%3D%22none%22%20stroke%3D%22%23B7D6CB%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%223%2010%22%2F%3E%0A%20%3Cg%20fill%3D%22%230B5B4B%22%3E%0A%20%20%3Cpath%20d%3D%22M0-137l9%2022-9-5-9%205z%22%2F%3E%3Cpath%20d%3D%22M137%200l-22%209%205-9-5-9z%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M0%20137l-9-22%209%205%209-5z%22%2F%3E%3Cpath%20d%3D%22M-137%200l22-9-5%209%205%209z%22%2F%3E%0A%20%3C%2Fg%3E%0A%20%3Cpath%20d%3D%22M-72%2058V-7h26v65zm42%200V-37h26v95zm42%200V-74h26v132z%22%20fill%3D%22url%28%23emerald%29%22%20rx%3D%224%22%2F%3E%0A%20%3Cpath%20d%3D%22M-82%2034L-28-12%2012-1%2073-69%22%20fill%3D%22none%22%20stroke%3D%22url%28%23gold%29%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Cpath%20d%3D%22M48-71l28%200-3%2028%22%20fill%3D%22none%22%20stroke%3D%22%23D79D36%22%20stroke-width%3D%2211%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%3Ccircle%20cx%3D%22-82%22%20cy%3D%2234%22%20r%3D%227%22%20fill%3D%22%23D79D36%22%2F%3E%0A%20%3Cpath%20d%3D%22M0-106l12%2034%2035%201-27%2021%2010%2034L0-37l-30%2021%2010-34-27-21%2035-1z%22%20fill%3D%22%23FFFFFF%22%20stroke%3D%22%23D9E9E3%22%20stroke-width%3D%222%22%20opacity%3D%22.92%22%2F%3E%0A%20%3Ccircle%20r%3D%2211%22%20fill%3D%22%23D79D36%22%2F%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E";
 const SRC_ALIAS = {"Gleim 2025 Vol. 1":"Gleim 2025", "Gleim 2025 Vol. 2":"Gleim 2025"};   // merged sources
 const SRC_COLORS = {"Gleim 2025":"#1a7f4e", "Sameh Allithy Target":"#2b4a9e", "MCQ Book":"#a35a00", "Gleim 2025 Vol. 1":"#1a7f4e", "Gleim 2025 Vol. 2":"#7b3fa0", "ICMA Exam Support Package 2025":"#0f766e", "Amro Taison":"#be185d"};
 function srcColor(name){ return SRC_COLORS[name] || "#6b7480"; }
@@ -1738,12 +1768,12 @@ function populateGlobalSourceSelect(){
   const sel = document.getElementById("globalSrcSelect");
   if(!sel) return;
   const srcs = allSources();
-  if(globalSourceFilter.includes("||")) globalSourceFilter = globalSourceFilter.split("||")[0];   // older multi-select value
-  if(globalSourceFilter !== "all" && !srcs.includes(globalSourceFilter)) globalSourceFilter = "all";
+  { const keep = globalSourceFilter==="all" ? [] : globalSourceFilter.split("||").filter(x=>srcs.includes(x));   // one or more sources
+    globalSourceFilter = (!keep.length || keep.length===srcs.length) ? "all" : keep.join("||"); }
   sel.innerHTML = `<option value="all">All sources (${srcs.length})</option>` +
     srcs.map(s=>`<option value="${s}">${s}</option>`).join("");
-  sel.value = globalSourceFilter;
-  const hs = document.getElementById("homeSrcSelect"); if(hs){ hs.innerHTML = sel.innerHTML; hs.value = globalSourceFilter; }
+  sel.value = globalSourceFilter.includes("||") ? "all" : globalSourceFilter;
+  mselSrcRender(); mselSecRender();
   const hc = document.getElementById("homeOnlyUn"); if(hc) hc.checked = onlyUnanswered;
   const cb = document.getElementById("onlyUnanswered"); if(cb) cb.checked = onlyUnanswered;
 }
@@ -2405,6 +2435,7 @@ function mockCertAt(i){ const e = mockHistory[i]; if(e) mockCert(e); }
 function mockCert(e){
   const pct = Math.round(e.c/e.n*100), nm = aiEsc((myProfile && myProfile.display_name) || userEmail);
   gid("certSheet").innerHTML = `
+    <img class="cert-logo" src="${LOGO_FULL}" alt="CMA Compass">
     <div class="kicker">CMA PART 1 &middot; FINANCIAL PLANNING, PERFORMANCE, AND ANALYTICS</div>
     <h1>Mock Exam Result</h1>
     <div class="body">This certifies that</div>
@@ -2680,7 +2711,7 @@ function aboutRender(){
   const d = aboutData, L = aboutLang, ar = L==="ar", T = ar ? {a:"نبذة عن المنصة", g:"هدفنا", t:"فريق العمل"} : {a:"About the platform", g:"Our goal", t:"Our team"};
   const para = x=>aiEsc(x||"").replace(/\n/g,"<br>");
   const team = (d.team||[]).map(m=>`<div class="ab-m"><div class="ab-av">${m.img?`<img src="${aiEsc(m.img)}" alt="">`:aiEsc((m.name||"?").charAt(0).toUpperCase())}</div><b>${aiEsc(m.name)}</b><span>${aiEsc((ar?m.role_ar:m.role_en)||m.role_ar||m.role_en||"")}</span></div>`).join("");
-  b.innerHTML = `<div class="ab-top"><h2 style="margin:0">${ar?"من نحن":"About Us"}</h2><div class="ab-lang" role="tablist"><button type="button" class="${ar?"on":""}" onclick="aboutLang='ar';aboutRender()">العربية</button><button type="button" class="${ar?"":"on"}" onclick="aboutLang='en';aboutRender()">English</button></div>${adm?`<button type="button" class="mx-back" onclick="aboutStartEdit()">&#9998; Edit</button>`:""}</div>
+  b.innerHTML = `<img class="ab-logo" src="${LOGO_FULL}" alt="CMA Compass"><div class="ab-top"><h2 style="margin:0">${ar?"من نحن":"About Us"}</h2><div class="ab-lang" role="tablist"><button type="button" class="${ar?"on":""}" onclick="aboutLang='ar';aboutRender()">العربية</button><button type="button" class="${ar?"":"on"}" onclick="aboutLang='en';aboutRender()">English</button></div>${adm?`<button type="button" class="mx-back" onclick="aboutStartEdit()">&#9998; Edit</button>`:""}</div>
     <div class="ab-body" dir="${ar?"rtl":"ltr"}"><h3>${T.a}</h3><p>${para(d[L].about)}</p><h3>${T.g}</h3><p>${para(d[L].goal)}</p>${team||adm?`<h3>${T.t}</h3>${team?`<div class="ab-team">${team}</div>`:`<p class="mx-note">${ar?"لم تُضف أسماء الفريق بعد. اضغط Edit لإضافتها.":"No team members added yet. Click Edit to add them."}</p>`}`:""}</div>`;
 }
 function aboutStartEdit(){ aboutDraft = JSON.parse(JSON.stringify(aboutData)); aboutDraft.team = aboutDraft.team || []; aboutEdit = true; aboutRender(); }
@@ -2715,7 +2746,8 @@ const TOURS = {
     {s:".sec", t:"أقسام المنهج ووحداته", x:"ينقسم المنهج إلى ستة أقسام، لكل قسم لونه ونسبته ووصفه. اضغط على أي وحدة لتظهر مواضيعها الفرعية مع تقدّمك فيها (عدد المُجاب/الكلي)، ثم اضغط على الموضوع لتبدأ حل أسئلته."},
     {s:".dsub .svb", t:"علامات الموضوعات", x:"▶ بجانب الموضوع تعني وجود فيديوهات مراجعة له، و📖 تعني وجود شرح مكتوب منشور. شاهد الفيديو واقرأ الشرح قبل أن تبدأ الحل."},
     {s:"#homeSearch", t:"البحث", x:"ابحث باسم الوحدة أو رقمها أو موضوعها للوصول إليها بسرعة."},
-    {s:"#homeSrcSelect", t:"مصادر الأسئلة", x:"اختر مصدر الأسئلة الذي تريده أو اترك كل المصادر. ويمكنك تفعيل «Only not answered» لعرض الأسئلة التي لم تجب عنها بعد فقط."},
+    {s:"#srcMsel", t:"فلتر المصادر", x:"اختر مصدرًا واحدًا أو أكثر بعلامات الاختيار (يمكنك الضغط على «only» لاختيار مصدر واحد فقط). تُحسب كل الأعداد والتقدم حسب المصادر المختارة."},
+    {s:"#secMsel", t:"فلتر الأقسام", x:"اختر قسمًا أو أكثر من أقسام المنهج الستة لتظهر بطاقاتها فقط، أو اترك كل الأقسام. ويمكنك تفعيل «Only not answered» لعرض الأسئلة التي لم تجب عنها بعد فقط."},
     {s:".mx-cta:not(.tour-cta)", t:"الاختبار التجريبي Mock Exam", x:"ابنِ اختبارًا مخصّصًا من المصادر والأقسام التي تختارها. لا تظهر الإجابات إلا بعد التسليم، ثم تحصل على النتيجة والزمن وتقريرًا بأخطائك وشهادة قابلة للطباعة، ويمكنك إيقاف الاختبار واستكماله لاحقًا."},
     {s:"#reviewBar", t:"مراجعة أخطائك وملاحظاتك", x:"Review Mistakes: الأسئلة التي أخطأت فيها. Flagged: الأسئلة التي علّمتها بنجمة. Comments: الأسئلة التي كتبت عليها ملاحظات. First try: الأسئلة التي أجبت عنها صحيحة من المحاولة الأولى. تجمع هذه الأزرار أسئلتك من كل الوحدات في مكان واحد."},
     {s:"#progressLine", t:"عدّاد التقدم", x:"يعرض عدد الأسئلة التي أجبت عنها حتى الآن في كل المنصة."},
@@ -3106,6 +3138,48 @@ async function rvUnpublish(){
   if(error){ alert("Could not unpublish: "+(error.message||error)); return; }
   delete rvPub[rvEdKey]; const el = gid("rvEdStatus"); el.textContent = "Unpublished (draft kept)"; el.className = "rv-st none"; gid("rvUnpub").style.display = "none"; renderSubVideos();
 }
+
+/* ===== multi-select dropdown (checkbox list) used by the Sources and Sections filters ===== */
+const msels = {};
+function mselInit(id, cfg){ msels[id] = Object.assign({open: !!(msels[id] && msels[id].open)}, cfg); mselRender(id); }
+function mselRender(id){
+  const m = msels[id], box = gid(id); if(!m || !box) return;
+  const items = m.items(), sel = m.get(), all = sel.size===items.length;
+  const label = all ? m.allLabel(items.length) : (sel.size===1 ? (items.find(x=>sel.has(x.v))||{}).label : sel.size+" "+m.noun+" selected");
+  box.innerHTML = `<button type="button" class="msel-b${all?"":" on"}" aria-haspopup="true" aria-expanded="${m.open}" aria-label="${aiEsc(m.title)}: ${aiEsc(label)}" onclick="mselToggle('${id}')"><span class="msel-t">${aiEsc(m.title)}</span><span class="msel-v">${aiEsc(label)}</span><span class="msel-c">&#9662;</span></button>`
+    + `<div class="msel-p${m.open?"":" hidden"}" role="group" aria-label="${aiEsc(m.title)}"><label class="msel-i msel-all"><input type="checkbox" ${all?"checked":""} onchange="mselAll('${id}')"><span>${aiEsc(m.allText)}</span></label>`
+    + items.map(x=>`<label class="msel-i"><input type="checkbox" ${sel.has(x.v)?"checked":""} data-v="${aiEsc(x.v)}" onchange="mselPick('${id}',this.dataset.v,this.checked)"><span>${x.dot?`<i class="msel-d" style="background:${x.dot}"></i>`:""}${aiEsc(x.label)}${x.n!=null?`<em>${x.n}</em>`:""}</span><button type="button" class="msel-only" data-v="${aiEsc(x.v)}" onclick="mselOnly('${id}',this.dataset.v);event.preventDefault()">only</button></label>`).join("")
+    + `</div>`;
+}
+function mselToggle(id){ Object.keys(msels).forEach(k=>{ if(k!==id && msels[k].open){ msels[k].open = false; mselRender(k); } }); msels[id].open = !msels[id].open; mselRender(id); }
+function mselApply(id, set){ const m = msels[id]; m.set(set); mselRender(id); m.change(); }
+function mselAll(id){ const m = msels[id]; mselApply(id, new Set(m.items().map(x=>x.v))); }
+function mselOnly(id, v){ mselApply(id, new Set([v])); }
+function mselPick(id, v, on){
+  const m = msels[id], sel = new Set(m.get()); on ? sel.add(v) : sel.delete(v);
+  if(!sel.size){ mselRender(id); return; }            // keep at least one selected
+  mselApply(id, sel);
+}
+document.addEventListener("click", e=>{ const path = e.composedPath ? e.composedPath() : []; Object.keys(msels).forEach(k=>{ const m = msels[k]; if(m.open && !path.includes(gid(k))){ m.open = false; mselRender(k); } }); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") Object.keys(msels).forEach(k=>{ if(msels[k].open){ msels[k].open = false; mselRender(k); } }); });
+function mselSrcRender(){
+  const counts = {}; if(manifest) Object.values(manifest).forEach(us=>Object.values(us).forEach(sb2=>(sb2.files||[]).forEach(f=>{ const k = f.source||"Sameh Allithy Target"; counts[k] = (counts[k]||0)+(f.ids||[]).length; })));
+  mselInit("srcMsel", {title:"Sources", noun:"sources", allText:"All sources", allLabel:n=>"All ("+n+")",
+    items:()=>allSources().map(x=>({v:x, label:x, n:counts[x]||0})),
+    get:()=>globalSourceFilter==="all" ? new Set(allSources()) : new Set(globalSourceFilter.split("||")),
+    set:set=>{ const all = allSources(); globalSourceFilter = set.size===all.length ? "all" : all.filter(x=>set.has(x)).join("||"); },
+    change:()=>{ localStorage.setItem("cma_global_source", globalSourceFilter); refreshAfterFilter(); }});
+}
+function homeSecKeys(){ return SECTIONS.map((_,i)=>String(i)).concat(UNITS.some(u=>mockSecIdx(u.n)<0) ? ["x"] : []); }
+let homeSecSel = (()=>{ try{ const v = localStorage.getItem("cma_home_secs"); return v && v!=="all" ? new Set(v.split(",")) : null; }catch(e){ return null; } })();
+function secOn(k){ return !homeSecSel || homeSecSel.has(k); }
+function mselSecRender(){
+  mselInit("secMsel", {title:"Sections", noun:"sections", allText:"All sections", allLabel:()=>"All",
+    items:()=>SECTIONS.map((sc,i)=>({v:String(i), label:sc.name+" ("+sc.pct+"%)", dot:sc.c})).concat(UNITS.some(u=>mockSecIdx(u.n)<0) ? [{v:"x", label:"Exam Test sets", dot:"#475569"}] : []),
+    get:()=>homeSecSel ? new Set(homeSecSel) : new Set(homeSecKeys()),
+    set:set=>{ homeSecSel = set.size===homeSecKeys().length ? null : set; try{ localStorage.setItem("cma_home_secs", homeSecSel ? [...homeSecSel].join(",") : "all"); }catch(e){} },
+    change:()=>renderHome()});
+}
 const explainOpen = {};
 function toggleExplain(qid){
   explainOpen[qid] = !explainOpen[qid];
@@ -3414,6 +3488,7 @@ function openSubCertificate(){
   const correct = ids.filter(id=>answered[id].correct).length, pct = Math.round(correct/ids.length*100);
   const today = new Date().toLocaleDateString('en-US');
   document.getElementById("certSheet").innerHTML = `
+    <img class="cert-logo" src="${LOGO_FULL}" alt="CMA Compass">
     <div class="kicker">CMA PART 1 &middot; FINANCIAL PLANNING, PERFORMANCE, AND ANALYTICS</div>
     <h1>Certificate of Completion</h1>
     <div class="body">This certifies that</div>
@@ -4344,16 +4419,17 @@ function renderHome(){
       + `<div class="sec-meta">${parts.length} units &middot; ${tot} questions${done?` &middot; ${pp}% done`:""}</div>`
       + `<div class="hunits">${parts.map(r=>r.html).join("")}</div></article>`;
   };
-  SECTIONS.forEach(sc=>{
+  SECTIONS.forEach((sc,si)=>{
     const us = sc.units.map(n=>UNITS.find(x=>x.n===n)).filter(Boolean); us.forEach(u=>used.add(u.n));
+    if(!secOn(String(si))) return;
     if(!q || sc.name.toLowerCase().includes(q) || sc.desc.toLowerCase().includes(q) || us.some(u=>true)) out += card(sc.name, sc.pct, sc.desc, us, sc.c);
   });
   const groups = {};
   UNITS.filter(u=>!used.has(u.n)).forEach(u=>{ (groups[u.group||"Other"] = groups[u.group||"Other"] || []).push(u); });
-  Object.keys(groups).forEach(g=>{ const c = card(g, 0, "", groups[g]); if(c) extra += `<div class="home-group">${aiEsc(g)}</div><div class="sgrid">${c}</div>`; });
+  Object.keys(groups).forEach(g=>{ if(!secOn("x")) return; const c = card(g, 0, "", groups[g]); if(c) extra += `<div class="home-group">${aiEsc(g)}</div><div class="sgrid">${c}</div>`; });
   grid.innerHTML = manifest===null ? '<div class="home-empty"><span class="spinner"></span>Loading...</div>'
     : ((accessRestricted && !accessSet.size) ? '<div class="home-empty"><b>No question sources are enabled for your account yet.</b><br>Please contact the administrator to get access.</div>' : (out||extra) ? `<div class="sgrid">${out}</div>${extra}` : '<div class="home-empty">No units match your search or filters.</div>');
-  gid("homeStats").textContent = manifest ? `${nUnits} units \u00b7 ${nSubs} topics \u00b7 ${nQ} questions` + (globalSourceFilter!=="all" ? " \u00b7 source: "+srcLabel() : "") : "";
+  gid("homeStats").textContent = manifest ? `${nUnits} units \u00b7 ${nSubs} topics \u00b7 ${nQ} questions` + (globalSourceFilter!=="all" ? " \u00b7 source: "+srcLabel() : "") + (homeSecSel ? " \u00b7 sections: "+homeSecSel.size+" of "+homeSecKeys().length : "") : "";
   grid.querySelectorAll("details.hunit").forEach(d=>d.addEventListener("toggle",()=>{ const n = +d.dataset.n; if(d.open) homeOpen.add(n); else homeOpen.delete(n); }));
 }
 function filterTree(){
