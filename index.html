@@ -887,6 +887,20 @@ body.rv-lock{overflow:hidden}
   .mob-menu .sb-ic{width:21px;height:21px}
   .mob-menu .inb-n{position:absolute;top:-4px;inset-inline-end:-4px}
 }
+
+/* pages */
+.page-bar{max-width:1280px;margin:0 auto;padding:14px 18px 0;display:flex;align-items:center;gap:12px}
+.page-bar button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:8px 14px;font:inherit;font-size:.84rem;font-weight:600;cursor:pointer;box-shadow:var(--shadow)}
+.page-bar button:hover{border-color:var(--brand);color:var(--brand)}
+#pageTitle{font-weight:800;color:var(--brand);font-size:1.05rem}
+.modal-veil.page-mode{position:static;inset:auto;display:block;background:none;padding:6px 18px 40px;z-index:auto;overflow:visible}
+.modal-veil.page-mode .dash-box{max-width:1180px;margin:10px auto;border:1px solid var(--line);box-shadow:var(--shadow)}
+#profileVeil.page-mode .dash-box{max-width:760px!important}
+.page-mode .modal-x-wrap{display:none}
+.page-mode .dash-box h1,.page-mode .dash-box h2{padding-right:0}
+.page-mode .inb-head,.page-mode .ab-top{padding-inline-end:0}
+.page-mode .inb-l,.page-mode .inb-r{max-height:calc(100vh - 250px);min-height:420px}
+@media(max-width:700px){.modal-veil.page-mode{padding:4px 8px 30px}.modal-veil.page-mode .dash-box{padding:14px}}
 </style>
 </head>
 <body>
@@ -963,6 +977,8 @@ body.rv-lock{overflow:hidden}
   <div id="homeGrid"></div>
 </section>
 <section id="mockView" class="hidden" aria-label="Mock Exam"></section>
+<div id="pageBar" class="page-bar hidden"><button type="button" onclick="pageBack()">&larr; Back</button><div id="pageTitle"></div></div>
+<div id="pageHost"></div>
 <div class="practice-bar hidden" id="practiceBar">
   <button onclick="goHome()" aria-label="Back to curriculum">&larr; Curriculum</button>
   <div id="crumb" aria-live="polite"></div>
@@ -1239,7 +1255,7 @@ async function startSession(user){
   await loadProfileExtra(user);
   await loadAccess(); applyAccess();
   buildTree(); render();
-  if(location.hash==="#practice") history.replaceState(null,"",location.pathname+location.search);
+  if(/^#(practice|mock|performance|inbox|profile|about|users|admin)$/.test(location.hash)) history.replaceState(null,"",location.pathname+location.search);
   showView("home");
   loadSubVideos(); loadReviewMeta();
   inboxBadge(); if(!window._inbTimer) window._inbTimer = setInterval(()=>{ if(userId && !document.hidden) inboxBadge(); }, 60000);
@@ -1350,10 +1366,10 @@ function openDashboard(){
     ${unitRows}
     <div class="dash-actions"><button onclick="closeDashboard()">Start Studying &rarr;</button></div>
   `;
-  document.getElementById("dashboardVeil").classList.remove("hidden");
+  openPage("performance");
 }
 function openReviewFromDash(kind){ closeDashboard(); reviewList(kind); }
-function closeDashboard(){ document.getElementById("dashboardVeil").classList.add("hidden"); }
+function closeDashboard(){ pageDrop(); }
 
 // ---------- Admin Dashboard ----------
 let adminStudents = null;   // cached after first load this session
@@ -1424,7 +1440,7 @@ function studentStatsForUnit(st, unitN){
 async function openAdminDashboard(){
   const box = document.getElementById("adminBody");
   box.innerHTML = `<p>Loading student data&hellip;</p>`;
-  document.getElementById("adminVeil").classList.remove("hidden");
+  openPage("admin");
   try{
     adminStudents = await loadAllStudentsData();
   }catch(e){
@@ -1433,7 +1449,7 @@ async function openAdminDashboard(){
   }
   renderAdminDashboard();
 }
-function closeAdmin(){ document.getElementById("adminVeil").classList.add("hidden"); }
+function closeAdmin(){ pageDrop(); }
 
 function renderAdminDashboard(){
   const box = document.getElementById("adminBody");
@@ -2505,7 +2521,7 @@ function applyAccess(){
 /* admin: users (status) & source access */
 let accRows = [], accSel = new Set(), accQ = "", accSources = [], accShowDel = false;
 async function openAccess(){
-  const b = gid("accessBody"); gid("accessVeil").classList.remove("hidden"); b.innerHTML = "<p>Loading&hellip;</p>";
+  const b = gid("accessBody"); openPage("users"); b.innerHTML = "<p>Loading&hellip;</p>";
   try{
     accSources = [...new Set(Object.values(manifestFull||manifest||{}).reduce((a,u)=>a.concat(Object.values(u).reduce((b2,sb2)=>b2.concat((sb2.files||[]).map(f=>f.source||"Sameh Allithy Target")),[])),[]))].sort();
     const [p, a, st, up, ed] = await Promise.all([sb.from("profiles").select("user_id,email,display_name,role"), sb.from("source_access").select("user_id,sources"), sb.from("user_status").select("user_id,status,reason"), sb.from("user_profiles").select("user_id,phone,avatar"), sb.from("review_editors").select("user_id")]);
@@ -2518,7 +2534,7 @@ async function openAccess(){
     accSel = new Set(); accQ = ""; renderAccess();
   }catch(e){ b.innerHTML = `<p>Could not load: ${aiEsc(e.message||String(e))}<br>Make sure source-access-setup.sql and platform-extras-setup.sql were run in Supabase.</p>`; }
 }
-function closeAccess(){ gid("accessVeil").classList.add("hidden"); }
+function closeAccess(){ pageDrop(); }
 function renderAccess(){
   gid("accessBody").innerHTML = `<h2 style="margin:0 0 4px">Users &amp; access</h2>
     <p class="mx-note" id="accInfo"></p>
@@ -2610,13 +2626,13 @@ async function inboxBadge(){
 }
 function inbName(uid){ const n = inb.names[uid]; return n ? (n.name || n.email || "Student") : "Student"; }
 async function openInbox(keep){
-  gid("inboxVeil").classList.remove("hidden");
+  openPage("inbox");
   if(!keep){ inb.mode = "list"; inb.sel = null; }
   await inboxLoad();
   clearInterval(inb.timer);
   inb.timer = setInterval(()=>{ if(!gid("inboxVeil").classList.contains("hidden") && !document.hidden && inb.mode==="list") inboxLoad(true); }, 15000);
 }
-function closeInbox(){ gid("inboxVeil").classList.add("hidden"); clearInterval(inb.timer); inboxBadge(); }
+function closeInbox(){ pageDrop(); }
 function openContact(){ const m = gid("moreMenu"); if(m) m.open = false; inboxCompose(); openInbox(true); }
 async function inboxLoad(silent){
   const adm = attIsAdmin();
@@ -2726,11 +2742,11 @@ const ABOUT_DEFAULT = {
 let aboutData = null, aboutLang = "ar", aboutEdit = false, aboutDraft = null;
 async function openAbout(){
   const m = gid("moreMenu"); if(m) m.open = false;
-  gid("aboutVeil").classList.remove("hidden"); aboutEdit = false;
+  openPage("about"); aboutEdit = false;
   try{ const { data } = await sb.from("site_pages").select("content").eq("key","about").maybeSingle(); aboutData = (data && data.content && data.content.ar) ? data.content : ABOUT_DEFAULT; }catch(e){ aboutData = ABOUT_DEFAULT; }
   aboutRender();
 }
-function closeAbout(){ gid("aboutVeil").classList.add("hidden"); }
+function closeAbout(){ pageDrop(); }
 function aboutRender(){
   const adm = attIsAdmin(), b = gid("aboutBody");
   if(aboutEdit){ aboutEditRender(); return; }
@@ -2883,7 +2899,7 @@ function endTour(done){
   if(tour && done){ try{ localStorage.setItem("cma_tour_"+tour.name, "1"); }catch(e){} }
   tour = null;
 }
-document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ ["accessVeil","inboxVeil","aboutVeil","profileVeil"].forEach(id=>{ const v=gid(id); if(v && !v.classList.contains("hidden")){ v.classList.add("hidden"); if(id==="inboxVeil") clearInterval(inb.timer); } }); } });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ [].forEach(id=>{ const v=gid(id); if(v && !v.classList.contains("hidden")){ v.classList.add("hidden"); if(id==="inboxVeil") clearInterval(inb.timer); } }); } });
 
 /* ===== My profile: personal info, mobile number and photo ===== */
 let myExtra = null, profDraft = null;
@@ -2929,9 +2945,9 @@ async function loadProfileExtra(user){
 function openProfile(){
   const m = gid("moreMenu"); if(m) m.open = false;
   profDraft = Object.assign({phone:"", country:"", city:"", avatar:""}, myExtra||{}); profDraft.name = (myProfile && myProfile.display_name) || "";
-  gid("profileVeil").classList.remove("hidden"); profileRender();
+  openPage("profile"); profileRender();
 }
-function closeProfile(){ gid("profileVeil").classList.add("hidden"); }
+function closeProfile(){ pageDrop(); }
 function profileRender(){
   const d = profDraft, nm = d.name || userEmail || "?";
   gid("profileBody").innerHTML = `<h2 style="margin:0 0 12px">My profile</h2>
@@ -3217,6 +3233,9 @@ function sbApply(){
   const h = gid("navHome"), mk = gid("navMock");
   if(h) h.classList.toggle("active", view==="home" || (view==="practice" && !reviewMode));
   if(mk) mk.classList.toggle("active", view==="mock");
+  const PI = {performance:"perfBtn", inbox:"inboxBtn", profile:"profileBtn", about:"aboutBtn", users:"accessBtn", admin:"adminBtn"};
+  Object.values(PI).forEach(id=>{ const e = gid(id); if(e) e.classList.remove("active"); });
+  if(view==="page" && PI[pageKey]){ const e = gid(PI[pageKey]); if(e) e.classList.add("active"); }
   const b = gid("sbCollapse"); if(b) b.setAttribute("aria-expanded", String(sbPref(sbCat())!=="rail"));
 }
 function sbToggle(){ const c = sbCat(); try{ localStorage.setItem(SB_KEY[c], sbPref(c)==="rail" ? "full" : "rail"); }catch(e){} sbApply(); }
@@ -3227,7 +3246,7 @@ function sbGo(what, arg){
   if(mock.phase==="exam") mockLeave();                 // leaving an exam saves it so it can be resumed
   sbClose();
   switch(what){
-    case "home": if(view==="practice") goHome(); else if(view==="mock") mockExit(); else window.scrollTo({top:0}); break;
+    case "home": if(view==="practice") goHome(); else if(view==="mock") mockExit(); else if(view==="page") pageDrop(); else window.scrollTo({top:0}); break;
     case "mock": if(view==="mock") mockRender(); else openMock(); break;
     case "review": reviewList(arg); break;
     case "perf": openDashboard(); break;
@@ -3244,6 +3263,30 @@ function sbGo(what, arg){
     case "profile": openProfile(); break;
     case "out": switchUser(); break;
   }
+}
+
+/* ===== Full pages (instead of pop-up windows): Performance, Inbox, Profile, About, Users & Access, Admin ===== */
+const PAGES = {performance:"dashboardVeil", inbox:"inboxVeil", profile:"profileVeil", about:"aboutVeil", users:"accessVeil", admin:"adminVeil"};
+const PAGE_TITLES = {performance:"My Performance", inbox:"Inbox", profile:"My profile", about:"About Us", users:"Users & Access", admin:"Admin Dashboard"};
+let pageKey = null;
+Object.values(PAGES).forEach(id=>{ const v = document.getElementById(id); if(v) document.getElementById("pageHost").appendChild(v); });   // pages live inside the main area, next to the sidebar
+function pageShow(key){
+  Object.values(PAGES).forEach(id=>{ const v = gid(id); v.classList.add("hidden"); v.classList.remove("page-mode"); });
+  const v = gid(PAGES[key]); v.classList.remove("hidden"); v.classList.add("page-mode");
+  if(pageKey && pageKey!==key) pageLeave(pageKey);
+  pageKey = key; gid("pageTitle").textContent = PAGE_TITLES[key] || "";
+}
+function openPage(key){
+  const hash = "#"+key;
+  if(view!=="page") history.pushState({v:"page"}, "", hash); else if(location.hash!==hash) history.replaceState({v:"page"}, "", hash);
+  const prev = pageKey; pageKey = key; showView("page"); pageKey = prev; pageShow(key); sbApply();
+}
+function pageLeave(key){ if(key==="inbox"){ clearInterval(inb.timer); inboxBadge(); } }
+function pageBack(){ if(PAGES[location.hash.slice(1)]) history.back(); else showView("home"); }
+function pageDrop(){                     // close the page right away (used before navigating somewhere else)
+  if(view!=="page") return;
+  if(PAGES[location.hash.slice(1)]) history.replaceState(null, "", location.pathname + location.search);
+  showView("home");
 }
 const explainOpen = {};
 function toggleExplain(qid){
@@ -4271,7 +4314,7 @@ async function resetSubHistory(){
   await selectSub(u, sub, null);
 }
 
-document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ const d=document.getElementById("dashboardVeil"), a=document.getElementById("adminVeil"); if(d && !d.classList.contains("hidden")) closeDashboard(); if(a && !a.classList.contains("hidden")) closeAdmin(); } });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ const d=document.getElementById("dashboardVeil"), a=document.getElementById("adminVeil");  } });
 
 /* ===== Play the Google Drive video inside the page (no new tab) ===== */
 function driveFileId(url){ const m = /drive\.google\.com\/file\/d\/([\w-]+)/.exec(url||""); return m ? m[1] : null; }
@@ -4398,6 +4441,8 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeNewsModal();
 let view = "home";
 const gid = id => document.getElementById(id);
 function showView(v){
+  if(v!=="page" && pageKey){ pageLeave(pageKey); pageKey = null; Object.values(PAGES).forEach(id=>{ const x = gid(id); x.classList.add("hidden"); x.classList.remove("page-mode"); }); }
+  gid("pageBar").classList.toggle("hidden", v!=="page");
   view = v;
   gid("homeView").classList.toggle("hidden", v!=="home");
   gid("layout").classList.toggle("hidden", v!=="practice");
@@ -4419,6 +4464,8 @@ function goHome(){
 }
 window.addEventListener("popstate", ()=>{
   if(mock.phase==="exam" && location.hash!=="#mock"){ mockLeave(); }
+  const hh = location.hash.slice(1);
+  if(PAGES[hh]){ pageKey = hh; showView("page"); pageShow(hh); sbApply(); return; }
   showView(location.hash==="#practice" ? "practice" : location.hash==="#mock" ? "mock" : "home");
 });
 window.addEventListener("beforeunload", ()=>mockSaveRun());
