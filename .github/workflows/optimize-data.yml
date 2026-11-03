@@ -1,0 +1,41 @@
+# Put this file in your repository at:  .github/workflows/optimize-data.yml
+# Then: GitHub > Actions > "Optimize question data" > Run workflow.
+# It runs optimize_data.py on the repository's data folder (images become small files) and commits the result.
+# Requirements: optimize_data.py must be in the repository root (next to index.html).
+name: Optimize question data
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Convert images inside the JSON files into separate image files
+        run: |
+          test -f optimize_data.py || (echo "optimize_data.py is missing from the repository root" && exit 1)
+          python optimize_data.py --in data --out data_optimized
+
+      - name: Replace the data folder with the optimized one
+        run: |
+          rm -rf data
+          mv data_optimized data
+          du -sh data
+
+      - name: Commit and push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Optimize question data: images as separate files" || echo "Nothing to commit"
+          git push
